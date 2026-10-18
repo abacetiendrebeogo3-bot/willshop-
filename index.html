@@ -753,10 +753,12 @@ function renderTeam() {
     const done = mine.filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, t0));
     const fails = mine.filter(o => is(o, /^(échec|echec)/i)).length;
     return `<article class="card"><div class="team-row"><div class="avatar">${esc(m.nom.charAt(0).toUpperCase())}</div>
-      <div style="min-width:0;flex:1"><div class="who" style="font-size:15px">${esc(m.nom)}</div><div class="meta">${esc(m.role)}${m.tel ? " · " + esc(m.tel) : ""} · ${m.pin ? "PIN défini" : "<b>pas de PIN</b> (il ne peut pas se connecter)"}</div></div>
-      ${m.tel ? `<a class="btn small" href="${esc(waLink(m.tel, ""))}" target="_blank" rel="noopener" aria-label="WhatsApp ${esc(m.nom)}">${I_WA}</a>` : ""}
-      ${m.nom !== myName ? `<a class="btn small pri" href="${esc(waLink(m.tel, invite(m)))}" target="_blank" rel="noopener">${I_WA} Inviter</a>` : ""}
-      <button class="btn small ghost" data-member="${esc(m.nom)}" data-actif="${m.actif ? 0 : 1}">${m.actif ? "Désactiver" : "Réactiver"}</button></div>
+      <div style="min-width:0;flex:1"><div class="who" style="font-size:15px">${esc(m.nom)}${m.actif ? "" : ` <span class="pill s-mut">Désactivé</span>`}</div><div class="meta">${esc(m.role)}${m.tel ? " · " + esc(m.tel) : ""}</div><div class="meta">${m.pin ? "PIN défini" : "<b>Pas de PIN</b> : il ne peut pas se connecter"}</div></div></div>
+      <div class="actions">
+        ${m.nom !== myName ? `<a class="btn small pri" href="${esc(waLink(m.tel, invite(m)))}" target="_blank" rel="noopener">${I_WA} Inviter</a>` : ""}
+        ${m.tel && m.nom !== myName ? `<a class="btn small" href="${esc(waLink(m.tel, ""))}" target="_blank" rel="noopener">${I_WA} Écrire</a>` : ""}
+        ${m.nom !== myName ? `<button class="btn small ghost" data-member="${esc(m.nom)}" data-actif="${m.actif ? 0 : 1}">${m.actif ? "Désactiver" : "Réactiver"}</button>` : ""}
+      </div>
       ${/livr/i.test(m.role) ? `<div class="stats"><span>À livrer <b>${toDo}</b></span><span>Livrées aujourd'hui <b>${done.length}</b></span><span>Encaissé <b>${F(done.reduce((s, o) => s + o.prix, 0))}</b></span><span>Échecs <b>${fails}</b></span></div>` : ""}
     </article>`;
   };
