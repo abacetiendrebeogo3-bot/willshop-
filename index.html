@@ -6,7 +6,10 @@
 <meta name="theme-color" content="#FFFFFF" id="tc">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("ws_theme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
 <meta name="description" content="WillShop : commandes, relances, livraisons et pilotage.">
-<link rel="manifest" href="manifest.webmanifest">
+<script>
+// Lien « ?simple » : pas d'installation, juste un raccourci qui ouvre l'app dans Chrome (vieux téléphones Android)
+if (!/[?&]simple/.test(location.search)) { var l = document.createElement("link"); l.rel = "manifest"; l.href = "manifest.webmanifest"; document.head.appendChild(l); }
+</script>
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
