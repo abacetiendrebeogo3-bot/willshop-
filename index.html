@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#800020">
+<meta name="description" content="WillShop : commandes, relances, livraisons et pilotage.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WillShop">
+<title>WillShop</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout : app téléphone à une colonne. En-tête collant avec le choix d'espace (Direction / Commercial / Livreur), barre d'onglets en bas ; colonne centrée de 760px sur ordinateur. Palette WillShop : crème, bordeaux, or, noir. */
+:root{
+  --bg:#F8F5EE; --surface:#FFFFFF; --sunk:#F2ECE1; --ink:#1F1917; --mut:#6B625B; --faint:#A0958C; --line:#EBE5DA;
+  --bx:#800020; --bx-fill:#800020; --bx-soft:#F5E6E9; --on-bx:#FFF8EC; --hero:#800020; --hero-mut:#E9C9CF;
+  --gold:#9A7220; --gold-fill:#D4A843; --gold-soft:#FDF5E2;
+  --ok:#2E7D4F; --ok-soft:#E5F1E9; --bad:#B3261E; --bad-soft:#FBE8E6; --info:#3F5C7A; --info-soft:#E8EEF4;
+  --shadow:0 4px 16px rgba(31,25,23,.06);
+  --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14100F; --surface:#1D1715; --sunk:#251E1B; --ink:#F3ECE4; --mut:#ACA096; --faint:#7D726A; --line:#342A26;
+  --bx:#E89AA8; --bx-fill:#9C2640; --bx-soft:#3A1B22; --on-bx:#FFF8EC; --hero:#4E1222; --hero-mut:#D9AEB7;
+  --gold:#E2BC62; --gold-fill:#D4A843; --gold-soft:#2C2416;
+  --ok:#74C595; --ok-soft:#172A1F; --bad:#F2908A; --bad-soft:#3A1C1A; --info:#9DB8D6; --info-soft:#1B2530;
+  --shadow:0 4px 16px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14100F; --surface:#1D1715; --sunk:#251E1B; --ink:#F3ECE4; --mut:#ACA096; --faint:#7D726A; --line:#342A26;
+  --bx:#E89AA8; --bx-fill:#9C2640; --bx-soft:#3A1B22; --on-bx:#FFF8EC; --hero:#4E1222; --hero-mut:#D9AEB7;
+  --gold:#E2BC62; --gold-fill:#D4A843; --gold-soft:#2C2416;
+  --ok:#74C595; --ok-soft:#172A1F; --bad:#F2908A; --bad-soft:#3A1C1A; --info:#9DB8D6; --info-soft:#1B2530;
+  --shadow:0 4px 16px rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 104px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:10px}
+.brand{font:800 22px/1 var(--serif);letter-spacing:-.01em;color:var(--bx)}
+.brand small{font:700 10px/1 var(--sans);letter-spacing:.14em;color:var(--gold);margin-left:4px;vertical-align:3px}
+.sync{margin-left:auto;font-size:12px;color:var(--mut);text-align:right;font-variant-numeric:tabular-nums}
+.icon-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer;flex:none}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sunk);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:none;color:var(--mut);font:600 13px var(--sans);padding:8px 4px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--bx);box-shadow:var(--shadow)}
+:is(button,a,select,input,textarea):focus-visible{outline:2px solid var(--gold-fill);outline-offset:2px}
+h1{font:700 26px/1.15 var(--serif);margin:18px 0 2px;text-wrap:balance}
+h2{font:700 19px/1.25 var(--serif);margin:26px 0 10px;text-wrap:balance;display:flex;align-items:baseline;gap:8px}
+h2 .count{font:600 13px var(--sans);color:var(--mut)}
+.sub{color:var(--mut);font-size:13.5px;margin:0}
+.eyebrow{font:700 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.num{font-variant-numeric:tabular-nums}
+/* Carte héro */
+.hero{background:var(--hero);color:var(--on-bx);border-radius:20px;padding:18px 18px 16px;margin-top:14px;display:flex;flex-direction:column;gap:12px}
+.hero .eyebrow{color:var(--gold-fill)}
+.hero .big{font:800 36px/1 var(--serif);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.hero .row2{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--hero-mut);font-size:13.5px}
+.hero .row2 b{color:var(--on-bx);font-variant-numeric:tabular-nums}
+/* Tuiles */
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+@media (min-width:600px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .l{font-size:12px;color:var(--mut);font-weight:600}
+.kpi b{font:700 26px/1.15 var(--serif);font-variant-numeric:tabular-nums}
+.kpi small{font-size:12px;color:var(--faint)}
+/* Points d'attention */
+.alerts{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.alert{display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:500 14px var(--sans);width:100%;text-align:left;cursor:pointer}
+.alert:first-child{border-top:0}
+.alert .dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--faint)}
+.alert.hot .dot{background:var(--bad)} .alert.warm .dot{background:var(--gold-fill)}
+.alert .n{margin-left:auto;font:700 16px var(--serif);font-variant-numeric:tabular-nums}
+.alert .chev{color:var(--faint)}
+.calm{padding:14px;color:var(--mut);font-size:14px}
+/* Tunnel */
+.funnel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:9px}
+.fstep{display:grid;grid-template-columns:minmax(0,9.5em) 1fr 4.5em;align-items:center;gap:10px;font-size:13px}
+.ftrack{height:12px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.ftrack span{display:block;height:100%;background:var(--gold-fill);border-radius:6px}
+.fstep:last-child .ftrack span{background:var(--bx-fill)}
+.fstep b{text-align:right;font-variant-numeric:tabular-nums}
+.fstep b i{font-style:normal;color:var(--faint);font-weight:500}
+/* Trésorerie */
+.cash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cash div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-width:0}
+.cash span{display:block;font-size:12px;color:var(--mut);font-weight:600}
+.cash b{display:block;font:700 17px/1.3 var(--serif);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.cash small{color:var(--faint);font-size:11.5px;font-variant-numeric:tabular-nums}
+/* Barres 7 jours */
+.bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:120px;padding:18px 14px 26px;background:var(--surface);border:1px solid var(--line);border-radius:16px;background-image:linear-gradient(var(--line) 1px,transparent 1px);background-size:100% 25%;background-origin:content-box}
+.bar{background:var(--gold-fill);border-radius:6px 6px 2px 2px;position:relative;min-height:3px;opacity:.75}
+.bar.today{background:var(--bx-fill);opacity:1}
+.bar i{position:absolute;bottom:-21px;left:50%;transform:translateX(-50%);font-style:normal;font-size:11px;color:var(--mut)}
+.bar em{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-style:normal;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums}
+/* Listes et cartes commandes */
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:13px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.c-top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.c-top>div{min-width:0}
+.who{font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.place{font-weight:600;overflow-wrap:anywhere}
+.meta{color:var(--mut);font-size:13px;overflow-wrap:anywhere}
+.amt{font:700 18px/1.2 var(--serif);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.pill{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;margin-top:6px}
+.s-pro{background:var(--gold-soft);color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold-fill)}
+.s-new{background:var(--bx-soft);color:var(--bx)}
+.s-conf{background:var(--gold-soft);color:var(--gold)}
+.s-road{background:var(--info-soft);color:var(--info)}
+.s-ok{background:var(--ok-soft);color:var(--ok)}
+.s-bad{background:var(--bad-soft);color:var(--bad)}
+.s-mut{background:var(--sunk);color:var(--mut)}
+.msg-box{background:var(--sunk);border-radius:12px;padding:9px 11px;font-size:13.5px;overflow-wrap:anywhere;white-space:pre-wrap}
+.msg-box .eyebrow{display:block;margin-bottom:4px;font-size:10px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 15px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 14px var(--sans);cursor:pointer;text-decoration:none}
+.btn svg{width:17px;height:17px;flex:none}
+.btn.pri{background:var(--bx-fill);border-color:var(--bx-fill);color:var(--on-bx)}
+.btn.gold{background:var(--gold-fill);border-color:var(--gold-fill);color:#1F1917}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.btn.small{min-height:36px;padding:0 11px;font-size:13px}
+.btn.ghost{background:none}
+.btn.wide{flex:1 1 0;min-width:0}
+.btn[disabled]{opacity:.5;cursor:default}
+select.sel{min-height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 13px var(--sans);padding:0 8px;max-width:100%}
+.panel{border-top:1px dashed var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.panel .opts{display:flex;flex-wrap:wrap;gap:8px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:4px 0 12px;padding-bottom:2px;scrollbar-width:none}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:7px 13px;font:600 13px var(--sans);cursor:pointer;white-space:nowrap;flex:none}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .c{color:var(--faint);margin-left:4px;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"] .c{color:var(--bg);opacity:.7}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:22px;text-align:center;color:var(--mut)}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;white-space:pre-wrap;line-height:1.6}
+.banner{border-radius:12px;padding:12px 14px;margin-top:12px;font-size:14px}
+.banner.err{background:var(--bad-soft);color:var(--bad)}
+.banner.info{background:var(--gold-soft);color:var(--ink)}
+.search{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:15px var(--sans);background:var(--surface);color:var(--ink);margin-bottom:6px}
+.field{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:15px var(--sans);background:var(--surface);color:var(--ink)}
+/* Routine commerciale */
+.steps{display:flex;gap:6px;overflow-x:auto;margin-top:14px;padding-bottom:2px;scrollbar-width:none}
+.stp{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--mut);border-radius:12px;padding:8px 12px;font:600 12.5px var(--sans);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.stp b{font:700 17px var(--serif);color:var(--ink);font-variant-numeric:tabular-nums}
+.stp[aria-current="step"]{border-color:var(--bx-fill);box-shadow:inset 0 0 0 1px var(--bx-fill);color:var(--bx)}
+.stp.done b{color:var(--ok)}
+.progress{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden;margin-top:12px}
+.progress span{display:block;height:100%;background:var(--gold-fill);transition:width .3s}
+.step-head{margin-top:16px;display:flex;flex-direction:column;gap:2px}
+.next{margin-top:14px;display:flex;justify-content:flex-end}
+/* Livreur */
+.me{display:flex;align-items:center;gap:10px;margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 10px 8px 14px}
+.me label{font-size:13px;color:var(--mut);font-weight:600;white-space:nowrap}
+.me select{flex:1;min-width:0}
+.drive .place{font-size:17px}
+.collect{display:flex;justify-content:space-between;align-items:center;background:var(--gold-soft);border-radius:12px;padding:8px 12px}
+.collect span{font-size:12.5px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.collect b{font:800 20px var(--serif);font-variant-numeric:tabular-nums}
+.contact{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.contact .btn{padding:0 6px;font-size:12.5px;gap:4px}
+.big-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.big-actions .btn{min-height:48px}
+/* Équipe */
+.team-row{display:flex;align-items:center;gap:12px}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--bx-soft);color:var(--bx);display:grid;place-items:center;font:700 15px var(--serif);flex:none}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--mut)}
+.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+.form{display:grid;grid-template-columns:1fr;gap:8px}
+@media (min-width:600px){.form{grid-template-columns:1.3fr 1fr 1fr 1fr auto}}
+/* Assistant */
+.chat{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.msg{max-width:88%;padding:10px 13px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:var(--bx-fill);color:var(--on-bx);border-bottom-right-radius:5px}
+.msg.ai{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:5px}
+.composer{display:flex;gap:8px;margin-top:12px}
+.composer textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:15px var(--sans);background:var(--surface);color:var(--ink);min-height:46px}
+.sugg{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+/* Rappel et revue du matin */
+.remind{margin-top:14px;background:var(--gold-soft);border:1px solid var(--gold-fill);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.remind b{font:700 16px var(--serif)}
+.remind ul{margin:0;padding-left:18px;font-size:13.5px}
+.review{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px 18px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.dots{display:flex;gap:6px}
+.dots i{flex:1;height:4px;border-radius:2px;background:var(--sunk)}
+.dots i.on{background:var(--gold-fill)}
+.review .q{font:700 15px var(--sans);color:var(--mut)}
+.review .big{font:800 44px/1 var(--serif);color:var(--bx);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.review .facts{display:flex;flex-direction:column;gap:8px}
+.fact{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px}
+.fact:first-child{border-top:0}
+.fact b{font:700 16px var(--serif);font-variant-numeric:tabular-nums;white-space:nowrap}
+.review .say{background:var(--gold-soft);border-radius:12px;padding:10px 12px;font-size:14px}
+.review .nav{display:flex;gap:8px;justify-content:space-between;align-items:center}
+[hidden]{display:none!important}
+/* Connexion */
+html{padding-top:env(safe-area-inset-top,0px)}
+.login{max-width:380px;margin:9vh auto 0;display:flex;flex-direction:column;gap:12px}
+.login-logo{display:block;margin:0 auto;border-radius:50%;box-shadow:0 10px 30px rgba(128,0,32,.25)}
+.pin{letter-spacing:.5em;text-align:center;font:700 24px var(--sans)}
+.field{min-height:48px;font-size:16px}
+/* Barre d'onglets */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs .in{display:flex;width:100%;max-width:760px}
+nav.tabs button{flex:1;background:none;border:0;color:var(--faint);font:600 11px var(--sans);padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative}
+nav.tabs svg{width:22px;height:22px}
+nav.tabs button[aria-selected="true"]{color:var(--bx)}
+nav.tabs button[aria-selected="true"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;background:var(--gold-fill);border-radius:0 0 2px 2px}
+nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--bx-fill);color:var(--on-bx);font-size:10px;font-weight:700;border-radius:99px;padding:1px 5px;font-variant-numeric:tabular-nums}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13.5px;font-weight:600;z-index:8;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:no-preference){.card,.kpi,.hero{animation:up .22s ease both}@keyframes up{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header id="hdr" hidden>
+    <div class="top">
+      <img src="icons/favicon-32.png" alt="" width="28" height="28" style="border-radius:50%">
+      <div class="brand">WillShop</div>
+      <div class="sync" id="sync" aria-live="polite">Connexion…</div>
+      <button class="icon-btn" id="refresh" title="Actualiser" aria-label="Actualiser">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      </button>
+    </div>
+    <div class="seg" role="group" aria-label="Espace" id="seg" hidden>
+      <button data-role="ceo" aria-pressed="true">Direction</button>
+      <button data-role="sales" aria-pressed="false">Commercial</button>
+      <button data-role="driver" aria-pressed="false">Livreur</button>
+    </div>
+  </header>
+  <div id="banner"></div>
+  <main id="view"></main>
+</div>
+<nav class="tabs" aria-label="Sections" id="nav" hidden><div class="in" role="tablist" id="tabs"></div></nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------- Réglages ---------- */
+const SHEET_ID = "1pTd-mhmjUVUYX1tDb37XChKd23ATgKYhuW9rpLq2Flo";
+const SERVER = "Google Sheets";
+const RANGE = "Commandes!A2:Q";
+const VRANGE = "Visites!A2:K";
+const TRANGE = "Équipe!A2:E";
+const STATUTS = ["Prospect", "Nouvelle", "Confirmée", "En livraison", "Reprogrammée", "Injoignable", "Échec", "Livrée", "Annulée"];
+const PAIEMENTS = ["Espèces", "Orange Money", "Moov Money"];
+const API = "https://script.google.com/macros/s/AKfycbxudwbiZxBeTqbPU5XxCkAx1KsCuzcA8Y3qEbTEERqQ8IB6XX4hDwH7Cs3o8l9Sv8G0/exec";
+const TEAM_APP = "";
+const MOTIFS = ["Client absent / injoignable", "Adresse introuvable", "Refus du client", "Pas d'argent sur place"];
+const STEPS = [1, 3, 7, 14];
+const STEPS_ORDER = ["Arrivée", "Question", "Veut le produit", "Numéro donné", "Ville", "Jour", "Offre vue", "Commande"];
+const FUNNEL = [["Arrivée", "Arrivés"], ["Veut le produit", "Ont dit « Oui »"], ["Numéro donné", "Numéro laissé"], ["Offre vue", "Ont vu l’offre"], ["Commande", "Ont commandé"]];
+const T_CONFIRM = "Bonjour 👋 c'est WillShop. Merci pour ta commande de {produit} ({prix}). On te livre {jour} à {lieu}, c'est bien ça ?";
+const TEMPLATES = {
+  1:  "Bonjour 👋 c'est WillShop. Ta commande de {produit} ({prix}) est toujours réservée pour toi. On te livre quand ?",
+  3:  "Bonjour ! Nos clients sont contents de leur {produit} 😊 Ta commande t'attend toujours. Tu veux qu'on passe aujourd'hui ?",
+  7:  "Bonjour, il nous reste peu de stock de {produit}. On garde encore ta commande jusqu'à demain, dis-moi si tu la veux 🙏",
+  14: "Dernier message 🙂 Si tu veux toujours ton {produit}, réponds OUI et on te livre. Sinon pas de souci, merci et bonne journée !"
+};
+const TEMPLATES_P = {
+  1:  "Bonjour 👋 c'est WillShop. Tu as commencé à réserver ton {produit} ({prix}). Je te le garde ? Dis-moi ton quartier et le jour qui t'arrange 🙂",
+  3:  "Bonjour ! Ton {produit} est toujours disponible à {prix}. Beaucoup de nos clientes voient déjà la différence 😊 On te livre quand ?",
+  7:  "Bonjour, il reste peu de stock de {produit}. Tu veux que je t'en garde un ? Réponds OUI 🙏",
+  14: "Dernier message 🙂 Si tu veux ton {produit}, réponds OUI et on te livre. Sinon pas de souci, bonne journée !"
+};
+const ICONS = {
+  home: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+  orders: '<path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/>',
+  clients: '<circle cx="9" cy="8" r="3.5"/><path d="M3 20c.8-3.5 3.2-5 6-5s5.2 1.5 6 5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 15c1.6.6 2.6 2.2 3 5"/>',
+  team: '<circle cx="12" cy="7" r="3.5"/><path d="M5 21c.8-4 3.6-6 7-6s6.2 2 7 6"/>',
+  ai: '<path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  day: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  runs: '<path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+  history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>'
+};
+const ROLES = {
+  ceo:    [["home", "Accueil"], ["orders", "Commandes"], ["clients", "Clients"], ["team", "Équipe"]],
+  sales:  [["day", "Ma journée"], ["orders", "Commandes"], ["clients", "Clients"]],
+  driver: [["runs", "Livraisons"], ["history", "Historique"]]
+};
+const I_WA = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3c-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>';
+const I_PHONE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>';
+const I_MAP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+const I_SPARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/></svg>';
+
+/* ---------- État ---------- */
+let sample = null, cred = null, myName = "", realRole = null, drivers = [];
+let orders = [], visits = [], team = [];
+let loaded = false, visitsLoaded = false, teamLoaded = false, lastSync = null;
+let role = "ceo";
+let tab = "home";
+let filter = "all", query = "", salesStep = 0;
+let me = "";
+let panel = null;           // { row, kind } panneau ouvert côté livreur
+let aiMsg = {};             // messages IA par ligne
+let chat = [], bilan = "";
+const view = document.getElementById("view");
+
+/* ---------- Utilitaires ---------- */
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const F = n => (Number(n) || 0).toLocaleString("fr-FR").replace(/[  ]/g, " ") + " F";
+const DAY = 86400000;
+const JOURS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+function parseDate(s) {
+  const m = String(s || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!m) { const d = new Date(s); return isNaN(d) ? null : d; }
+  return new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+}
+const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const today = () => startOfDay(new Date());
+const sameDay = (a, b) => a && b && startOfDay(a).getTime() === startOfDay(b).getTime();
+const daysBetween = (a, b) => Math.round((startOfDay(b) - startOfDay(a)) / DAY);
+const fmtDate = d => d ? d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }) + " · " + d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "";
+const nowStamp = () => new Date().toLocaleString("fr-FR").replace(",", "");
+function waNumber(t) {
+  let d = String(t || "").replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  if (d.length === 8) d = "226" + d;
+  return d;
+}
+const waLink = (tel, text) => "https://api.whatsapp.com/send?phone=" + waNumber(tel) + (text ? "&text=" + encodeURIComponent(text) : "");
+const telLink = t => "tel:+" + waNumber(t);
+const mapLink = o => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((o.lieu || "") + ", " + (/ouaga/i.test(o.zone) ? "Ouagadougou" : "Burkina Faso"));
+const is = (o, re) => re.test(o.statut || "");
+const isProspect = o => is(o, /^prosp/i);
+const isClosed = o => is(o, /^(livr|annul)/i);
+const isToDeliver = o => is(o, /^(confirm|en livr|reprog)/i);
+const isProblem = o => is(o, /^(injoig|échec|echec)/i);
+const canRelance = o => isProspect(o) || is(o, /^(nouv|injoig|échec|echec)/i);
+function statusClass(st) {
+  if (/^prosp/i.test(st)) return "s-pro";
+  if (/^nouv/i.test(st)) return "s-new";
+  if (/^confirm/i.test(st)) return "s-conf";
+  if (/^(en livr|reprog)/i.test(st)) return "s-road";
+  if (/^livr/i.test(st)) return "s-ok";
+  if (/^(annul|échec|echec)/i.test(st)) return "s-bad";
+  return "s-mut";
+}
+const tokList = k => String(k || "").split(/[,;]+/).map(x => x.trim()).filter(Boolean);
+const relOf = toks => toks.map(t => /^J\+(\d+)/i.exec(t)).filter(Boolean).map(m => +m[1]);
+function rowFrom(v, i) {
+  return {
+    row: i + 2, date: parseDate(v[0]),
+    produit: v[1] || "", qte: Number(v[2]) || 1, prix: Number(String(v[3]).replace(/\D/g, "")) || 0,
+    zone: v[4] || "", lieu: v[5] || "", tel: String(v[6] || "").replace(/^'/, ""), jour: v[7] || "",
+    statut: v[8] || "Nouvelle", note: v[9] || "",
+    toks: tokList(v[10]), relances: relOf(tokList(v[10])),
+    derniere: v[11] || "", sid: v[12] || "", etape: v[13] || "",
+    livreur: v[14] || "", paiement: v[15] || "", livreeLe: parseDate(v[16])
+  };
+}
+// Date de livraison prévue à partir du jour choisi dans le tunnel
+function deliveryDate(o) {
+  if (!o.date) return null;
+  const base = startOfDay(o.date), j = String(o.jour || "").toLowerCase();
+  const m = j.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?/);
+  if (m) return new Date(+(m[3] || base.getFullYear()), +m[2] - 1, +m[1]);
+  if (!j || /aujourd/.test(j)) return base;
+  if (/demain/.test(j)) return new Date(base.getTime() + DAY);
+  const idx = JOURS.findIndex(d => j.startsWith(d));
+  if (idx < 0) return base;
+  return new Date(base.getTime() + ((idx - base.getDay() + 7) % 7) * DAY);
+}
+function dueStep(o, now = new Date()) {
+  if (!canRelance(o) || !o.date) return null;
+  const age = daysBetween(o.date, now), done = new Set(o.relances);
+  let due = null;
+  for (const s of STEPS) if (age >= s && !done.has(s)) due = s;
+  return due;
+}
+const fill = (t, o) => t.replace("{produit}", o.produit || "ta commande").replace("{prix}", F(o.prix)).replace("{jour}", (o.jour || "aujourd'hui").toLowerCase()).replace("{lieu}", o.lieu || "ton quartier");
+function msgFor(o, t) { return aiMsg[o.row] || (t && t.msg) || ""; }
+function toast(t) {
+  const el = document.getElementById("toast"); el.textContent = t; el.hidden = false;
+  clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 2200);
+}
+
+/* ---------- Bannière / erreurs ---------- */
+function banner(html, kind = "err") { document.getElementById("banner").innerHTML = html ? `<div class="banner ${kind}">${html}</div>` : ""; }
+function errorCopy(e) { return esc((e && e.message) || "Erreur"); }
+function errorCopyOld(e) {
+  switch (e && e.code) {
+    case "needs_reauth": return "Ta connexion Google Sheets a expiré. Reconnecte Google Sheets dans claude.ai → Paramètres → Connecteurs, puis touche Actualiser.";
+    case "server_not_connected": return "Google Sheets n'est pas connecté. Ajoute le connecteur Google Sheets dans claude.ai → Paramètres → Connecteurs.";
+    case "selection_required": return "Plusieurs connecteurs Google Sheets existent : choisis celui à utiliser dans la fenêtre de Claude.";
+    case "not_in_manifest": case "approval_required": return "L'accès à Google Sheets n'a pas été autorisé pour cette page. Touche Actualiser et accepte la demande.";
+    case "blocked_by_policy": return "Ton organisation bloque l'accès à Google Sheets depuis cette page.";
+    case "server_unavailable": case "upstream_error": return "Google Sheets ne répond pas pour le moment (connexion lente ?). Les dernières données restent affichées.";
+    case "tool_error": return "Google Sheets a refusé la demande : " + esc(e.message || "");
+    default: return "Impossible de joindre Google Sheets pour le moment.";
+  }
+}
+
+/* ---------- Serveur (Google Apps Script, branché au Google Sheet) ---------- */
+async function api(action, p) {
+  const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action, cred, p: p || {} }) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || "Erreur");
+  return j.data;
+}
+let loading = false;
+async function load(quiet) {
+  if (!cred || loading) return;
+  loading = true;
+  if (!quiet) document.getElementById("sync").textContent = "Actualisation…";
+  try {
+    const d = await api("data");
+    orders = d.rows.map(x => rowFrom(x.v, x.row - 2)).filter(o => o.produit || o.tel);
+    drivers = d.drivers || [];
+    if (d.visits) { visits = d.visits.map(v => ({ date: parseDate(v[0]), produit: v[1] || "", step: v[3] || "Arrivée" })); visitsLoaded = true; }
+    if (d.team) { team = d.team; teamLoaded = true; }
+    loaded = true; lastSync = new Date();
+    document.getElementById("sync").textContent = myName + " · " + lastSync.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    banner(""); render();
+  } catch (e) {
+    if (/PIN|essais/i.test(e.message)) { logout("Ton code a changé. Reconnecte-toi."); }
+    else { banner("Pas de connexion pour le moment. Les dernières données restent affichées."); document.getElementById("sync").textContent = "Hors ligne"; }
+  } finally { loading = false; }
+}
+document.getElementById("refresh").onclick = () => load();
+setInterval(() => { if (cred && !document.hidden) load(true); }, 120000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && cred && lastSync && Date.now() - lastSync > 60000) load(true); });
+
+/* ---------- Écriture ---------- */
+// Applique un changement tout de suite à l'écran, puis l'enregistre ; annule si ça échoue
+async function change(o, local, patch, okText) {
+  const prev = { ...o }; Object.assign(o, local); panel = null; render();
+  try { await api("update", { row: o.row, patch }); if (okText) toast(okText); }
+  catch (e) { Object.assign(o, prev); render(); banner("Pas enregistré : " + esc(e.message)); }
+}
+const setStatut = (o, st) => change(o, { statut: st }, { statut: st }, "Statut : " + st);
+const setLivreur = (o, nom) => change(o, { livreur: nom }, { livreur: nom }, nom ? "Attribuée à " + nom : "Livreur retiré");
+const startRun = o => change(o, { statut: "En livraison" }, { statut: "En livraison" }, "Bonne route 🛵");
+const delivered = (o, pay) => change(o, { statut: "Livrée", paiement: pay, livreeLe: new Date() }, { statut: "Livrée", paiement: pay, livreeLe: "now" }, "Livrée · " + F(o.prix) + " en " + pay);
+function failed(o, motif) {
+  const note = (o.note ? o.note + " | " : "") + "Échec " + new Date().toLocaleDateString("fr-FR") + " : " + motif;
+  return change(o, { statut: "Échec", note }, { statut: "Échec", note }, "Échec noté, le commercial va rappeler");
+}
+function reschedule(o, d) {
+  const label = JOURS[d.getDay()].replace(/^./, c => c.toUpperCase()) + " " + d.toLocaleDateString("fr-FR");
+  return change(o, { statut: "Reprogrammée", jour: label }, { statut: "Reprogrammée", jour: label }, "Reprogrammée : " + label);
+}
+function doneTask(o, t) {
+  if (!t || !t.tok) return;
+  const toks = o.toks.filter(x => x.toLowerCase() !== t.tok.toLowerCase()).concat([t.tok]);
+  return change(o, { toks, relances: relOf(toks) }, { relances: toks.join(", "), derniere: "now" }, "C'est noté ✓");
+}
+async function addMember(nom, r, tel, pin) {
+  if (!nom) return;
+  team.push({ nom, role: r, tel, actif: true, pin: !!pin }); render();
+  try { await api("addMember", { nom, role: r, tel, pin }); toast(nom + " ajouté à l'équipe"); load(true); }
+  catch (e) { team = team.filter(t => t.nom !== nom); render(); banner("Pas ajouté : " + esc(e.message)); }
+}
+async function setMember(m, p, okText) {
+  try { await api("setMember", Object.assign({ nom: m.nom }, p)); toast(okText); load(true); }
+  catch (e) { banner("Pas enregistré : " + esc(e.message)); }
+}
+
+/* ---------- Connexion ---------- */
+function renderLogin(msg) {
+  document.getElementById("hdr").hidden = true; document.getElementById("nav").hidden = true;
+  view.innerHTML = `<form class="login" id="lf">
+    <img src="icons/logo-240.png" alt="WillShop" width="120" height="120" class="login-logo">
+    <h1 style="text-align:center;margin:6px 0 0">WillShop</h1>
+    <p class="sub" style="text-align:center">Choisis ton nom et tape ton code PIN.</p>
+    <select class="field" id="ln" aria-label="Ton nom"><option value="">Chargement…</option></select>
+    <input class="field pin" id="lp" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" placeholder="••••" aria-label="Code PIN">
+    <button class="btn pri" type="submit" id="lb">Entrer</button>
+    ${msg ? `<div class="banner err">${esc(msg)}</div>` : ""}
+  </form>`;
+  api("names").then(list => {
+    const s = document.getElementById("ln"); if (!s) return;
+    s.innerHTML = list.length ? `<option value="">Ton nom…</option>` + list.map(m => `<option>${esc(m.nom)}</option>`).join("") : `<option value="">Aucun membre avec un PIN</option>`;
+    const last = store("ws_name"); if (last) s.value = last;
+  }).catch(() => { const s = document.getElementById("ln"); if (s) s.innerHTML = `<option value="">Pas de connexion</option>`; });
+  document.getElementById("lf").onsubmit = async e => {
+    e.preventDefault();
+    const nom = document.getElementById("ln").value, pin = document.getElementById("lp").value.trim();
+    if (!nom || !pin) return;
+    const b = document.getElementById("lb"); b.disabled = true; b.textContent = "Vérification…";
+    cred = { nom, pin };
+    try { const r = await api("login"); store("ws_name", nom); store("ws_pin", pin); start(r); }
+    catch (err) { cred = null; renderLogin(/PIN/i.test(err.message) ? "Nom ou PIN incorrect." : /essais/i.test(err.message) ? err.message : "Pas de connexion. Réessaie."); }
+  };
+}
+function logout(msg) { store("ws_pin", null); cred = null; loaded = false; orders = []; renderLogin(msg); }
+function start(r) {
+  realRole = r.role; myName = r.nom; role = r.role; tab = ROLES[role][0][0];
+  if (realRole === "driver") me = myName;
+  document.getElementById("seg").hidden = realRole !== "ceo";
+  document.getElementById("hdr").hidden = false; document.getElementById("nav").hidden = false;
+  render(); load();
+}
+
+/* ---------- Calculs ---------- */
+const livreurs = () => drivers.slice();
+function stats() {
+  const now = new Date(), t0 = today();
+  const real = orders.filter(o => !isProspect(o));
+  const tOrders = real.filter(o => sameDay(o.date, t0));
+  const deliveredToday = orders.filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, t0));
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(t0.getTime() - i * DAY);
+    days.push({ d, n: real.filter(o => sameDay(o.date, d)).length, today: i === 0 });
+  }
+  const cash = mode => {
+    const all = orders.filter(o => is(o, /^livr/i) && o.paiement === mode);
+    return { today: all.filter(o => sameDay(o.livreeLe, t0)).reduce((s, o) => s + o.prix, 0), week: all.filter(o => o.livreeLe && daysBetween(o.livreeLe, now) < 7).reduce((s, o) => s + o.prix, 0) };
+  };
+  const delivered = real.filter(o => is(o, /^livr/i));
+  return {
+    real, tOrders, todayValue: tOrders.reduce((s, o) => s + o.prix, 0),
+    collected: deliveredToday.reduce((s, o) => s + o.prix, 0), deliveredToday: deliveredToday.length,
+    prospectsToday: orders.filter(o => isProspect(o) && sameDay(o.date, t0)).length,
+    toCall: orders.filter(o => is(o, /^nouv/i)).length,
+    onRoad: orders.filter(o => is(o, /^en livr/i)).length,
+    rate: real.length ? Math.round(delivered.length / real.length * 100) : 0,
+    days, cash: Object.fromEntries(PAIEMENTS.map(m => [m, cash(m)])),
+    due: orders.map(o => ({ o, step: dueStep(o, now) })).filter(x => x.step)
+  };
+}
+function alerts() {
+  const now = Date.now(), t1 = today().getTime() + DAY;
+  const late = orders.filter(o => is(o, /^nouv/i) && o.date && now - o.date.getTime() > 2 * 3600000);
+  const noDriver = orders.filter(o => isToDeliver(o) && !o.livreur && (deliveryDate(o) || 0) <= t1);
+  const fails = orders.filter(o => is(o, /^(échec|echec)/i));
+  const unreach = orders.filter(o => is(o, /^injoig/i));
+  const due = stats().due;
+  return [
+    { n: late.length, t: "Nouvelles commandes pas appelées depuis plus de 2 h", lvl: "hot", f: "nouv" },
+    { n: noDriver.length, t: "Livraisons d'aujourd'hui ou demain sans livreur", lvl: "hot", f: "nodriver" },
+    { n: fails.length, t: "Échecs de livraison à reprogrammer", lvl: "warm", f: "pb" },
+    { n: unreach.length, t: "Clients injoignables", lvl: "warm", f: "pb" },
+    { n: due.length, t: "Relances à faire aujourd'hui", lvl: "", go: ["sales", "day", 2] }
+  ].filter(a => a.n);
+}
+function funnel(day = today()) {
+  const t0 = startOfDay(day).getTime();
+  const list = visits.filter(v => v.date && startOfDay(v.date).getTime() === t0);
+  const reach = s => list.filter(v => STEPS_ORDER.indexOf(v.step) >= STEPS_ORDER.indexOf(s)).length;
+  return { total: list.length, steps: FUNNEL.map(([k, l]) => ({ l, n: k === "Arrivée" ? list.length : reach(k) })), questions: list.filter(v => v.step === "Question").length };
+}
+function clients() {
+  const map = new Map();
+  for (const o of orders) {
+    const k = waNumber(o.tel) || ("x" + o.row);
+    if (!map.has(k)) map.set(k, { tel: o.tel, lieu: o.lieu, orders: [], spent: 0, livrees: 0, last: null, products: new Set() });
+    const c = map.get(k);
+    c.orders.push(o); c.products.add(o.produit);
+    if (is(o, /^livr/i)) { c.spent += o.prix; c.livrees++; }
+    if (o.date && (!c.last || o.date > c.last)) { c.last = o.date; c.lieu = o.lieu || c.lieu; }
+  }
+  return [...map.values()].sort((a, b) => (b.last || 0) - (a.last || 0));
+}
+// Parcours du client : chaque jour, chaque client a au plus une action, la plus urgente
+const T_DAY = {
+  jour: "Bonjour 👋 c'est WillShop. On te livre ton {produit} aujourd'hui à {lieu}. Tu es disponible à quelle heure ?",
+  veille: "Bonsoir 👋 c'est WillShop. On te livre ton {produit} demain à {lieu}. Tu seras disponible ? À quelle heure ça t'arrange ?",
+  hot: "Bonjour 👋 c'est WillShop. Tu as commencé à réserver ton {produit} ({prix}). Je te le garde ? Dis-moi ton quartier et le jour qui t'arrange 🙂",
+  problem: "Bonjour, c'est WillShop. On n'a pas pu te livrer ton {produit}. Quel jour et à quelle heure ça t'arrange ? On s'organise 🙏"
+};
+const stampLabel = () => new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+const hasTok = (o, t) => o.toks.some(x => x.toLowerCase() === t.toLowerCase());
+function taskFor(o, now = new Date()) {
+  const t0 = today(), dd = deliveryDate(o), step = dueStep(o, now), dTok = "Jour " + stampLabel(), rTok = "R" + stampLabel();
+  if (isToDeliver(o) && !is(o, /^en livr/i) && dd && dd <= t0 && !hasTok(o, dTok)) return { k: "jour", tok: dTok, msg: fill(T_DAY.jour, o), label: dd < t0 ? "En retard, prévue le " + dd.toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "Livraison aujourd'hui" };
+  if (is(o, /^nouv/i) && !step) return { k: "call", msg: fill(T_CONFIRM, o), label: "Message de confirmation" };
+  if (step) return { k: "relance", step, tok: "J+" + step, msg: fill((isProspect(o) ? TEMPLATES_P : TEMPLATES)[step], o), label: "Relance J+" + step };
+  if (isToDeliver(o) && dd && daysBetween(t0, dd) === 1 && !hasTok(o, "Veille")) return { k: "veille", tok: "Veille", msg: fill(T_DAY.veille, o), label: "Rappel de la veille" };
+  if (isProspect(o) && o.date && daysBetween(o.date, now) === 0 && !hasTok(o, "J+0")) return { k: "hot", tok: "J+0", msg: fill(T_DAY.hot, o), label: "Premier message" };
+  if (isProblem(o) && !hasTok(o, rTok)) return { k: "problem", tok: rTok, msg: fill(T_DAY.problem, o), label: "Rattraper le client" };
+  if (isToDeliver(o) && !o.livreur && dd && daysBetween(t0, dd) <= 1) return { k: "assign", label: "Choisir un livreur" };
+  return null;
+}
+const SALES_STEPS = [
+  { k: "jour", t: "Livraisons du jour", d: "Ces clients ont choisi aujourd'hui. Préviens-les que la livraison arrive." },
+  { k: "call", t: "À confirmer", d: "Nouvelles commandes. Envoie le message, puis passe-les en « Confirmée »." },
+  { k: "relance", t: "Relances", d: "Le message est déjà écrit. Touche WhatsApp et envoie : la relance se note toute seule." },
+  { k: "veille", t: "Livraisons de demain", d: "Rappelle-leur que la livraison est demain." },
+  { k: "hot", t: "Prospects du jour", d: "Ils ont laissé leur numéro sans finir. Un petit message suffit souvent." },
+  { k: "problem", t: "Problèmes", d: "Injoignables et livraisons ratées. Propose un nouveau jour." },
+  { k: "assign", t: "À attribuer", d: "Choisis le livreur pour les livraisons d'aujourd'hui et de demain." }
+];
+function salesBuckets() {
+  const now = new Date(), b = Object.fromEntries(SALES_STEPS.map(s => [s.k, []]));
+  for (const o of orders) { const t = taskFor(o, now); if (t && b[t.k]) b[t.k].push({ o, t }); }
+  b.call.sort((x, y) => (x.o.date || 0) - (y.o.date || 0));
+  b.relance.sort((x, y) => x.t.step - y.t.step);
+  return b;
+}
+// Rappel toutes les 2 heures : ce qui est oublié à cette heure-ci
+function forgotten() {
+  const now = new Date(), h = now.getHours(), b = salesBuckets(), out = [], pl = (n, a, z = "s") => n + " " + a + (n > 1 ? z : "");
+  const late = b.call.filter(x => now - x.o.date > 2 * 3600000).length;
+  if (late) out.push(pl(late, "commande") + " pas confirmée" + (late > 1 ? "s" : "") + " depuis plus de 2 h");
+  if (h >= 10 && b.jour.length) out.push(pl(b.jour.length, "client") + " livré" + (b.jour.length > 1 ? "s" : "") + " aujourd'hui pas encore prévenu" + (b.jour.length > 1 ? "s" : ""));
+  if (h >= 12 && b.relance.length) out.push(pl(b.relance.length, "relance") + " pas encore envoyée" + (b.relance.length > 1 ? "s" : ""));
+  if (h >= 17 && b.veille.length) out.push(pl(b.veille.length, "livraison") + " de demain pas encore rappelée" + (b.veille.length > 1 ? "s" : ""));
+  if (h >= 12 && b.problem.length) out.push(pl(b.problem.length, "problème") + " à rattraper");
+  return out;
+}
+
+/* ---------- Rendu : éléments communs ---------- */
+const empty = msg => `<div class="empty">${msg}</div>`;
+function statusSelect(o) {
+  return `<select class="sel" data-act="status" aria-label="Statut">${STATUTS.map(s => `<option ${s === o.statut ? "selected" : ""}>${s}</option>`).join("")}${STATUTS.includes(o.statut) ? "" : `<option selected>${esc(o.statut)}</option>`}</select>`;
+}
+function driverSelect(o) {
+  const names = livreurs(); if (o.livreur && !names.includes(o.livreur)) names.push(o.livreur);
+  if (!names.length) return `<button class="btn small ghost" data-go="team">Ajouter un livreur</button>`;
+  return `<select class="sel" data-act="driver" aria-label="Livreur"><option value="">Livreur…</option>${names.map(n => `<option ${n === o.livreur ? "selected" : ""}>${esc(n)}</option>`).join("")}</select>`;
+}
+function orderCard(o, opts = {}) {
+  const t = opts.task, text = t && t.msg ? msgFor(o, t) : "";
+  const dd = deliveryDate(o);
+  const when = o.jour ? "livraison " + esc(o.jour.toLowerCase()) : "";
+  return `<article class="card" data-row="${o.row}">
+    <div class="c-top">
+      <div>
+        <div class="who">${esc(o.tel) || "Sans numéro"}</div>
+        <div class="place">${esc(o.lieu) || `<span class="meta">Quartier pas encore donné</span>`}${o.zone ? ` <span class="meta">· ${esc(o.zone)}</span>` : ""}</div>
+        <div class="meta">${esc(o.produit)}${o.qte > 1 ? " × " + o.qte : ""} · ${fmtDate(o.date)}</div>
+        ${when || o.livreur ? `<div class="meta">${when}${when && o.livreur ? " · " : ""}${o.livreur ? "🛵 " + esc(o.livreur) : ""}</div>` : ""}
+        ${isProspect(o) ? `<div class="meta">Arrêté à : <b>${esc(o.etape || "Numéro donné")}</b></div>` : ""}
+      </div>
+      <div><div class="amt">${F(o.prix)}</div><div style="text-align:right"><span class="pill ${statusClass(o.statut)}">${esc(o.statut)}</span></div></div>
+    </div>
+    ${text ? `<div class="msg-box"><span class="eyebrow">${aiMsg[o.row] ? "Message écrit par l'IA" : esc(t.label)}</span>${esc(text)}</div>` : ""}
+    <div class="actions">
+      <a class="btn small pri" href="${esc(waLink(o.tel, text))}" target="_blank" rel="noopener" ${t && t.tok ? `data-done="1"` : ""}>${I_WA} WhatsApp</a>
+      <a class="btn small" href="${esc(telLink(o.tel))}">${I_PHONE} Appeler</a>
+      ${t && t.k === "call" ? `<button class="btn small ok" data-act="confirm">Confirmée ✓</button>` : ""}
+      ${text && sample ? `<button class="btn small ghost" data-act="ai">${I_SPARK} Message IA</button>` : ""}
+      ${statusSelect(o)}
+      ${isToDeliver(o) ? driverSelect(o) : ""}
+      ${t && t.tok ? `<button class="btn small ghost" data-act="skip">Déjà fait</button>` : ""}
+    </div>
+  </article>`;
+}
+
+/* ---------- Direction : revue du matin, une étape à la fois ---------- */
+const dayKey = () => today().toISOString().slice(0, 10);
+let reviewStep = store("ws_review") === dayKey() ? -1 : 0;
+function reviewSteps() {
+  const t0 = today(), y0 = new Date(t0.getTime() - DAY), real = orders.filter(o => !isProspect(o));
+  const delY = orders.filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, y0));
+  const ordY = real.filter(o => sameDay(o.date, y0)), proY = orders.filter(o => isProspect(o) && sameDay(o.date, y0));
+  const sum = l => l.reduce((s, o) => s + o.prix, 0);
+  const byMode = PAIEMENTS.map(m => [m, sum(delY.filter(o => o.paiement === m))]).filter(x => x[1]);
+  const prod = {}; ordY.forEach(o => { prod[o.produit] = (prod[o.produit] || 0) + 1; });
+  const top = Object.entries(prod).sort((a, b) => b[1] - a[1])[0];
+  const fu = funnel(y0), fmax = Math.max(1, fu.total), worst = fu.steps.slice(1).map((x, i) => ({ l: x.l, lost: fu.steps[i].n - x.n })).sort((a, b) => b.lost - a.lost)[0];
+  const al = alerts();
+  const toDay = orders.filter(o => isToDeliver(o) && (deliveryDate(o) || 0) <= t0);
+  const tomorrow = orders.filter(o => isToDeliver(o) && sameDay(deliveryDate(o), new Date(t0.getTime() + DAY)));
+  const b = salesBuckets();
+  const fact = (l, v) => `<div class="fact"><span>${l}</span><b>${v}</b></div>`;
+  return [
+    { q: "Hier, on a encaissé", big: F(sum(delY)), body: `<div class="facts">${fact("Livraisons réussies", delY.length)}${byMode.map(([m, v]) => fact(m, F(v))).join("")}${fact("Échecs de livraison hier", orders.filter(o => is(o, /^(échec|echec)/i) && /Échec/.test(o.note) && o.note.includes(y0.toLocaleDateString("fr-FR"))).length)}</div>`,
+      say: delY.length ? "" : "Aucune livraison marquée « Livrée » hier. Si des colis sont partis, demande aux livreurs de les valider dans leur app." },
+    { q: "Hier, on a reçu", big: ordY.length + " commande" + (ordY.length > 1 ? "s" : ""), body: `<div class="facts">${fact("Valeur des commandes", F(sum(ordY)))}${fact("Prospects (numéro laissé)", proY.length)}${top ? fact("Produit le plus demandé", esc(top[0])) : ""}${fact("Déjà livrées sur ces commandes", ordY.filter(o => is(o, /^livr/i)).length)}</div>` },
+    { q: "Le tunnel hier", big: fu.total + " visiteur" + (fu.total > 1 ? "s" : ""), body: fu.total ? `<div class="funnel" style="border:0;padding:0">${fu.steps.map(x => `<div class="fstep"><span>${esc(x.l)}</span><div class="ftrack"><span style="width:${Math.round(x.n / fmax * 100)}%"></span></div><b>${x.n} <i>${Math.round(x.n / fmax * 100)}%</i></b></div>`).join("")}</div>` : empty("Pas de visite enregistrée hier."),
+      say: worst && worst.lost > 0 ? `C'est avant « ${worst.l} » qu'on perd le plus de monde (${worst.lost} personne${worst.lost > 1 ? "s" : ""}).` : "" },
+    { q: "Ce qui bloque ce matin", big: al.length ? al.reduce((n, a) => n + a.n, 0) + " point" + (al.length > 1 ? "s" : "") : "Rien 👍", body: al.length ? `<div class="facts">${al.map(a => fact(esc(a.t), a.n)).join("")}</div>` : "" },
+    { q: "Au programme aujourd'hui", big: toDay.length + " livraison" + (toDay.length > 1 ? "s" : ""), body: `<div class="facts">${fact("À encaisser si tout est livré", F(sum(toDay)))}${fact("Dont sans livreur", toDay.filter(o => !o.livreur).length)}${fact("Commandes à confirmer", b.call.length)}${fact("Relances à envoyer", b.relance.length)}${fact("Livraisons prévues demain", tomorrow.length)}</div>` },
+    { q: "L'équipe aujourd'hui", big: livreurs().length + " livreur" + (livreurs().length > 1 ? "s" : ""), body: livreurs().length ? `<div class="facts">${livreurs().map(n => fact(esc(n), toDay.filter(o => o.livreur === n).length + " à livrer")).join("")}</div>` : empty("Ajoute tes livreurs dans l'onglet Équipe pour leur attribuer des commandes."),
+      say: toDay.filter(o => !o.livreur).length ? "Attribue les livraisons sans livreur avant 9 h pour qu'ils partent tôt." : "" }
+  ];
+}
+function renderReview() {
+  const st = reviewSteps(), i = Math.min(reviewStep, st.length - 1), x = st[i], last = i === st.length - 1;
+  return `<h1>Revue du matin</h1><p class="sub">${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · étape ${i + 1} sur ${st.length}</p>
+    <section class="review" aria-live="polite">
+      <div class="dots" aria-hidden="true">${st.map((_, k) => `<i class="${k <= i ? "on" : ""}"></i>`).join("")}</div>
+      <div><div class="q">${x.q}</div><div class="big">${x.big}</div></div>
+      ${x.body || ""}
+      ${x.say ? `<div class="say">${x.say}</div>` : ""}
+      <div class="nav">${i > 0 ? `<button class="btn ghost" data-rev="${i - 1}">← Retour</button>` : `<button class="btn ghost" data-rev="end">Passer</button>`}
+        <button class="btn pri" data-rev="${last ? "end" : i + 1}">${last ? "Ouvrir le tableau de bord" : "Suivant →"}</button></div>
+    </section>`;
+}
+function renderHome() {
+  if (reviewStep >= 0) return renderReview();
+  const s = stats(), al = alerts(), fu = funnel(), fmax = Math.max(1, fu.total);
+  const max = Math.max(1, ...s.days.map(d => d.n));
+  const h = new Date().getHours();
+  const cashTotal = PAIEMENTS.reduce((t, m) => t + s.cash[m].today, 0);
+  return `
+    <h1>${h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"} ${esc(myName)}</h1>
+    <p class="sub">${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · <button class="btn small ghost" data-rev="0" style="min-height:30px;padding:0 8px">Revoir la revue du matin</button></p>
+    <section class="hero" aria-label="Résumé du jour">
+      <span class="eyebrow">Encaissé aujourd'hui</span>
+      <div class="big">${F(s.collected)}</div>
+      <div class="row2"><span><b>${s.deliveredToday}</b> livrée${s.deliveredToday > 1 ? "s" : ""}</span><span><b>${s.tOrders.length}</b> commande${s.tOrders.length > 1 ? "s" : ""} reçue${s.tOrders.length > 1 ? "s" : ""} · ${F(s.todayValue)}</span><span>Taux de livraison <b>${s.rate} %</b></span></div>
+    </section>
+    <div class="kpis">
+      <div class="kpi"><span class="l">À confirmer</span><b>${s.toCall}</b><small>statut « Nouvelle »</small></div>
+      <div class="kpi"><span class="l">Prospects du jour</span><b>${s.prospectsToday}</b><small>numéro laissé</small></div>
+      <div class="kpi"><span class="l">En livraison</span><b>${s.onRoad}</b><small>sur la route</small></div>
+      <div class="kpi"><span class="l">Relances du jour</span><b>${s.due.length}</b><small>J+1 · J+3 · J+7 · J+14</small></div>
+    </div>
+    <h2>Points d'attention</h2>
+    <div class="alerts">${al.length ? al.map((a, i) => `<button class="alert ${a.lvl}" data-alert="${i}"><span class="dot"></span><span>${esc(a.t)}</span><span class="n">${a.n}</span><span class="chev">›</span></button>`).join("") : `<div class="calm">Rien de bloquant. Tout est sous contrôle.</div>`}</div>
+    <h2>Tunnel aujourd'hui</h2>
+    ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="funnel">${fu.steps.map(x => `<div class="fstep"><span>${esc(x.l)}</span><div class="ftrack"><span style="width:${Math.round(x.n / fmax * 100)}%"></span></div><b>${x.n} <i>${Math.round(x.n / fmax * 100)}%</i></b></div>`).join("")}${fu.questions ? `<p class="meta" style="margin:2px 0 0">${fu.questions} personne${fu.questions > 1 ? "s ont" : " a"} touché « J'ai une question ».</p>` : ""}</div>` : empty("Pas encore de visite aujourd'hui.")}
+    <h2>Trésorerie <span class="count">encaissé aujourd'hui · ${F(cashTotal)}</span></h2>
+    <div class="cash">${PAIEMENTS.map(m => `<div><span>${m}</span><b>${F(s.cash[m].today)}</b><small>7 j : ${F(s.cash[m].week)}</small></div>`).join("")}</div>
+    <h2>Commandes · 7 derniers jours</h2>
+    <div class="bars" role="img" aria-label="Commandes par jour sur 7 jours">
+      ${s.days.map(d => `<div class="bar ${d.today ? "today" : ""}" style="height:${Math.round(d.n / max * 100)}%"><em>${d.n || ""}</em><i>${d.d.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3)}</i></div>`).join("")}
+    </div>
+    <h2>Bilan du jour</h2>
+    <div id="bilanBox">${bilan ? `<div class="note">${esc(bilan)}</div>` : empty("L'IA lit tes chiffres et te dit quoi faire en priorité.")}</div>
+    <div class="actions" style="margin-top:10px"><button class="btn gold" id="bilanBtn" ${sample ? "" : "hidden"}>${I_SPARK} ${bilan ? "Refaire le bilan" : "Faire le bilan"}</button></div>`;
+}
+const FILTERS = {
+  all: ["Toutes", () => true], pro: ["Prospects", isProspect], nouv: ["Nouvelles", o => is(o, /^nouv/i)],
+  conf: ["Confirmées", o => is(o, /^confirm/i)], road: ["En route", o => is(o, /^(en livr|reprog)/i)],
+  pb: ["Problèmes", isProblem], livr: ["Livrées", o => is(o, /^livr/i)], annul: ["Annulées", o => is(o, /^annul/i)],
+  nodriver: ["Sans livreur", o => isToDeliver(o) && !o.livreur]
+};
+function renderOrders() {
+  const q = query.trim().toLowerCase();
+  const list = orders.filter(FILTERS[filter][1]).filter(o => !q || [o.tel, o.lieu, o.produit, o.zone, o.livreur].join(" ").toLowerCase().includes(q)).sort((a, b) => (b.date || 0) - (a.date || 0));
+  return `<h1>Commandes</h1><p class="sub">${orders.length} lignes dans ton Google Sheet</p>
+    <div style="margin-top:14px"><input class="search" id="q" type="search" placeholder="Numéro, quartier, produit, livreur…" value="${esc(query)}" aria-label="Chercher"></div>
+    <div class="chips">${Object.entries(FILTERS).map(([k, [l, fn]]) => `<button class="chip" data-filter="${k}" aria-pressed="${filter === k}">${l}<span class="c">${orders.filter(fn).length}</span></button>`).join("")}</div>
+    <div class="list">${list.length ? list.slice(0, 80).map(o => orderCard(o, { task: taskFor(o) })).join("") : empty(orders.length ? "Aucune commande pour ce filtre." : "Les commandes de tes tunnels apparaîtront ici.")}</div>`;
+}
+function renderClients() {
+  const cs = clients(), q = query.trim().toLowerCase();
+  const list = cs.filter(c => !q || [c.tel, c.lieu, ...c.products].join(" ").toLowerCase().includes(q));
+  return `<h1>Clients</h1><p class="sub">${cs.length} numéros · ${cs.filter(c => c.livrees).length} ont déjà acheté</p>
+    <div style="margin-top:14px"><input class="search" id="q" type="search" placeholder="Chercher un client, un quartier, un produit…" value="${esc(query)}" aria-label="Chercher"></div>
+    <div class="list">${list.length ? list.slice(0, 80).map(c => `<article class="card">
+      <div class="c-top"><div><div class="who">${esc(c.tel)}</div><div class="place">${esc(c.lieu)}</div><div class="meta">${[...c.products].map(esc).join(" · ")}</div></div>
+      <div><div class="amt">${F(c.spent)}</div><div class="meta" style="text-align:right">${c.orders.length} commande${c.orders.length > 1 ? "s" : ""}</div>${c.livrees >= 2 ? `<div style="text-align:right"><span class="pill s-conf">Fidèle</span></div>` : c.livrees ? "" : `<div style="text-align:right"><span class="pill s-mut">Pas encore acheté</span></div>`}</div></div>
+      <div class="actions"><a class="btn small pri" href="${esc(waLink(c.tel, ""))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a><button class="btn small" data-copy="${esc(c.tel)}">Copier le numéro</button></div>
+    </article>`).join("") : empty(cs.length ? "Aucun client trouvé." : "Tes clients apparaîtront ici dès la première commande.")}</div>`;
+}
+function renderTeam() {
+  const t0 = today();
+  const card = m => {
+    const mine = orders.filter(o => o.livreur === m.nom);
+    const toDo = mine.filter(isToDeliver).length;
+    const done = mine.filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, t0));
+    const fails = mine.filter(o => is(o, /^(échec|echec)/i)).length;
+    return `<article class="card"><div class="team-row"><div class="avatar">${esc(m.nom.charAt(0).toUpperCase())}</div>
+      <div style="min-width:0;flex:1"><div class="who" style="font-size:15px">${esc(m.nom)}</div><div class="meta">${esc(m.role)}${m.tel ? " · " + esc(m.tel) : ""} · ${m.pin ? "PIN défini" : "<b>pas de PIN</b> (il ne peut pas se connecter)"}</div></div>
+      ${m.tel ? `<a class="btn small" href="${esc(waLink(m.tel, ""))}" target="_blank" rel="noopener" aria-label="WhatsApp ${esc(m.nom)}">${I_WA}</a>` : ""}
+      <button class="btn small ghost" data-member="${esc(m.nom)}" data-actif="${m.actif ? 0 : 1}">${m.actif ? "Désactiver" : "Réactiver"}</button></div>
+      ${/livr/i.test(m.role) ? `<div class="stats"><span>À livrer <b>${toDo}</b></span><span>Livrées aujourd'hui <b>${done.length}</b></span><span>Encaissé <b>${F(done.reduce((s, o) => s + o.prix, 0))}</b></span><span>Échecs <b>${fails}</b></span></div>` : ""}
+    </article>`;
+  };
+  return `<h1>Équipe</h1><p class="sub">Chacun se connecte à cette app avec son nom et son PIN. Envoie-leur simplement le lien de l'app.</p>
+    ${TEAM_APP ? `<div class="actions" style="margin-top:12px"><a class="btn gold" href="${TEAM_APP}" target="_blank" rel="noopener">Ouvrir l'app Équipe</a><button class="btn" data-copy="${TEAM_APP}">Copier le lien</button></div>` : ""}
+    <h2>Ajouter quelqu'un</h2>
+    <form class="form" id="addForm"><input class="field" id="mNom" placeholder="Nom (ex : Issouf)" aria-label="Nom" required>
+      <select class="field" id="mRole" aria-label="Rôle"><option>Livreur</option><option>Commercial</option></select>
+      <input class="field" id="mTel" type="tel" inputmode="numeric" placeholder="Téléphone" aria-label="Téléphone">
+      <input class="field" id="mPin" inputmode="numeric" maxlength="8" placeholder="PIN (4 chiffres)" aria-label="Code PIN">
+      <button class="btn pri" type="submit">Ajouter</button></form>
+    <h2>Membres <span class="count">${team.length}</span></h2>
+    <div class="list">${!teamLoaded ? empty("Lecture de l'équipe…") : team.length ? team.map(card).join("") : empty("Ajoute ton premier livreur pour pouvoir lui attribuer des commandes.")}</div>`;
+}
+
+/* ---------- Commercial ---------- */
+function renderDay() {
+  const b = salesBuckets();
+  const total = SALES_STEPS.reduce((n, s) => n + b[s.k].length, 0);
+  const cur = SALES_STEPS[salesStep];
+  const done = salesStep >= SALES_STEPS.length;
+  const left = done ? 0 : SALES_STEPS.slice(salesStep).reduce((n, s) => n + b[s.k].length, 0);
+  const pct = total ? Math.round((1 - left / total) * 100) : 100;
+  const fg = forgotten(), h = new Date().getHours(), nx = h + (h % 2 ? 1 : 2);
+  return `<h1>Ma journée</h1><p class="sub">${total ? total + " client" + (total > 1 ? "s" : "") + " à traiter, étape par étape." : "Rien à traiter pour le moment."}</p>
+    ${fg.length ? `<section class="remind" aria-label="Rappel"><span class="eyebrow">Rappel de ${h} h</span><b>Ces clients attendent encore</b><ul>${fg.map(x => `<li>${esc(x)}</li>`).join("")}</ul><span class="meta">Prochain point à ${nx % 24} h.</span></section>` : ""}
+    <div class="steps" role="list">${SALES_STEPS.map((s, i) => `<button class="stp ${b[s.k].length ? "" : "done"}" role="listitem" data-step-go="${i}" ${i === salesStep ? 'aria-current="step"' : ""}>${s.t}<b>${b[s.k].length || "✓"}</b></button>`).join("")}</div>
+    <div class="progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
+    ${done ? `<div class="step-head"><span class="eyebrow">Fin de routine</span><h2 style="margin:4px 0">Bravo, ta routine est faite 👏</h2><p class="sub">Les compteurs se mettent à jour à chaque nouvelle commande. Reviens dans quelques heures.</p></div>
+      <div class="next"><button class="btn" data-step-go="0">Recommencer</button></div>`
+    : `<div class="step-head"><span class="eyebrow">Étape ${salesStep + 1} sur ${SALES_STEPS.length}</span><h2 style="margin:4px 0">${cur.t} <span class="count">${b[cur.k].length}</span></h2><p class="sub">${cur.d}</p></div>
+      <div class="list" style="margin-top:12px">${b[cur.k].length ? b[cur.k].map(x => orderCard(x.o, { task: x.t })).join("") : empty("Rien dans cette étape. 👍")}</div>
+      <div class="next"><button class="btn pri" data-step-go="${salesStep + 1}">${salesStep + 1 < SALES_STEPS.length ? "Étape suivante · " + SALES_STEPS[salesStep + 1].t : "Terminer"} →</button></div>`}`;
+}
+
+/* ---------- Livreur ---------- */
+function driverOrders() { return orders.filter(o => (!me || o.livreur === me)); }
+function driverCard(o) {
+  const p = panel && panel.row === o.row ? panel.kind : null;
+  const dd = deliveryDate(o), t0 = today();
+  const late = dd && dd < t0;
+  const next = [1, 2, 3].map(i => new Date(t0.getTime() + i * DAY));
+  return `<article class="card drive" data-row="${o.row}">
+    <div class="c-top">
+      <div><div class="place">${esc(o.lieu) || "Quartier à demander"}</div>
+        <div class="meta">${esc(o.zone)} · ${esc(o.produit)}${o.qte > 1 ? " × " + o.qte : ""}</div>
+        <div class="who" style="margin-top:4px">${esc(o.tel)}</div>
+        ${late ? `<div class="meta" style="color:var(--bad)">Prévue ${esc(String(o.jour).toLowerCase())}, en retard</div>` : o.jour ? `<div class="meta">Livraison ${esc(String(o.jour).toLowerCase())}</div>` : ""}
+        ${!me && o.livreur ? `<div class="meta">🛵 ${esc(o.livreur)}</div>` : ""}</div>
+      <span class="pill ${statusClass(o.statut)}">${esc(o.statut)}</span>
+    </div>
+    <div class="collect"><span>À encaisser</span><b>${F(o.prix)}</b></div>
+    <div class="contact">
+      <a class="btn small" href="${esc(telLink(o.tel))}">${I_PHONE} Appeler</a>
+      <a class="btn small" href="${esc(waLink(o.tel, "Bonjour 👋 c'est le livreur WillShop pour ton " + (o.produit || "colis") + ". Je suis en route, tu es où exactement ?"))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a>
+      <a class="btn small" href="${esc(mapLink(o))}" target="_blank" rel="noopener">${I_MAP} Itinéraire</a>
+    </div>
+    ${p === "pay" ? `<div class="panel"><span class="eyebrow">Comment le client a payé ?</span><div class="opts">${PAIEMENTS.map(m => `<button class="btn ok wide" data-pay="${esc(m)}">${m}</button>`).join("")}</div><button class="btn small ghost" data-act="close">Annuler</button></div>`
+    : p === "fail" ? `<div class="panel"><span class="eyebrow">Pourquoi ça n'a pas marché ?</span><div class="opts">${MOTIFS.map(m => `<button class="btn small" data-fail="${esc(m)}">${m}</button>`).join("")}</div><button class="btn small ghost" data-act="close">Annuler</button></div>`
+    : p === "later" ? `<div class="panel"><span class="eyebrow">Nouveau jour de livraison</span><div class="opts">${next.map((d, i) => `<button class="btn small" data-later="${d.getTime()}">${i === 0 ? "Demain" : JOURS[d.getDay()].replace(/^./, c => c.toUpperCase())} ${d.getDate()}</button>`).join("")}</div><button class="btn small ghost" data-act="close">Annuler</button></div>`
+    : `<div class="big-actions">
+        ${is(o, /^en livr/i) ? `<button class="btn ok" data-act="pay">Livré ✓</button>` : `<button class="btn pri" data-act="go">Je pars</button>`}
+        ${is(o, /^en livr/i) ? `<button class="btn" data-act="fail">Échec</button>` : `<button class="btn ok" data-act="pay">Livré ✓</button>`}
+        <button class="btn ghost" data-act="later">Reprogrammer</button>
+        ${is(o, /^en livr/i) ? "" : `<button class="btn ghost" data-act="fail">Échec</button>`}
+      </div>`}
+  </article>`;
+}
+function meSelect() {
+  if (realRole !== "ceo") return "";
+  const names = livreurs();
+  return `<div class="me"><label for="meSel">Je suis</label><select class="sel" id="meSel"><option value="">Tous les livreurs</option>${names.map(n => `<option ${n === me ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></div>`;
+}
+function renderRuns() {
+  const t0 = today(), t1 = t0.getTime() + DAY;
+  const mine = driverOrders().filter(isToDeliver);
+  const now = mine.filter(o => (deliveryDate(o) || 0) < t1).sort((a, b) => (is(b, /^en livr/i) - is(a, /^en livr/i)) || ((deliveryDate(a) || 0) - (deliveryDate(b) || 0)));
+  const later = mine.filter(o => (deliveryDate(o) || 0) >= t1).sort((a, b) => (deliveryDate(a) || 0) - (deliveryDate(b) || 0));
+  const doneToday = driverOrders().filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, t0));
+  const cash = doneToday.filter(o => o.paiement === "Espèces").reduce((s, o) => s + o.prix, 0);
+  return `<h1>Mes livraisons</h1>${meSelect()}
+    <section class="hero" aria-label="Ma journée de livraison"><span class="eyebrow">Aujourd'hui</span><div class="big">${now.length} à livrer</div>
+      <div class="row2"><span><b>${doneToday.length}</b> livrée${doneToday.length > 1 ? "s" : ""}</span><span>Encaissé <b>${F(doneToday.reduce((s, o) => s + o.prix, 0))}</b></span><span>Espèces en main <b>${F(cash)}</b></span></div></section>
+    <h2>À livrer maintenant <span class="count">${now.length}</span></h2>
+    <div class="list">${now.length ? now.map(driverCard).join("") : empty(me ? "Aucune livraison pour toi aujourd'hui." : "Aucune livraison prévue aujourd'hui.")}</div>
+    ${later.length ? `<h2>Plus tard <span class="count">${later.length}</span></h2><div class="list">${later.map(driverCard).join("")}</div>` : ""}`;
+}
+function renderHistory() {
+  const list = driverOrders().filter(o => is(o, /^(livr|échec|echec)/i)).sort((a, b) => (b.livreeLe || b.date || 0) - (a.livreeLe || a.date || 0)).slice(0, 60);
+  return `<h1>Historique</h1>${meSelect()}
+    <h2>Dernières livraisons</h2>
+    <div class="list">${list.length ? list.map(o => `<article class="card"><div class="c-top"><div><div class="place">${esc(o.lieu)}</div><div class="meta">${esc(o.tel)} · ${esc(o.produit)}</div><div class="meta">${o.livreeLe ? fmtDate(o.livreeLe) : fmtDate(o.date)}${o.paiement ? " · " + esc(o.paiement) : ""}</div></div>
+      <div><div class="amt">${F(o.prix)}</div><div style="text-align:right"><span class="pill ${statusClass(o.statut)}">${esc(o.statut)}</span></div></div></div></article>`).join("") : empty("Tes livraisons terminées s'afficheront ici.")}</div>`;
+}
+
+/* ---------- Assistant ---------- */
+function renderAI() {
+  if (!sample) return `<h1>Assistant</h1>${empty("L'assistant n'est pas disponible dans cette vue.")}`;
+  const sugg = role === "sales" ? ["Qui dois-je appeler en premier ?", "Écris un message pour un client injoignable", "Quels prospects ont le plus de chances d'acheter ?"] : ["Combien j'ai encaissé cette semaine ?", "Quels quartiers commandent le plus ?", "Où mon tunnel perd-il le plus de monde ?", "Quel livreur a le plus d'échecs ?"];
+  return `<h1>Assistant</h1><p class="sub">Il lit ton Google Sheet : commandes, prospects, livraisons et tunnel.</p>
+    <div class="chat" id="chat">${chat.map(m => `<div class="msg ${m.role === "user" ? "me" : "ai"}">${esc(m.content)}</div>`).join("")}</div>
+    ${chat.length ? "" : `<div class="sugg">${sugg.map(t => `<button class="chip" data-sugg="${esc(t)}">${esc(t)}</button>`).join("")}</div>`}
+    <div class="composer"><textarea id="askBox" rows="1" placeholder="Écris ta question…" aria-label="Ta question"></textarea><button class="btn pri" id="send">Envoyer</button></div>`;
+}
+
+/* ---------- Rendu principal ---------- */
+function renderTabs() {
+  const due = loaded ? salesBuckets() : null;
+  const badge = { day: due ? Object.values(due).reduce((n, l) => n + l.length, 0) : 0, runs: loaded ? driverOrders().filter(o => isToDeliver(o) && (deliveryDate(o) || 0) < today().getTime() + DAY).length : 0 };
+  document.getElementById("tabs").innerHTML = ROLES[role].map(([k, l]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>${l}${badge[k] ? `<span class="badge">${badge[k]}</span>` : ""}</button>`).join("");
+  document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => { tab = b.dataset.tab; query = ""; panel = null; window.scrollTo(0, 0); render(); });
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.role === role)));
+}
+function render() {
+  renderTabs();
+  if (!cred) return renderLogin("");
+  if (false) { view.innerHTML = `<h1>Connexion</h1>${empty("Cette app lit tes commandes dans Google Sheets. Ouvre-la dans Claude pour la connecter.")}`; return; }
+  if (!loaded && tab !== "ai") { view.innerHTML = `<h1>Chargement</h1>${empty("Lecture de tes commandes dans Google Sheets…")}`; return; }
+  const y = window.scrollY;
+  const R = { home: renderHome, orders: renderOrders, clients: renderClients, team: renderTeam, ai: renderAI, day: renderDay, runs: renderRuns, history: renderHistory };
+  view.innerHTML = (R[tab] || R[ROLES[role][0][0]])() + `<p class="sub" style="text-align:center;margin-top:30px"><button class="btn small ghost" id="out">Se déconnecter</button></p>`;
+  bind();
+  window.scrollTo(0, y);
+}
+const findO = el => orders.find(x => x.row === +el.closest("[data-row]").dataset.row);
+function bind() {
+  view.querySelectorAll('[data-act="status"]').forEach(s => s.onchange = () => { const o = findO(s); if (o) setStatut(o, s.value); });
+  view.querySelectorAll('[data-act="driver"]').forEach(s => s.onchange = () => { const o = findO(s); if (o) setLivreur(o, s.value); });
+  view.querySelectorAll("[data-done]").forEach(a => a.addEventListener("click", () => { const o = findO(a); if (!o) return; const t = taskFor(o); setTimeout(() => doneTask(o, t), 500); }));
+  view.querySelectorAll('[data-act="skip"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) doneTask(o, taskFor(o)); });
+  view.querySelectorAll('[data-act="confirm"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) setStatut(o, "Confirmée"); });
+  view.querySelectorAll('[data-act="ai"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) aiMessage(o, b); });
+  view.querySelectorAll('[data-act="go"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) startRun(o); });
+  ["pay", "fail", "later"].forEach(k => view.querySelectorAll(`[data-act="${k}"]`).forEach(b => b.onclick = () => { panel = { row: +b.closest("[data-row]").dataset.row, kind: k }; render(); }));
+  view.querySelectorAll('[data-act="close"]').forEach(b => b.onclick = () => { panel = null; render(); });
+  view.querySelectorAll("[data-pay]").forEach(b => b.onclick = () => { const o = findO(b); if (o) delivered(o, b.dataset.pay); });
+  view.querySelectorAll("[data-fail]").forEach(b => b.onclick = () => { const o = findO(b); if (o) failed(o, b.dataset.fail); });
+  view.querySelectorAll("[data-later]").forEach(b => b.onclick = () => { const o = findO(b); if (o) reschedule(o, new Date(+b.dataset.later)); });
+  view.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => {
+    const label = b.textContent;
+    try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Copié ✓"; } catch (e) { b.textContent = b.dataset.copy; }
+    setTimeout(() => { b.textContent = label; }, 1500);
+  });
+  view.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { filter = b.dataset.filter; render(); });
+  view.querySelectorAll("[data-rev]").forEach(b => b.onclick = () => { const v = b.dataset.rev; if (v === "end") { reviewStep = -1; store("ws_review", dayKey()); } else reviewStep = +v; window.scrollTo(0, 0); render(); });
+  view.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { setRole("ceo", b.dataset.go); });
+  view.querySelectorAll("[data-step-go]").forEach(b => b.onclick = () => { salesStep = Math.min(+b.dataset.stepGo, SALES_STEPS.length); window.scrollTo(0, 0); render(); });
+  view.querySelectorAll("[data-alert]").forEach(b => b.onclick = () => {
+    const a = alerts()[+b.dataset.alert]; if (!a) return;
+    if (a.go) { salesStep = a.go[2]; setRole(a.go[0], a.go[1]); } else { filter = a.f; tab = "orders"; window.scrollTo(0, 0); render(); }
+  });
+  const q = document.getElementById("q");
+  if (q) q.oninput = () => { query = q.value; const pos = q.selectionStart; render(); const q2 = document.getElementById("q"); q2.focus(); q2.setSelectionRange(pos, pos); };
+  view.querySelectorAll("[data-member]").forEach(b => b.onclick = () => { const m = team.find(x => x.nom === b.dataset.member); if (m) { m.actif = b.dataset.actif === "1"; render(); setMember(m, { actif: m.actif }, m.nom + (m.actif ? " réactivé" : " désactivé")); } });
+  const lo = document.getElementById("out"); if (lo) lo.onclick = () => logout("");
+  const ms = document.getElementById("meSel"); if (ms) ms.onchange = () => { me = ms.value; store("ws_me", me); render(); };
+  const f = document.getElementById("addForm");
+  if (f) f.onsubmit = e => { e.preventDefault(); addMember(document.getElementById("mNom").value.trim(), document.getElementById("mRole").value, document.getElementById("mTel").value.replace(/[^0-9+ ]/g, "").trim(), document.getElementById("mPin").value.replace(/\D/g, "")); f.reset(); };
+  const bb = document.getElementById("bilanBtn"); if (bb) bb.onclick = makeBilan;
+  const send = document.getElementById("send"); if (send) send.onclick = () => askAI(document.getElementById("askBox").value);
+  const ta = document.getElementById("askBox"); if (ta) ta.onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); askAI(ta.value); } };
+  view.querySelectorAll("[data-sugg]").forEach(b => b.onclick = () => askAI(b.dataset.sugg));
+}
+function setRole(r, t) {
+  role = r; tab = t || ROLES[r][0][0]; query = ""; panel = null; filter = "all";
+  window.scrollTo(0, 0); render();
+}
+document.querySelectorAll(".seg button").forEach(b => b.onclick = () => setRole(b.dataset.role));
+
+/* ---------- IA ---------- */
+function dataForAI() {
+  const rows = orders.slice(-300).map(o => [o.date ? o.date.toLocaleString("fr-FR") : "", o.produit, o.qte, o.prix, o.zone, o.lieu, o.tel, o.jour, o.statut, o.relances.map(s => "J+" + s).join(" "), o.note, o.etape, o.livreur, o.paiement, o.livreeLe ? o.livreeLe.toLocaleString("fr-FR") : ""].join(" | "));
+  const fu = funnel();
+  return "Date | Produit | Qté | Prix F | Zone | Quartier/Ville | Téléphone | Jour livraison | Statut | Relances faites | Note | Étape atteinte | Livreur | Paiement | Livrée le\n" + rows.join("\n")
+    + `\n\nTunnel aujourd'hui : ${fu.steps.map(s => s.l + " " + s.n).join(", ")}.`
+    + `\nÉquipe : ${team.map(t => t.nom + " (" + t.role + ")").join(", ") || "pas encore renseignée"}.`;
+}
+const RULES = () => `Tu es l'assistant de gestion de WillShop, une boutique en ligne à Ouagadougou, Burkina Faso (Kit Minceur, Green Mask Stick…). Tu parles à ${role === "sales" ? "un commercial de WillShop" : role === "driver" ? "un livreur de WillShop" : "Wilfried, le patron"}.
+Réponds en français simple et direct, phrases courtes, chiffres précis en francs CFA (F). Pas de jargon. Si une info n'est pas dans les données, dis-le.
+Date et heure actuelles : ${new Date().toLocaleString("fr-FR")}.
+Statuts : Prospect = a laissé son numéro dans le tunnel sans finir (l'étape atteinte dit où il s'est arrêté) ; Nouvelle = commande à confirmer par appel ; Confirmée ; En livraison ; Reprogrammée ; Injoignable ; Échec = livraison ratée (motif dans la note) ; Livrée = vendu et encaissé (mode de paiement et date dans les colonnes) ; Annulée.
+Relances prévues à J+1, J+3, J+7, J+14 pour les prospects, nouvelles, injoignables et échecs.
+Données :
+${dataForAI()}`;
+let bilanCtl = null;
+async function makeBilan() {
+  if (!sample) return;
+  const box = document.getElementById("bilanBox"), btn = document.getElementById("bilanBtn");
+  btn.disabled = true; box.innerHTML = `<div class="note">Je prépare ton bilan…</div>`;
+  bilanCtl = new AbortController();
+  try {
+    const { text } = await sample(RULES() + `\n\nFais le bilan du jour en 6 lignes maximum, avec des tirets : 1) encaissé et livrées du jour, 2) commandes et prospects reçus, 3) où le tunnel perd le plus de monde, 4) qui appeler en priorité (numéros), 5) problèmes de livraison, 6) une action concrète pour demain.`, {
+      signal: bilanCtl.signal, cache: { gcTime: 600000 },
+      onText: ({ text }) => { const b = document.getElementById("bilanBox"); if (b) b.innerHTML = `<div class="note">${esc(text)}</div>`; }
+    });
+    bilan = text;
+  } catch (e) {
+    bilan = e.text || "";
+    if (e.code === "not_granted" || e.code === "sampling_disabled") sample = null;
+    banner(e.code === "rate_limited" ? "Trop de demandes à l'assistant. Réessaie dans quelques minutes." : e.code === "not_granted" ? "L'assistant n'a pas été autorisé pour cette page." : e.code === "cancelled" ? "" : "Le bilan n'a pas pu être préparé. Réessaie.", "info");
+  }
+  render();
+}
+async function aiMessage(o, btn) {
+  if (!sample) return;
+  btn.disabled = true; btn.textContent = "J'écris…";
+  const ctx = `Client : ${o.tel}. Produit : ${o.produit} à ${F(o.prix)}. Zone : ${o.zone}. Quartier/ville : ${o.lieu || "pas donné"}. Jour de livraison choisi : ${o.jour || "pas choisi"}. Statut : ${o.statut}. Étape atteinte dans le tunnel : ${o.etape || "?"}. Relances déjà faites : ${o.relances.map(s => "J+" + s).join(", ") || "aucune"}. Note : ${o.note || "aucune"}. Commande reçue le ${o.date ? o.date.toLocaleString("fr-FR") : "?"}.`;
+  try {
+    const { text } = await sample(`Tu écris un message WhatsApp pour WillShop (Ouagadougou) à envoyer à ce client. Tutoiement chaleureux, français simple d'Afrique de l'Ouest, 2 à 3 phrases maximum, 1 émoji au plus, finir par une question qui appelle une réponse simple. Adapte au statut (confirmer une commande, relancer un prospect, rattraper un échec de livraison…). Ne promets aucune réduction. Réponds uniquement avec le message.\n\n${ctx}`, { cache: false, modelTier: "quick" });
+    aiMsg[o.row] = text.trim().replace(/^["«]\s*|\s*["»]$/g, "");
+  } catch (e) {
+    if (e.code === "not_granted" || e.code === "sampling_disabled") sample = null;
+    toast(e.code === "rate_limited" ? "Trop de demandes, réessaie plus tard" : "Message IA indisponible");
+  }
+  render();
+}
+let aiCtl = null, busy = false;
+async function askAI(q) {
+  q = String(q || "").trim(); if (!q || busy || !sample) return;
+  busy = true; chat.push({ role: "user", content: q }); chat = chat.slice(-12); render();
+  const box = document.getElementById("chat");
+  const bubble = document.createElement("div"); bubble.className = "msg ai"; bubble.textContent = "Je réfléchis…"; box.appendChild(bubble);
+  bubble.scrollIntoView({ block: "end" });
+  aiCtl = new AbortController();
+  try {
+    const { text } = await sample([{ role: "user", content: RULES() }, { role: "assistant", content: "D'accord, j'ai les données." }, ...chat], { cache: false, signal: aiCtl.signal, onText: ({ text }) => { bubble.textContent = text; } });
+    chat.push({ role: "assistant", content: text });
+  } catch (e) {
+    chat.push({ role: "assistant", content: e.text || (e.code === "rate_limited" ? "Trop de questions d'un coup. Réessaie dans quelques minutes." : e.code === "not_granted" ? "L'assistant n'a pas été autorisé pour cette page." : "Je n'ai pas pu répondre. Réessaie.") });
+    if (e.code === "not_granted" || e.code === "sampling_disabled") sample = null;
+  }
+  busy = false; render();
+  const c = document.getElementById("chat"); if (c && c.lastElementChild) c.lastElementChild.scrollIntoView({ block: "end" });
+}
+
+/* ---------- Démarrage ---------- */
+(function () {
+  const n = store("ws_name"), p = store("ws_pin");
+  if (n && p) { cred = { nom: n, pin: p }; api("login").then(start).catch(() => logout("")); renderLogin(""); document.getElementById("lb").textContent = "Connexion…"; }
+  else renderLogin("");
+})();
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
