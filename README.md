@@ -12,6 +12,14 @@ App de pilotage de WillShop (Ouagadougou) : une seule app, trois espaces selon l
 - Les données restent dans le Google Sheet « WillShop - Commandes Tunnels » (onglets Commandes, Visites, Équipe).
 - `apps-script/Code.gs` est le pont sécurisé entre l'app et le Sheet (Google Apps Script, déployé en application Web). Chaque appel vérifie le nom et le PIN de l'onglet Équipe ; chaque rôle ne peut modifier que ses colonnes.
 
+## Stock
+
+Onglet « Stock » du Sheet (Produit, Stock actuel, Seuil d'alerte, Prix d'achat, Prix de vente). Le stock baisse automatiquement quand une commande passe en « Livrée » (et remonte si la livraison est annulée). Chaque mouvement est noté dans l'onglet « Mouvements ». Un produit « Green Mask Stick » compte 2 unités pour une commande « Green Mask Stick x2 ».
+
+## Assistant IA
+
+La fonction `api/chat.js` (Vercel) appelle Claude avec la clé `ANTHROPIC_API_KEY`, à ajouter dans Vercel → Settings → Environment Variables, puis redéployer. Sans clé, l'onglet Assistant explique comment l'activer.
+
 ## Ajouter quelqu'un
 
 Dans l'app (Direction → Équipe) ou directement dans l'onglet « Équipe » du Sheet : Nom, Rôle (Direction, Commercial ou Livreur), Téléphone, Actif (Oui/Non), PIN.

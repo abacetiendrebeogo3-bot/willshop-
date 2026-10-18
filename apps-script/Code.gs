@@ -56,6 +56,34 @@ function auth_(cred) {
 }
 
 // Colonnes que chaque rôle peut modifier (numéro de colonne dans « Commandes »)
+// ---------- Stock ----------
+// Onglet « Stock » : Produit | Stock actuel | Seuil | Prix d'achat | Prix de vente | Mise à jour
+// Onglet « Mouvements » : Date | Produit | Type | Quantité | Stock après | Par | Note
+function stockRows_() {
+  var sh = ss_().getSheetByName("Stock"); if (!sh) return [];
+  var n = sh.getLastRow(); if (n < 2) return [];
+  return sh.getRange(2, 1, n - 1, 6).getDisplayValues().map(function (r, i) {
+    return { row: i + 2, produit: String(r[0]).trim(), stock: Number(String(r[1]).replace(/[^0-9-]/g, "")) || 0, seuil: Number(String(r[2]).replace(/\D/g, "")) || 0,
+      achat: Number(String(r[3]).replace(/\D/g, "")) || 0, vente: Number(String(r[4]).replace(/\D/g, "")) || 0, maj: r[5] };
+  }).filter(function (x) { return x.produit; });
+}
+// « Green Mask Stick x2 » avec quantité 1 = 2 unités du produit « Green Mask Stick »
+function stockFor_(produit, qte) {
+  var name = String(produit || "").toLowerCase(), best = null;
+  stockRows_().forEach(function (x) { var k = x.produit.toLowerCase(); if (name.indexOf(k) === 0 && (!best || k.length > best.produit.length)) best = x; });
+  if (!best) return null;
+  var m = /x\s*(\d+)\s*$/i.exec(produit || ""), mult = m ? Number(m[1]) : 1;
+  return { item: best, units: (Number(qte) || 1) * mult };
+}
+function moveStock_(item, delta, type, by, note) {
+  var sh = ss_().getSheetByName("Stock"), after = item.stock + delta;
+  sh.getRange(item.row, 2).setValue(after);
+  sh.getRange(item.row, 6).setValue(stamp_());
+  ss_().getSheetByName("Mouvements").appendRow([stamp_(), item.produit, type, delta, after, by, String(note || "").slice(0, 200)]);
+  item.stock = after;
+  return after;
+}
+
 var FIELDS = {
   ceo:    { statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, paiement: 16, livreeLe: 17, jour: 8, lieu: 6 },
   sales:  { statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, jour: 8, lieu: 6 },
@@ -74,7 +102,10 @@ function api(action, cred, p) {
     if (role === "driver") out = out.filter(function (x) { return x.v[14] === me.nom; });
     var t = team_();
     var res = { rows: out, drivers: t.filter(function (m) { return /livr/i.test(m.role) && m.actif; }).map(function (m) { return m.nom; }) };
+    if (role !== "driver") res.stock = stockRows_().map(function (x) { return { produit: x.produit, stock: x.stock, seuil: x.seuil, achat: role === "ceo" ? x.achat : 0, vente: x.vente, maj: x.maj }; });
     if (role === "ceo") {
+      var ms = ss.getSheetByName("Mouvements"), mn = ms ? ms.getLastRow() : 0;
+      res.moves = mn < 2 ? [] : ms.getRange(Math.max(2, mn - 60), 1, Math.min(61, mn - 1), 7).getDisplayValues().reverse();
       var vs = ss.getSheetByName("Visites"), vn = vs.getLastRow();
       var from = Math.max(2, vn - 3000);
       res.visits = vn < 2 ? [] : vs.getRange(from, 1, vn - from + 1, 4).getDisplayValues();
@@ -92,12 +123,20 @@ function api(action, cred, p) {
       if (!(row >= 2 && row <= sh2.getLastRow())) throw new Error("Commande introuvable");
       if (role === "driver" && sh2.getRange(row, 15).getDisplayValue() !== me.nom) throw new Error("Cette livraison n'est pas à toi");
       var allowed = FIELDS[role], patch = (p && p.patch) || {};
+      var before = sh2.getRange(row, 1, 1, 9).getDisplayValues()[0], wasDelivered = /^livr/i.test(before[8]);
       Object.keys(patch).forEach(function (k) {
         if (!allowed[k]) throw new Error("Modification non autorisée");
         var v = patch[k] === "now" ? stamp_() : String(patch[k]).slice(0, 400);
         sh2.getRange(row, allowed[k]).setValue(v);
       });
       sh2.getRange(row, 18).setValue(me.nom + " · " + stamp_());
+      if (patch.statut !== undefined) {
+        var nowDelivered = /^livr/i.test(patch.statut);
+        if (nowDelivered !== wasDelivered) {
+          var st = stockFor_(before[1], before[2]);
+          if (st) moveStock_(st.item, nowDelivered ? -st.units : st.units, nowDelivered ? "Sortie (livraison)" : "Retour (livraison annulée)", me.nom, "Commande ligne " + row + " · " + before[6]);
+        }
+      }
       return { ok: true };
     } finally {
       lock.releaseLock();
@@ -121,6 +160,30 @@ function api(action, cred, p) {
     var tsh = ss_().getSheetByName("Équipe");
     if (p.actif !== undefined) tsh.getRange(m.row, 4).setValue(p.actif ? "Oui" : "Non");
     if (p.pin) tsh.getRange(m.row, 5).setValue("'" + String(p.pin).replace(/\D/g, "").slice(0, 8));
+    return { ok: true };
+  }
+  if (action === "stockMove") {
+    if (role !== "ceo") throw new Error("Réservé à la direction");
+    var lk = LockService.getScriptLock(); lk.waitLock(10000);
+    try {
+      var it = stockRows_().filter(function (x) { return x.produit === p.produit; })[0];
+      if (!it) throw new Error("Produit introuvable");
+      var q = Math.round(Number(p.qte) || 0);
+      if (p.type === "entree") { if (q <= 0) throw new Error("Quantité invalide"); return { stock: moveStock_(it, q, "Entrée", me.nom, p.note) }; }
+      if (p.type === "perte") { if (q <= 0) throw new Error("Quantité invalide"); return { stock: moveStock_(it, -q, "Perte / casse", me.nom, p.note) }; }
+      if (p.type === "inventaire") { if (q < 0) throw new Error("Quantité invalide"); return { stock: moveStock_(it, q - it.stock, "Inventaire (compté : " + q + ")", me.nom, p.note) }; }
+      throw new Error("Type inconnu");
+    } finally { lk.releaseLock(); }
+  }
+
+  if (action === "stockProduct") {
+    if (role !== "ceo") throw new Error("Réservé à la direction");
+    var name = String(p.produit || "").trim().slice(0, 60);
+    if (!name) throw new Error("Nom manquant");
+    var ssh = ss_().getSheetByName("Stock"), ex = stockRows_().filter(function (x) { return x.produit.toLowerCase() === name.toLowerCase(); })[0];
+    var seuil = Math.max(0, Math.round(Number(p.seuil) || 0)), achat = Math.max(0, Math.round(Number(p.achat) || 0)), vente = Math.max(0, Math.round(Number(p.vente) || 0));
+    if (ex) { ssh.getRange(ex.row, 3, 1, 3).setValues([[seuil, achat || "", vente || ""]]); ssh.getRange(ex.row, 6).setValue(stamp_()); }
+    else ssh.appendRow([name, 0, seuil, achat || "", vente || "", stamp_()]);
     return { ok: true };
   }
   throw new Error("Action inconnue");
