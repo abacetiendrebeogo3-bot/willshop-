@@ -84,10 +84,24 @@ function moveStock_(item, delta, type, by, note) {
   return after;
 }
 
+// ---------- Journal (suivi en direct) ----------
+function journal_(qui, action, row, client, detail) {
+  try { ss_().getSheetByName("Journal").appendRow([stamp_(), qui, action, row || "", client ? "'" + client : "", String(detail || "").slice(0, 200)]); } catch (e) {}
+}
+// ---------- Caisse : remises d'espèces des livreurs ----------
+// Onglet « Caisse » : Déclaré le | Livreur | Montant | Commandes (lignes) | Statut | Validé par | Validé le | Note
+function remises_() {
+  var sh = ss_().getSheetByName("Caisse"), n = sh.getLastRow();
+  if (n < 2) return [];
+  return sh.getRange(2, 1, n - 1, 8).getDisplayValues().map(function (r, i) {
+    return { id: i + 2, date: r[0], livreur: r[1], montant: Number(String(r[2]).replace(/\D/g, "")) || 0, lignes: String(r[3]), statut: r[4], par: r[5], le: r[6] };
+  });
+}
+
 var FIELDS = {
-  ceo:    { statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, paiement: 16, livreeLe: 17, jour: 8, lieu: 6 },
-  sales:  { statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, jour: 8, lieu: 6 },
-  driver: { statut: 9, note: 10, paiement: 16, livreeLe: 17, jour: 8 }
+  ceo:    { paye: 0, statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, paiement: 16, livreeLe: 17, jour: 8, lieu: 6 },
+  sales:  { paye: 0, statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, jour: 8, lieu: 6 },
+  driver: { paye: 0, statut: 9, note: 10, paiement: 16, livreeLe: 17, jour: 8 }
 };
 
 function api(action, cred, p) {
@@ -97,13 +111,18 @@ function api(action, cred, p) {
 
   if (action === "data") {
     var ss = ss_(), sh = ss.getSheetByName("Commandes"), n = sh.getLastRow();
-    var rows = n < 2 ? [] : sh.getRange(2, 1, n - 1, 18).getDisplayValues();
+    var rows = n < 2 ? [] : sh.getRange(2, 1, n - 1, 21).getDisplayValues();
     var out = rows.map(function (r, i) { return { row: i + 2, v: r }; });
     if (role === "driver") out = out.filter(function (x) { return x.v[14] === me.nom; });
     var t = team_();
     var res = { rows: out, drivers: t.filter(function (m) { return /livr/i.test(m.role) && m.actif; }).map(function (m) { return m.nom; }) };
     if (role !== "driver") res.stock = stockRows_().map(function (x) { return { produit: x.produit, stock: x.stock, seuil: x.seuil, achat: role === "ceo" ? x.achat : 0, vente: x.vente, maj: x.maj }; });
+    var rem = remises_();
+    if (role === "driver") res.remises = rem.filter(function (x) { return x.livreur === me.nom; }).slice(-10);
     if (role === "ceo") {
+      res.remises = rem.slice(-40);
+      var js = ss.getSheetByName("Journal"), jn = js.getLastRow();
+      res.journal = jn < 2 ? [] : js.getRange(Math.max(2, jn - 59), 1, Math.min(60, jn - 1), 6).getDisplayValues().reverse();
       var ms = ss.getSheetByName("Mouvements"), mn = ms ? ms.getLastRow() : 0;
       res.moves = mn < 2 ? [] : ms.getRange(Math.max(2, mn - 60), 1, Math.min(61, mn - 1), 7).getDisplayValues().reverse();
       var vs = ss.getSheetByName("Visites"), vn = vs.getLastRow();
@@ -123,13 +142,28 @@ function api(action, cred, p) {
       if (!(row >= 2 && row <= sh2.getLastRow())) throw new Error("Commande introuvable");
       if (role === "driver" && sh2.getRange(row, 15).getDisplayValue() !== me.nom) throw new Error("Cette livraison n'est pas à toi");
       var allowed = FIELDS[role], patch = (p && p.patch) || {};
-      var before = sh2.getRange(row, 1, 1, 9).getDisplayValues()[0], wasDelivered = /^livr/i.test(before[8]);
+      var before = sh2.getRange(row, 1, 1, 21).getDisplayValues()[0], wasDelivered = /^livr/i.test(before[8]);
+      var client = before[6], notes = [];
+      // « paye » : le client a payé (mode = Espèces / Orange Money / Moov Money)
+      if (patch.paye !== undefined) {
+        var mode = String(patch.paye).slice(0, 30);
+        if (mode) { sh2.getRange(row, 16).setValue(mode); sh2.getRange(row, 19, 1, 2).setValues([[stamp_(), me.nom]]); notes.push("Payé " + before[3] + " F en " + mode); }
+        else if (role === "ceo") { sh2.getRange(row, 19, 1, 3).setValues([["", "", ""]]); notes.push("Paiement annulé"); }
+        delete patch.paye;
+      }
+      // une livraison payée sur place enregistre aussi le paiement (sauf s'il était déjà payé d'avance)
+      if (patch.paiement && /^livr/i.test(patch.statut || "") && !before[18]) { sh2.getRange(row, 19, 1, 2).setValues([[stamp_(), me.nom]]); }
       Object.keys(patch).forEach(function (k) {
-        if (!allowed[k]) throw new Error("Modification non autorisée");
+        if (!(k in allowed)) throw new Error("Modification non autorisée");
         var v = patch[k] === "now" ? stamp_() : String(patch[k]).slice(0, 400);
         sh2.getRange(row, allowed[k]).setValue(v);
       });
       sh2.getRange(row, 18).setValue(me.nom + " · " + stamp_());
+      if (patch.statut !== undefined && patch.statut !== before[8]) notes.push(patch.statut + (patch.paiement ? " · " + before[3] + " F en " + patch.paiement : ""));
+      if (patch.livreur !== undefined) notes.push(patch.livreur ? "Attribuée à " + patch.livreur : "Livreur retiré");
+      if (patch.relances !== undefined) { var last = String(patch.relances).split(/,\s*/).pop(); notes.push(/^J\+/.test(last) ? "Relance " + last + " envoyée" : /^jour/i.test(last) ? "Client prévenu de la livraison du jour" : /^veille/i.test(last) ? "Rappel de la veille envoyé" : "Client recontacté"); }
+      if (patch.jour !== undefined && patch.statut === undefined) notes.push("Livraison prévue " + patch.jour);
+      if (notes.length) journal_(me.nom, notes.join(" · "), row, client, before[1] + " · " + before[5]);
       if (patch.statut !== undefined) {
         var nowDelivered = /^livr/i.test(patch.statut);
         if (nowDelivered !== wasDelivered) {
@@ -162,6 +196,38 @@ function api(action, cred, p) {
     if (p.pin) tsh.getRange(m.row, 5).setValue("'" + String(p.pin).replace(/\D/g, "").slice(0, 8));
     return { ok: true };
   }
+  if (action === "remise") {
+    if (role !== "driver") throw new Error("Réservé aux livreurs");
+    var lk2 = LockService.getScriptLock(); lk2.waitLock(10000);
+    try {
+      var cs = ss_().getSheetByName("Commandes"), cn = cs.getLastRow();
+      var all = cn < 2 ? [] : cs.getRange(2, 1, cn - 1, 21).getDisplayValues();
+      var pending = {};
+      remises_().filter(function (x) { return x.livreur === me.nom && /attente/i.test(x.statut); }).forEach(function (x) { x.lignes.split(/[,\s]+/).forEach(function (l) { if (l) pending[l] = 1; }); });
+      var lignes = [], total = 0;
+      all.forEach(function (r, i) { var ln = String(i + 2); if (/esp/i.test(r[15]) && r[19] === me.nom && r[18] && !r[20] && !pending[ln]) { lignes.push(ln); total += Number(String(r[3]).replace(/\D/g, "")) || 0; } });
+      if (!lignes.length) throw new Error("Rien à remettre : pas d'espèces encaissées en attente");
+      ss_().getSheetByName("Caisse").appendRow([stamp_(), me.nom, total, lignes.join(", "), "En attente", "", "", ""]);
+      journal_(me.nom, "Remise de caisse déclarée : " + total + " F", "", "", lignes.length + " commande(s)");
+      return { montant: total, lignes: lignes.length };
+    } finally { lk2.releaseLock(); }
+  }
+
+  if (action === "remiseOk") {
+    if (role !== "ceo") throw new Error("Réservé à la direction");
+    var lk3 = LockService.getScriptLock(); lk3.waitLock(10000);
+    try {
+      var r0 = remises_().filter(function (x) { return x.id === Number(p.id); })[0];
+      if (!r0) throw new Error("Remise introuvable");
+      if (!/attente/i.test(r0.statut)) throw new Error("Remise déjà validée");
+      var csh = ss_().getSheetByName("Caisse"), now = stamp_();
+      csh.getRange(r0.id, 5, 1, 3).setValues([[p.refus ? "Refusée" : "Reçu", me.nom, now]]);
+      if (!p.refus) { var cm = ss_().getSheetByName("Commandes"); r0.lignes.split(/[,\s]+/).forEach(function (l) { if (Number(l) >= 2) cm.getRange(Number(l), 21).setValue(now); }); }
+      journal_(me.nom, (p.refus ? "Remise refusée : " : "Argent reçu de " + r0.livreur + " : ") + r0.montant + " F", "", "", "");
+      return { ok: true };
+    } finally { lk3.releaseLock(); }
+  }
+
   if (action === "stockMove") {
     if (role !== "ceo") throw new Error("Réservé à la direction");
     var lk = LockService.getScriptLock(); lk.waitLock(10000);

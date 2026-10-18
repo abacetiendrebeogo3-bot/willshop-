@@ -293,7 +293,7 @@ const I_MAP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 const I_SPARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/></svg>';
 
 /* ---------- État ---------- */
-let sample = null, cred = null, myName = "", realRole = null, drivers = [], stock = [], moves = [], stockPanel = null;
+let sample = null, cred = null, myName = "", realRole = null, drivers = [], stock = [], moves = [], stockPanel = null, remises = [], journal = [];
 let orders = [], visits = [], team = [];
 let loaded = false, visitsLoaded = false, teamLoaded = false, lastSync = null;
 let role = "ceo";
@@ -356,7 +356,9 @@ function rowFrom(v, i) {
     statut: v[8] || "Nouvelle", note: v[9] || "",
     toks: tokList(v[10]), relances: relOf(tokList(v[10])),
     derniere: v[11] || "", sid: v[12] || "", etape: v[13] || "",
-    livreur: v[14] || "", paiement: v[15] || "", livreeLe: parseDate(v[16])
+    livreur: v[14] || "", paiement: v[15] || "", livreeLe: parseDate(v[16]),
+    // paiement : date, qui a encaissé, remise à la caisse (anciennes lignes : payées à la livraison)
+    payeLe: parseDate(v[18]) || (/^livr/i.test(v[8] || "") && v[15] ? parseDate(v[16]) : null), payePar: v[19] || "", remisLe: parseDate(v[20])
   };
 }
 // Date de livraison prévue à partir du jour choisi dans le tunnel
@@ -421,6 +423,8 @@ async function load(quiet) {
     if (d.team) { team = d.team; teamLoaded = true; }
     if (d.stock) stock = d.stock;
     if (d.moves) moves = d.moves;
+    if (d.remises) remises = d.remises;
+    if (d.journal) journal = d.journal;
     loaded = true; lastSync = new Date();
     document.getElementById("sync").textContent = myName + " · " + lastSync.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
     banner(""); render();
@@ -443,7 +447,18 @@ async function change(o, local, patch, okText) {
 const setStatut = (o, st) => change(o, { statut: st }, { statut: st }, "Statut : " + st);
 const setLivreur = (o, nom) => change(o, { livreur: nom }, { livreur: nom }, nom ? "Attribuée à " + nom : "Livreur retiré");
 const startRun = o => change(o, { statut: "En livraison" }, { statut: "En livraison" }, "Bonne route 🛵");
-const delivered = (o, pay) => change(o, { statut: "Livrée", paiement: pay, livreeLe: new Date() }, { statut: "Livrée", paiement: pay, livreeLe: "now" }, "Livrée · " + F(o.prix) + " en " + pay);
+const markPaid = (o, mode) => change(o, { paiement: mode, payeLe: new Date(), payePar: myName }, { paye: mode }, "Payé · " + F(o.prix) + " en " + mode);
+const deliverPaid = o => change(o, { statut: "Livrée", livreeLe: new Date() }, { statut: "Livrée", livreeLe: "now" }, "Livrée (déjà payée)");
+async function declareRemise() {
+  try { const r = await api("remise"); toast("Remise déclarée : " + F(r.montant) + ". Wilfried va valider."); load(true); }
+  catch (e) { banner(esc(e.message)); }
+}
+async function validateRemise(id, refus) {
+  const x = remises.find(r => r.id === id); if (x) { x.statut = refus ? "Refusée" : "Reçu"; render(); }
+  try { await api("remiseOk", { id, refus }); toast(refus ? "Remise refusée" : "Argent reçu ✓"); load(true); }
+  catch (e) { banner("Pas enregistré : " + esc(e.message)); load(true); }
+}
+const delivered = (o, pay) => change(o, { statut: "Livrée", paiement: pay, livreeLe: new Date(), payeLe: o.payeLe || new Date(), payePar: o.payePar || myName }, { statut: "Livrée", paiement: pay, livreeLe: "now" }, "Livrée · " + F(o.prix) + " en " + pay);
 function failed(o, motif) {
   const note = (o.note ? o.note + " | " : "") + "Échec " + new Date().toLocaleDateString("fr-FR") + " : " + motif;
   return change(o, { statut: "Échec", note }, { statut: "Échec", note }, "Échec noté, le commercial va rappeler");
@@ -516,14 +531,15 @@ function stats() {
     const d = new Date(t0.getTime() - i * DAY);
     days.push({ d, n: real.filter(o => sameDay(o.date, d)).length, today: i === 0 });
   }
+  const paidToday = orders.filter(o => o.payeLe && sameDay(o.payeLe, t0) && !is(o, /^annul/i));
   const cash = mode => {
-    const all = orders.filter(o => is(o, /^livr/i) && o.paiement === mode);
-    return { today: all.filter(o => sameDay(o.livreeLe, t0)).reduce((s, o) => s + o.prix, 0), week: all.filter(o => o.livreeLe && daysBetween(o.livreeLe, now) < 7).reduce((s, o) => s + o.prix, 0) };
+    const all = orders.filter(o => o.payeLe && o.paiement === mode && !is(o, /^annul/i));
+    return { today: all.filter(o => sameDay(o.payeLe, t0)).reduce((s, o) => s + o.prix, 0), week: all.filter(o => daysBetween(o.payeLe, now) < 7).reduce((s, o) => s + o.prix, 0) };
   };
   const delivered = real.filter(o => is(o, /^livr/i));
   return {
     real, tOrders, todayValue: tOrders.reduce((s, o) => s + o.prix, 0),
-    collected: deliveredToday.reduce((s, o) => s + o.prix, 0), deliveredToday: deliveredToday.length,
+    collected: paidToday.reduce((s, o) => s + o.prix, 0), paidCount: paidToday.length, deliveredToday: deliveredToday.length,
     prospectsToday: orders.filter(o => isProspect(o) && sameDay(o.date, t0)).length,
     toCall: orders.filter(o => is(o, /^nouv/i)).length,
     onRoad: orders.filter(o => is(o, /^en livr/i)).length,
@@ -531,6 +547,15 @@ function stats() {
     days, cash: Object.fromEntries(PAIEMENTS.map(m => [m, cash(m)])),
     due: orders.map(o => ({ o, step: dueStep(o, now) })).filter(x => x.step)
   };
+}
+// Caisse : avances, argent chez les livreurs, remises à valider
+function caisse() {
+  const pendingLines = new Set(remises.filter(r => /attente/i.test(r.statut)).flatMap(r => String(r.lignes).split(/[,\s]+/).filter(Boolean).map(Number)));
+  const avances = orders.filter(o => o.payeLe && !is(o, /^(livr|annul)/i));
+  const enMain = {};
+  orders.filter(o => o.payeLe && /esp/i.test(o.paiement) && o.payePar && drivers.includes(o.payePar) && !o.remisLe && !is(o, /^annul/i))
+    .forEach(o => { const k = o.payePar; enMain[k] = enMain[k] || { total: 0, n: 0, declare: 0 }; enMain[k].total += o.prix; enMain[k].n++; if (pendingLines.has(o.row)) enMain[k].declare += o.prix; });
+  return { avances, avTotal: avances.reduce((s, o) => s + o.prix, 0), enMain, aValider: remises.filter(r => /attente/i.test(r.statut)) };
 }
 function alerts() {
   const now = Date.now(), t1 = today().getTime() + DAY;
@@ -545,6 +570,7 @@ function alerts() {
     { n: fails.length, t: "Échecs de livraison à reprogrammer", lvl: "warm", f: "pb" },
     { n: unreach.length, t: "Clients injoignables", lvl: "warm", f: "pb" },
     { n: due.length, t: "Relances à faire aujourd'hui", lvl: "", go: ["sales", "day", 2] },
+    { n: caisse().aValider.length, t: "Remises d'argent des livreurs à valider", lvl: "warm", anchor: "caisse" },
     ...stockStats().filter(x => x.dispo <= x.seuil).map(x => ({ n: x.dispo, t: (x.dispo <= 0 ? "Rupture de stock : " : "Stock bas : ") + x.produit + " (disponibles)", lvl: x.dispo <= 0 ? "hot" : "warm", tab: "stock" }))
   ].filter(a => a.n);
 }
@@ -625,6 +651,8 @@ function driverSelect(o) {
   return `<select class="sel" data-act="driver" aria-label="Livreur"><option value="">Livreur…</option>${names.map(n => `<option ${n === o.livreur ? "selected" : ""}>${esc(n)}</option>`).join("")}</select>`;
 }
 function orderCard(o, opts = {}) {
+  if (panel && panel.row === o.row && panel.kind === "paid") return `<article class="card" data-row="${o.row}"><div class="c-top"><div><div class="who">${esc(o.tel)}</div><div class="meta">${esc(o.produit)} · ${esc(o.lieu)}</div></div><div class="amt">${F(o.prix)}</div></div>
+    <div class="panel"><span class="eyebrow">Le client a payé ${F(o.prix)} comment ?</span><div class="opts">${PAIEMENTS.map(m => `<button class="btn ok wide" data-paid="${esc(m)}">${m}</button>`).join("")}</div><button class="btn small ghost" data-act="close">Annuler</button></div></article>`;
   const t = opts.task, text = t && t.msg ? msgFor(o, t) : "";
   const dd = deliveryDate(o);
   const when = o.jour ? "livraison " + esc(o.jour.toLowerCase()) : "";
@@ -645,6 +673,7 @@ function orderCard(o, opts = {}) {
       <a class="btn small" href="${esc(telLink(o.tel))}">${I_PHONE} Appeler</a>
       ${t && t.k === "call" ? `<button class="btn small ok" data-act="confirm">Confirmée ✓</button>` : ""}
       ${text && sample ? `<button class="btn small ghost" data-act="ai">${I_SPARK} Message IA</button>` : ""}
+      ${o.payeLe ? `<span class="pill s-ok" style="margin:0">Payé · ${esc(o.paiement)}${o.payePar ? " · " + esc(o.payePar) : ""}</span>` : !is(o, /^(annul|prosp)/i) ? `<button class="btn small" data-act="paid">Payé ?</button>` : ""}
       ${statusSelect(o)}
       ${isToDeliver(o) ? driverSelect(o) : ""}
       ${t && t.tok ? `<button class="btn small ghost" data-act="skip">Déjà fait</button>` : ""}
@@ -657,7 +686,7 @@ const dayKey = () => today().toISOString().slice(0, 10);
 let reviewStep = store("ws_review") === dayKey() ? -1 : 0;
 function reviewSteps() {
   const t0 = today(), y0 = new Date(t0.getTime() - DAY), real = orders.filter(o => !isProspect(o));
-  const delY = orders.filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, y0));
+  const delY = orders.filter(o => o.payeLe && sameDay(o.payeLe, y0) && !is(o, /^annul/i));
   const ordY = real.filter(o => sameDay(o.date, y0)), proY = orders.filter(o => isProspect(o) && sameDay(o.date, y0));
   const sum = l => l.reduce((s, o) => s + o.prix, 0);
   const byMode = PAIEMENTS.map(m => [m, sum(delY.filter(o => o.paiement === m))]).filter(x => x[1]);
@@ -670,7 +699,7 @@ function reviewSteps() {
   const b = salesBuckets();
   const fact = (l, v) => `<div class="fact"><span>${l}</span><b>${v}</b></div>`;
   return [
-    { q: "Hier, on a encaissé", big: F(sum(delY)), body: `<div class="facts">${fact("Livraisons réussies", delY.length)}${byMode.map(([m, v]) => fact(m, F(v))).join("")}${fact("Échecs de livraison hier", orders.filter(o => is(o, /^(échec|echec)/i) && /Échec/.test(o.note) && o.note.includes(y0.toLocaleDateString("fr-FR"))).length)}</div>`,
+    { q: "Hier, on a encaissé", big: F(sum(delY)), body: `<div class="facts">${fact("Paiements reçus", delY.length)}${byMode.map(([m, v]) => fact(m, F(v))).join("")}${fact("Échecs de livraison hier", orders.filter(o => is(o, /^(échec|echec)/i) && /Échec/.test(o.note) && o.note.includes(y0.toLocaleDateString("fr-FR"))).length)}</div>`,
       say: delY.length ? "" : "Aucune livraison marquée « Livrée » hier. Si des colis sont partis, demande aux livreurs de les valider dans leur app." },
     { q: "Hier, on a reçu", big: ordY.length + " commande" + (ordY.length > 1 ? "s" : ""), body: `<div class="facts">${fact("Valeur des commandes", F(sum(ordY)))}${fact("Prospects (numéro laissé)", proY.length)}${top ? fact("Produit le plus demandé", esc(top[0])) : ""}${fact("Déjà livrées sur ces commandes", ordY.filter(o => is(o, /^livr/i)).length)}</div>` },
     { q: "Le tunnel hier", big: fu.total + " visiteur" + (fu.total > 1 ? "s" : ""), body: fu.total ? `<div class="funnel" style="border:0;padding:0">${fu.steps.map(x => `<div class="fstep"><span>${esc(x.l)}</span><div class="ftrack"><span style="width:${Math.round(x.n / fmax * 100)}%"></span></div><b>${x.n} <i>${Math.round(x.n / fmax * 100)}%</i></b></div>`).join("")}</div>` : empty("Pas de visite enregistrée hier."),
@@ -705,7 +734,7 @@ function renderHome() {
     <section class="hero" aria-label="Résumé du jour">
       <span class="eyebrow">Encaissé aujourd'hui</span>
       <div class="big">${F(s.collected)}</div>
-      <div class="row2"><span><b>${s.deliveredToday}</b> livrée${s.deliveredToday > 1 ? "s" : ""}</span><span><b>${s.tOrders.length}</b> commande${s.tOrders.length > 1 ? "s" : ""} reçue${s.tOrders.length > 1 ? "s" : ""} · ${F(s.todayValue)}</span><span>Taux de livraison <b>${s.rate} %</b></span></div>
+      <div class="row2"><span><b>${s.paidCount}</b> paiement${s.paidCount > 1 ? "s" : ""}</span><span><b>${s.deliveredToday}</b> livrée${s.deliveredToday > 1 ? "s" : ""}</span><span><b>${s.tOrders.length}</b> commande${s.tOrders.length > 1 ? "s" : ""} reçue${s.tOrders.length > 1 ? "s" : ""} · ${F(s.todayValue)}</span><span>Taux de livraison <b>${s.rate} %</b></span></div>
     </section>
     <div class="kpis">
       <div class="kpi"><span class="l">À confirmer</span><b>${s.toCall}</b><small>statut « Nouvelle »</small></div>
@@ -717,8 +746,17 @@ function renderHome() {
     <div class="alerts">${al.length ? al.map((a, i) => `<button class="alert ${a.lvl}" data-alert="${i}"><span class="dot"></span><span>${esc(a.t)}</span><span class="n">${a.n}</span><span class="chev">›</span></button>`).join("") : `<div class="calm">Rien de bloquant. Tout est sous contrôle.</div>`}</div>
     <h2>Tunnel aujourd'hui</h2>
     ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="funnel">${fu.steps.map(x => `<div class="fstep"><span>${esc(x.l)}</span><div class="ftrack"><span style="width:${Math.round(x.n / fmax * 100)}%"></span></div><b>${x.n} <i>${Math.round(x.n / fmax * 100)}%</i></b></div>`).join("")}${fu.questions ? `<p class="meta" style="margin:2px 0 0">${fu.questions} personne${fu.questions > 1 ? "s ont" : " a"} touché « J'ai une question ».</p>` : ""}</div>` : empty("Pas encore de visite aujourd'hui.")}
-    <h2>Trésorerie <span class="count">encaissé aujourd'hui · ${F(cashTotal)}</span></h2>
+    <h2 id="caisse">Caisse <span class="count">encaissé aujourd'hui · ${F(cashTotal)}</span></h2>
     <div class="cash">${PAIEMENTS.map(m => `<div><span>${m}</span><b>${F(s.cash[m].today)}</b><small>7 j : ${F(s.cash[m].week)}</small></div>`).join("")}</div>
+    ${(() => { const c = caisse(); const names = Object.keys(c.enMain); return `
+    <div class="facts card" style="margin-top:10px;gap:0">
+      <div class="fact"><span>Avances reçues (payées, pas encore livrées)</span><b>${F(c.avTotal)} · ${c.avances.length}</b></div>
+      ${names.length ? names.map(n => `<div class="fact"><span>Espèces chez ${esc(n)}${c.enMain[n].declare ? ` <span class="pill s-conf">remise déclarée</span>` : ""}</span><b>${F(c.enMain[n].total)}</b></div>`).join("") : `<div class="fact"><span>Espèces chez les livreurs</span><b>0 F</b></div>`}
+    </div>
+    ${c.aValider.length ? `<div class="list" style="margin-top:10px">${c.aValider.map(r => `<div class="card"><div class="c-top"><div><div class="place">${esc(r.livreur)} dit avoir remis</div><div class="meta">${esc(r.date)} · ${String(r.lignes).split(/[,\s]+/).filter(Boolean).length} livraison(s)</div></div><div class="amt">${F(r.montant)}</div></div>
+      <div class="actions"><button class="btn small ok" data-remise="${r.id}">Reçu ✓</button><button class="btn small ghost" data-remise-refus="${r.id}">Pas reçu</button></div></div>`).join("")}</div>` : ""}`; })()}
+    <h2>Suivi en direct</h2>
+    <div class="card" style="gap:0;padding:4px 14px">${journal.length ? journal.slice(0, 15).map(j => `<div class="fact" style="align-items:flex-start"><span><b style="font:600 14px var(--sans)">${esc(j[1])}</b> ${esc(j[2])}${j[4] ? ` <span class="meta">· ${esc(j[4])}</span>` : ""}</span><span class="meta" style="white-space:nowrap">${esc(String(j[0]).slice(0, 5) === new Date().toLocaleDateString("fr-FR").slice(0, 5) ? String(j[0]).slice(11, 16) : String(j[0]).slice(0, 5))}</span></div>`).join("") : `<div class="calm">Les actions de l'équipe apparaîtront ici : confirmations, paiements, livraisons, remises.</div>`}</div>
     <h2>Commandes · 7 derniers jours</h2>
     <div class="bars" role="img" aria-label="Commandes par jour sur 7 jours">
       ${s.days.map(d => `<div class="bar ${d.today ? "today" : ""}" style="height:${Math.round(d.n / max * 100)}%"><em>${d.n || ""}</em><i>${d.d.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3)}</i></div>`).join("")}
@@ -817,7 +855,7 @@ function driverCard(o) {
         ${!me && o.livreur ? `<div class="meta">🛵 ${esc(o.livreur)}</div>` : ""}</div>
       <span class="pill ${statusClass(o.statut)}">${esc(o.statut)}</span>
     </div>
-    <div class="collect"><span>À encaisser</span><b>${F(o.prix)}</b></div>
+    ${o.payeLe ? `<div class="collect" style="background:var(--ok-soft)"><span style="color:var(--ok)">Déjà payé (${esc(o.paiement)})</span><b style="font-size:15px">Rien à encaisser</b></div>` : `<div class="collect"><span>À encaisser</span><b>${F(o.prix)}</b></div>`}
     <div class="contact">
       <a class="btn small" href="${esc(telLink(o.tel))}">${I_PHONE} Appeler</a>
       <a class="btn small" href="${esc(waLink(o.tel, "Bonjour 👋 c'est le livreur WillShop pour ton " + (o.produit || "colis") + ". Je suis en route, tu es où exactement ?"))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a>
@@ -827,8 +865,8 @@ function driverCard(o) {
     : p === "fail" ? `<div class="panel"><span class="eyebrow">Pourquoi ça n'a pas marché ?</span><div class="opts">${MOTIFS.map(m => `<button class="btn small" data-fail="${esc(m)}">${m}</button>`).join("")}</div><button class="btn small ghost" data-act="close">Annuler</button></div>`
     : p === "later" ? `<div class="panel"><span class="eyebrow">Nouveau jour de livraison</span><div class="opts">${next.map((d, i) => `<button class="btn small" data-later="${d.getTime()}">${i === 0 ? "Demain" : JOURS[d.getDay()].replace(/^./, c => c.toUpperCase())} ${d.getDate()}</button>`).join("")}</div><button class="btn small ghost" data-act="close">Annuler</button></div>`
     : `<div class="big-actions">
-        ${is(o, /^en livr/i) ? `<button class="btn ok" data-act="pay">Livré ✓</button>` : `<button class="btn pri" data-act="go">Je pars</button>`}
-        ${is(o, /^en livr/i) ? `<button class="btn" data-act="fail">Échec</button>` : `<button class="btn ok" data-act="pay">Livré ✓</button>`}
+        ${is(o, /^en livr/i) ? `<button class="btn ok" data-act="${o.payeLe ? "deliverpaid" : "pay"}">Livré ✓</button>` : `<button class="btn pri" data-act="go">Je pars</button>`}
+        ${is(o, /^en livr/i) ? `<button class="btn" data-act="fail">Échec</button>` : `<button class="btn ok" data-act="${o.payeLe ? "deliverpaid" : "pay"}">Livré ✓</button>`}
         <button class="btn ghost" data-act="later">Reprogrammer</button>
         ${is(o, /^en livr/i) ? "" : `<button class="btn ghost" data-act="fail">Échec</button>`}
       </div>`}
@@ -845,10 +883,15 @@ function renderRuns() {
   const now = mine.filter(o => (deliveryDate(o) || 0) < t1).sort((a, b) => (is(b, /^en livr/i) - is(a, /^en livr/i)) || ((deliveryDate(a) || 0) - (deliveryDate(b) || 0)));
   const later = mine.filter(o => (deliveryDate(o) || 0) >= t1).sort((a, b) => (deliveryDate(a) || 0) - (deliveryDate(b) || 0));
   const doneToday = driverOrders().filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, t0));
-  const cash = doneToday.filter(o => o.paiement === "Espèces").reduce((s, o) => s + o.prix, 0);
+  const pendingLines = new Set(remises.filter(r => /attente/i.test(r.statut)).flatMap(r => String(r.lignes).split(/[,\s]+/).filter(Boolean).map(Number)));
+  const cashAll = driverOrders().filter(o => o.payeLe && /esp/i.test(o.paiement) && o.payePar === (me || o.payePar) && !o.remisLe && !is(o, /^annul/i));
+  const cash = cashAll.filter(o => !pendingLines.has(o.row)).reduce((s, o) => s + o.prix, 0);
+  const declared = cashAll.filter(o => pendingLines.has(o.row)).reduce((s, o) => s + o.prix, 0);
   return `<h1>Mes livraisons</h1>${meSelect()}
     <section class="hero" aria-label="Ma journée de livraison"><span class="eyebrow">Aujourd'hui</span><div class="big">${now.length} à livrer</div>
-      <div class="row2"><span><b>${doneToday.length}</b> livrée${doneToday.length > 1 ? "s" : ""}</span><span>Encaissé <b>${F(doneToday.reduce((s, o) => s + o.prix, 0))}</b></span><span>Espèces en main <b>${F(cash)}</b></span></div></section>
+      <div class="row2"><span><b>${doneToday.length}</b> livrée${doneToday.length > 1 ? "s" : ""}</span><span>Encaissé <b>${F(doneToday.reduce((s, o) => s + o.prix, 0))}</b></span><span>Espèces à remettre <b>${F(cash)}</b></span></div></section>
+    ${realRole === "driver" && cash > 0 ? `<div class="remind" style="margin-top:12px"><span class="eyebrow">Ce soir</span><b>Tu as ${F(cash)} en espèces à remettre à Wilfried</b><div class="actions"><button class="btn pri" id="remiseBtn">J'ai remis ${F(cash)}</button></div></div>` : ""}
+    ${declared > 0 ? `<div class="remind" style="margin-top:12px;background:var(--ok-soft);border-color:var(--ok)"><b>Remise de ${F(declared)} déclarée</b><span class="meta">En attente de la confirmation de Wilfried.</span></div>` : ""}
     <h2>À livrer maintenant <span class="count">${now.length}</span></h2>
     <div class="list">${now.length ? now.map(driverCard).join("") : empty(me ? "Aucune livraison pour toi aujourd'hui." : "Aucune livraison prévue aujourd'hui.")}</div>
     ${later.length ? `<h2>Plus tard <span class="count">${later.length}</span></h2><div class="list">${later.map(driverCard).join("")}</div>` : ""}`;
@@ -957,6 +1000,12 @@ function bind() {
   view.querySelectorAll('[data-act="driver"]').forEach(s => s.onchange = () => { const o = findO(s); if (o) setLivreur(o, s.value); });
   view.querySelectorAll("[data-done]").forEach(a => a.addEventListener("click", () => { const o = findO(a); if (!o) return; const t = taskFor(o); setTimeout(() => doneTask(o, t), 500); }));
   view.querySelectorAll('[data-act="skip"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) doneTask(o, taskFor(o)); });
+  view.querySelectorAll('[data-act="paid"]').forEach(b => b.onclick = () => { panel = { row: +b.closest("[data-row]").dataset.row, kind: "paid" }; render(); });
+  view.querySelectorAll("[data-paid]").forEach(b => b.onclick = () => { const o = findO(b); if (o) markPaid(o, b.dataset.paid); });
+  view.querySelectorAll('[data-act="deliverpaid"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) deliverPaid(o); });
+  view.querySelectorAll("[data-remise]").forEach(b => b.onclick = () => validateRemise(+b.dataset.remise, false));
+  view.querySelectorAll("[data-remise-refus]").forEach(b => b.onclick = () => validateRemise(+b.dataset.remiseRefus, true));
+  const rb = document.getElementById("remiseBtn"); if (rb) rb.onclick = () => { rb.disabled = true; rb.textContent = "Envoi…"; declareRemise(); };
   view.querySelectorAll('[data-act="confirm"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) setStatut(o, "Confirmée"); });
   view.querySelectorAll('[data-act="ai"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) aiMessage(o, b); });
   view.querySelectorAll('[data-act="go"]').forEach(b => b.onclick = () => { const o = findO(b); if (o) startRun(o); });
@@ -977,6 +1026,7 @@ function bind() {
   view.querySelectorAll("[data-alert]").forEach(b => b.onclick = () => {
     const a = alerts()[+b.dataset.alert]; if (!a) return;
     if (a.tab) { tab = a.tab; window.scrollTo(0, 0); render(); return; }
+    if (a.anchor) { const el = document.getElementById(a.anchor); if (el) el.scrollIntoView({ behavior: "smooth" }); return; }
     if (a.go) { salesStep = a.go[2]; setRole(a.go[0], a.go[1]); } else { filter = a.f; tab = "orders"; window.scrollTo(0, 0); render(); }
   });
   const q = document.getElementById("q");
