@@ -217,6 +217,24 @@ nav.tabs button[aria-selected="true"]::before{content:"";position:absolute;top:0
 nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--bx-fill);color:var(--on-bx);font-size:10px;font-weight:700;border-radius:99px;padding:1px 5px;font-variant-numeric:tabular-nums}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13.5px;font-weight:600;z-index:8;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion:no-preference){.card,.kpi,.hero{animation:up .22s ease both}@keyframes up{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}}
+
+/* Commandes : à faire aujourd'hui */
+.oswitch{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;margin-top:14px}
+.oswitch button{flex:1;border:0;background:transparent;border-radius:10px;padding:10px 8px;font:inherit;font-weight:700;font-size:14px;color:var(--muted,#777);cursor:pointer}
+.oswitch button[aria-pressed="true"]{background:var(--ink,#1d1d1b);color:var(--bg,#fff)}
+.oswitch b{display:inline-block;min-width:20px;padding:1px 6px;border-radius:99px;background:#C8102E;color:#fff;font-size:12px;margin-left:4px}
+.tgroup{margin-top:22px}
+.tg-head{display:flex;align-items:center;gap:10px}
+.tg-head h2{margin:0;font-size:18px;flex:1}
+.tg-head .dot{width:12px;height:12px;border-radius:50%;flex:none}
+.tg-n{font-weight:800;font-size:15px;min-width:28px;text-align:center;padding:2px 8px;border-radius:99px;color:#fff}
+.tg-d{margin:4px 0 10px 22px;font-size:13.5px;opacity:.75}
+.g-red .dot,.g-red .tg-n,.b-red{background:#C8102E}
+.g-orange .dot,.g-orange .tg-n,.b-orange{background:#E07A00}
+.g-green .dot,.g-green .tg-n,.b-green{background:#1E8E4E}
+.g-blue .dot,.g-blue .tg-n,.b-blue{background:#2F6FD6}
+.g-grey .dot,.g-grey .tg-n,.b-grey{background:#6B6B6B}
+.tband{margin:-13px -14px 0;padding:7px 14px;border-radius:15px 15px 0 0;color:#fff;font-weight:800;font-size:13px;letter-spacing:.01em}
 </style>
 </head>
 <body>
@@ -298,7 +316,7 @@ let orders = [], visits = [], team = [];
 let loaded = false, visitsLoaded = false, teamLoaded = false, lastSync = null;
 let role = "ceo";
 let tab = "home";
-let filter = "all", query = "", salesStep = 0;
+let filter = "all", query = "", salesStep = 0, ordersMode = store("ws_omode") || "todo";
 let me = "";
 let panel = null;           // { row, kind } panneau ouvert côté livreur
 let aiMsg = {};             // messages IA par ligne
@@ -306,7 +324,7 @@ let chat = [], bilan = "";
 const view = document.getElementById("view");
 
 /* ---------- Utilitaires ---------- */
-function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const F = n => (Number(n) || 0).toLocaleString("fr-FR").replace(/[  ]/g, " ") + " F";
 const DAY = 86400000;
@@ -404,9 +422,18 @@ function errorCopyOld(e) {
 }
 
 /* ---------- Serveur (Google Apps Script, branché au Google Sheet) ---------- */
-async function api(action, p) {
-  const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action, cred, p: p || {} }) });
-  const j = await r.json();
+async function api(action, p, tries = 2) {
+  let r;
+  try {
+    const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const tm = ctl ? setTimeout(() => ctl.abort(), 25000) : 0;
+    r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action, cred, p: p || {} }), signal: ctl ? ctl.signal : undefined });
+    clearTimeout(tm);
+  } catch (e) {
+    if (tries > 1) { await new Promise(ok => setTimeout(ok, 1500)); return api(action, p, tries - 1); }
+    const err = new Error("Pas de connexion"); err.net = true; throw err;
+  }
+  let j; try { j = await r.json(); } catch (e) { const err = new Error("Pas de connexion"); err.net = true; throw err; }
   if (!j.ok) throw new Error(j.error || "Erreur");
   return j.data;
 }
@@ -417,6 +444,17 @@ async function load(quiet) {
   if (!quiet) document.getElementById("sync").textContent = "Actualisation…";
   try {
     const d = await api("data");
+    applyData(d);
+    try { store("ws_cache", JSON.stringify(d)); } catch (e) {}
+    lastSync = new Date();
+    document.getElementById("sync").textContent = myName + " · " + lastSync.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    banner(""); render();
+  } catch (e) {
+    if (!e.net && /PIN|essais/i.test(e.message)) { logout("Ton code a changé. Reconnecte-toi."); }
+    else { banner("Pas de connexion pour le moment. Les dernières données restent affichées."); document.getElementById("sync").textContent = "Hors ligne"; }
+  } finally { loading = false; }
+}
+function applyData(d) {
     orders = d.rows.map(x => rowFrom(x.v, x.row - 2)).filter(o => o.produit || o.tel);
     drivers = d.drivers || [];
     if (d.visits) { visits = d.visits.map(v => ({ date: parseDate(v[0]), produit: v[1] || "", step: v[3] || "Arrivée" })); visitsLoaded = true; }
@@ -425,13 +463,7 @@ async function load(quiet) {
     if (d.moves) moves = d.moves;
     if (d.remises) remises = d.remises;
     if (d.journal) journal = d.journal;
-    loaded = true; lastSync = new Date();
-    document.getElementById("sync").textContent = myName + " · " + lastSync.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-    banner(""); render();
-  } catch (e) {
-    if (/PIN|essais/i.test(e.message)) { logout("Ton code a changé. Reconnecte-toi."); }
-    else { banner("Pas de connexion pour le moment. Les dernières données restent affichées."); document.getElementById("sync").textContent = "Hors ligne"; }
-  } finally { loading = false; }
+    loaded = true;
 }
 document.getElementById("refresh").onclick = () => load();
 setInterval(() => { if (cred && !document.hidden) load(true); }, 120000);
@@ -506,13 +538,19 @@ function renderLogin(msg) {
     if (!nom || !pin) return;
     const b = document.getElementById("lb"); b.disabled = true; b.textContent = "Vérification…";
     cred = { nom, pin };
-    try { const r = await api("login"); store("ws_name", nom); store("ws_pin", pin); start(r); }
-    catch (err) { cred = null; renderLogin(/PIN/i.test(err.message) ? "Nom ou PIN incorrect." : /essais/i.test(err.message) ? err.message : "Pas de connexion. Réessaie."); }
+    try { const r = await api("login"); store("ws_name", nom); store("ws_pin", pin); store("ws_profile", JSON.stringify({ nom: r.nom, role: r.role })); start(r); }
+    catch (err) { cred = null; renderLogin(err.net ? "Pas de connexion internet. Vérifie ta connexion et réessaie." : /PIN/i.test(err.message) ? "Nom ou PIN incorrect." : /essais/i.test(err.message) ? err.message : "Pas de connexion. Réessaie."); }
   };
 }
-function logout(msg) { store("ws_pin", null); cred = null; loaded = false; orders = []; renderLogin(msg); }
+function logout(msg) { store("ws_pin", null); store("ws_profile", null); store("ws_cache", null); cred = null; loaded = false; orders = []; renderLogin(msg); }
+function startTab(r) {
+  const tabs = ROLES[r].map(x => x[0]), saved = String(store("ws_tab") || "").split("|");
+  if (saved[1] === dayKey() && tabs.includes(saved[0])) return saved[0];
+  if (r === "sales" && store("ws_dayDone") === dayKey()) return "orders";
+  return tabs[0];
+}
 function start(r) {
-  realRole = r.role; myName = r.nom; role = r.role; tab = ROLES[role][0][0];
+  realRole = r.role; myName = r.nom; role = r.role; tab = startTab(role);
   if (realRole === "driver") me = myName;
   document.getElementById("seg").hidden = realRole !== "ceo";
   document.getElementById("hdr").hidden = false; document.getElementById("nav").hidden = false;
@@ -656,7 +694,9 @@ function orderCard(o, opts = {}) {
   const t = opts.task, text = t && t.msg ? msgFor(o, t) : "";
   const dd = deliveryDate(o);
   const when = o.jour ? "livraison " + esc(o.jour.toLowerCase()) : "";
+  const band = t ? `<div class="tband b-${opts.color || ({ call: "red", jour: "green", relance: "orange", hot: "orange", veille: "blue", problem: "grey", assign: "blue" }[t.k] || "blue")}">${esc(t.label)}${t.k === "relance" ? " · à envoyer aujourd'hui" : ""}</div>` : "";
   return `<article class="card" data-row="${o.row}">
+    ${band}
     <div class="c-top">
       <div>
         <div class="who">${esc(o.tel) || "Sans numéro"}</div>
@@ -771,10 +811,30 @@ const FILTERS = {
   pb: ["Problèmes", isProblem], livr: ["Livrées", o => is(o, /^livr/i)], annul: ["Annulées", o => is(o, /^annul/i)],
   nodriver: ["Sans livreur", o => isToDeliver(o) && !o.livreur]
 };
+const TODO_GROUPS = [
+  { k: "call", c: "red", t: "À confirmer", d: "Nouvelles commandes : appelle ou écris tout de suite." },
+  { k: "jour", c: "green", t: "À livrer aujourd'hui", d: "Préviens le client que la livraison arrive." },
+  { k: "relance", c: "orange", t: "À relancer aujourd'hui", d: "Le message est prêt : touche WhatsApp et envoie." },
+  { k: "hot", c: "orange", t: "Prospects du jour", d: "Numéro laissé sans finir la commande." },
+  { k: "veille", c: "blue", t: "Livraisons de demain", d: "Rappel de la veille." },
+  { k: "problem", c: "grey", t: "Injoignables · échecs", d: "Propose un nouveau jour." },
+  { k: "assign", c: "blue", t: "Livreur à choisir", d: "Livraisons d'aujourd'hui ou demain sans livreur." }
+];
+function ordersSwitch() {
+  const n = loaded ? Object.values(salesBuckets()).reduce((a, l) => a + l.length, 0) : 0;
+  return `<div class="oswitch" role="tablist"><button data-omode="todo" aria-pressed="${ordersMode === "todo"}">À faire aujourd'hui${n ? ` <b>${n}</b>` : ""}</button><button data-omode="all" aria-pressed="${ordersMode === "all"}">Toutes les commandes</button></div>`;
+}
+function renderTodo() {
+  const b = salesBuckets(), total = TODO_GROUPS.reduce((n, g) => n + b[g.k].length, 0);
+  return `<h1>Commandes</h1><p class="sub">${total ? total + " client" + (total > 1 ? "s" : "") + " à traiter aujourd'hui, du plus urgent au moins urgent." : "Rien à faire pour le moment 👍"}</p>${ordersSwitch()}
+    ${total ? TODO_GROUPS.filter(g => b[g.k].length).map(g => `<section class="tgroup g-${g.c}"><div class="tg-head"><span class="dot"></span><h2>${g.t}</h2><span class="tg-n">${b[g.k].length}</span></div><p class="tg-d">${g.d}</p>
+      <div class="list">${b[g.k].map(x => orderCard(x.o, { task: x.t, color: g.c })).join("")}</div></section>`).join("") : empty("Toutes les commandes sont à jour. Les nouvelles apparaîtront ici automatiquement.")}`;
+}
 function renderOrders() {
+  if (ordersMode !== "all") return renderTodo();
   const q = query.trim().toLowerCase();
   const list = orders.filter(FILTERS[filter][1]).filter(o => !q || [o.tel, o.lieu, o.produit, o.zone, o.livreur].join(" ").toLowerCase().includes(q)).sort((a, b) => (b.date || 0) - (a.date || 0));
-  return `<h1>Commandes</h1><p class="sub">${orders.length} lignes dans ton Google Sheet</p>
+  return `<h1>Commandes</h1><p class="sub">${orders.length} lignes dans ton Google Sheet</p>${ordersSwitch()}
     <div style="margin-top:14px"><input class="search" id="q" type="search" placeholder="Numéro, quartier, produit, livreur…" value="${esc(query)}" aria-label="Chercher"></div>
     <div class="chips">${Object.entries(FILTERS).map(([k, [l, fn]]) => `<button class="chip" data-filter="${k}" aria-pressed="${filter === k}">${l}<span class="c">${orders.filter(fn).length}</span></button>`).join("")}</div>
     <div class="list">${list.length ? list.slice(0, 80).map(o => orderCard(o, { task: taskFor(o) })).join("") : empty(orders.length ? "Aucune commande pour ce filtre." : "Les commandes de tes tunnels apparaîtront ici.")}</div>`;
@@ -833,7 +893,7 @@ function renderDay() {
     <div class="steps" role="list">${SALES_STEPS.map((s, i) => `<button class="stp ${b[s.k].length ? "" : "done"}" role="listitem" data-step-go="${i}" ${i === salesStep ? 'aria-current="step"' : ""}>${s.t}<b>${b[s.k].length || "✓"}</b></button>`).join("")}</div>
     <div class="progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
     ${done ? `<div class="step-head"><span class="eyebrow">Fin de routine</span><h2 style="margin:4px 0">Bravo, ta routine est faite 👏</h2><p class="sub">Les compteurs se mettent à jour à chaque nouvelle commande. Reviens dans quelques heures.</p></div>
-      <div class="next"><button class="btn" data-step-go="0">Recommencer</button></div>`
+      <div class="next"><button class="btn pri" data-tabgo="orders">Voir mes commandes →</button><button class="btn ghost" data-step-go="0">Recommencer</button></div>`
     : `<div class="step-head"><span class="eyebrow">Étape ${salesStep + 1} sur ${SALES_STEPS.length}</span><h2 style="margin:4px 0">${cur.t} <span class="count">${b[cur.k].length}</span></h2><p class="sub">${cur.d}</p></div>
       <div class="list" style="margin-top:12px">${b[cur.k].length ? b[cur.k].map(x => orderCard(x.o, { task: x.t })).join("") : empty("Rien dans cette étape. 👍")}</div>
       <div class="next"><button class="btn pri" data-step-go="${salesStep + 1}">${salesStep + 1 < SALES_STEPS.length ? "Étape suivante · " + SALES_STEPS[salesStep + 1].t : "Terminer"} →</button></div>`}`;
@@ -980,7 +1040,7 @@ function renderTabs() {
   const due = loaded ? salesBuckets() : null;
   const badge = { day: due ? Object.values(due).reduce((n, l) => n + l.length, 0) : 0, runs: loaded ? driverOrders().filter(o => isToDeliver(o) && (deliveryDate(o) || 0) < today().getTime() + DAY).length : 0 };
   document.getElementById("tabs").innerHTML = ROLES[role].map(([k, l]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>${l}${badge[k] ? `<span class="badge">${badge[k]}</span>` : ""}</button>`).join("");
-  document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => { tab = b.dataset.tab; query = ""; panel = null; window.scrollTo(0, 0); render(); });
+  document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => { tab = b.dataset.tab; store("ws_tab", tab + "|" + dayKey()); query = ""; panel = null; window.scrollTo(0, 0); render(); });
   document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.role === role)));
 }
 function render() {
@@ -1022,7 +1082,9 @@ function bind() {
   view.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { filter = b.dataset.filter; render(); });
   view.querySelectorAll("[data-rev]").forEach(b => b.onclick = () => { const v = b.dataset.rev; if (v === "end") { reviewStep = -1; store("ws_review", dayKey()); } else reviewStep = +v; window.scrollTo(0, 0); render(); });
   view.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { setRole("ceo", b.dataset.go); });
-  view.querySelectorAll("[data-step-go]").forEach(b => b.onclick = () => { salesStep = Math.min(+b.dataset.stepGo, SALES_STEPS.length); window.scrollTo(0, 0); render(); });
+  view.querySelectorAll("[data-step-go]").forEach(b => b.onclick = () => { salesStep = Math.min(+b.dataset.stepGo, SALES_STEPS.length); if (salesStep >= SALES_STEPS.length) store("ws_dayDone", dayKey()); window.scrollTo(0, 0); render(); });
+  view.querySelectorAll("[data-tabgo]").forEach(b => b.onclick = () => { tab = b.dataset.tabgo; store("ws_tab", tab + "|" + dayKey()); window.scrollTo(0, 0); render(); });
+  view.querySelectorAll("[data-omode]").forEach(b => b.onclick = () => { ordersMode = b.dataset.omode; store("ws_omode", ordersMode); window.scrollTo(0, 0); render(); });
   view.querySelectorAll("[data-alert]").forEach(b => b.onclick = () => {
     const a = alerts()[+b.dataset.alert]; if (!a) return;
     if (a.tab) { tab = a.tab; window.scrollTo(0, 0); render(); return; }
@@ -1156,8 +1218,18 @@ document.getElementById("themeBtn").onclick = () => { applyTheme(document.docume
 /* ---------- Démarrage ---------- */
 (function () {
   const n = store("ws_name"), p = store("ws_pin");
-  if (n && p) { cred = { nom: n, pin: p }; api("login").then(start).catch(() => logout("")); renderLogin(""); document.getElementById("lb").textContent = "Connexion…"; }
-  else renderLogin("");
+  let prof = null; try { prof = JSON.parse(store("ws_profile") || "null"); } catch (e) {}
+  if (n && p && prof && prof.role) {
+    // Session gardée : on ouvre tout de suite avec les dernières données, puis on vérifie en arrière-plan
+    cred = { nom: n, pin: p };
+    try { const c = JSON.parse(store("ws_cache") || "null"); if (c) applyData(c); } catch (e) {}
+    start(prof);
+    api("login").catch(e => { if (!e.net && /PIN|essais/i.test(e.message)) logout("Ton code a changé. Reconnecte-toi."); });
+  } else if (n && p) {
+    cred = { nom: n, pin: p }; renderLogin(""); document.getElementById("lb").textContent = "Connexion…";
+    api("login").then(r => { store("ws_profile", JSON.stringify({ nom: r.nom, role: r.role })); start(r); })
+      .catch(e => { if (!e.net && /PIN|essais/i.test(e.message)) logout("Ton code a changé. Reconnecte-toi."); else { cred = null; renderLogin("Pas de connexion internet. Réessaie dans un instant."); } });
+  } else renderLogin("");
 })();
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
