@@ -94,6 +94,37 @@ body.drb-on{margin:0;height:100%;background:#E8E5DC;color:var(--ink);font-family
 body.drb-on{overflow:hidden}
 #zoom{z-index:2147483001}
 #drb .note{font-size:13.5px;line-height:1.5;color:var(--mut);background:var(--soft);border-radius:12px;padding:10px 12px}
+
+/* Retouches reprises du tunnel Kit (19/10) */
+#drb .recu{background:#FFF8DC;border:1.5px dashed #E0B800;border-radius:12px;padding:10px 12px;margin:8px 0;font:500 14px 'DM Sans',sans-serif;color:#1d1d1b}
+#drb .recu div{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+#drb .recu .tot{border-top:1px solid #E0B800;margin-top:4px;padding-top:7px;font-weight:800;font-size:17px}
+#drb .qbtn small{display:block;font-size:11.5px;color:#6b6b66;margin-top:2px}
+#drb .opt,#drb .opt.main{background:#FCD116!important;border:2px solid #E0B800!important;color:#1d1d1b!important;box-shadow:0 3px 0 #C9A400}
+#drb .opt:hover{background:#FFE15A!important}
+#drb .opt.ask{background:#fff!important;border:1.5px dashed #B9C3BB!important;color:#55605a!important;box-shadow:none}
+#drb .qbtn.sel{border-color:#E0B800;background:#FFF8DC;box-shadow:0 0 0 2px #FCD116}
+#drb .cta{background:#FCD116!important;color:#1d1d1b!important;border:2px solid #E0B800!important;animation:none!important;box-shadow:0 3px 0 #C9A400}
+#drb .cta#go{background:#CE1126!important;color:#fff!important;border:0!important;animation:pulseR 2.4s infinite!important}
+#drb .cta#go:hover{background:#B00E20!important}
+#drb .go .cta svg{fill:#1d1d1b}
+@keyframes pulseR{0%{box-shadow:0 0 0 0 rgba(206,17,38,.45)}70%{box-shadow:0 0 0 12px rgba(206,17,38,0)}100%{box-shadow:0 0 0 0 rgba(206,17,38,0)}}
+/* Réponses animées : pop + doigt */
+#drb .yourturn{flex-basis:100%;text-align:center;font:800 13px 'DM Sans',sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#1d1d1b;margin:2px 0 4px;animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both}
+#drb .yourturn span{display:inline-block;animation:finger 1s ease-in-out infinite}
+#drb .opt{position:relative;animation:popIn .55s cubic-bezier(.34,1.56,.64,1) both,nudge 2.4s ease-in-out infinite!important}
+#drb .opt.ask{animation:popIn .55s cubic-bezier(.34,1.56,.64,1) both!important}
+#dock.days .opt{animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both!important}
+#drb .opt.main::after{content:"👆";position:absolute;right:14px;bottom:-12px;font-size:26px;animation:tap 1.2s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+#drb .opt:active{transform:scale(.94)!important}
+@keyframes popIn{0%{opacity:0;transform:scale(.4) translateY(18px)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes nudge{0%,62%,100%{transform:scale(1);box-shadow:0 3px 0 #C9A400,0 0 0 0 rgba(252,209,22,.7)}72%{transform:scale(1.07);box-shadow:0 3px 0 #C9A400,0 0 0 8px rgba(252,209,22,.45)}84%{transform:scale(.98);box-shadow:0 3px 0 #C9A400,0 0 0 14px rgba(252,209,22,0)}}
+@keyframes finger{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@keyframes tap{0%,100%{transform:translate(0,0) scale(1)}45%{transform:translate(-6px,-8px) scale(1.1)}60%{transform:translate(-6px,-6px) scale(.92)}}
+@media (prefers-reduced-motion:reduce){#drb .opt{animation:popIn .3s both!important}#drb .opt.main::after,#drb .yourturn span{animation:none}}
+/* Réponses toujours visibles sur petits écrans */
+#drb #dock{flex:none}
+@media (max-height:640px){#drb .pcard img{height:110px}#drb .note{padding:7px 10px;font-size:13px}#drb .qbtn{padding:8px 10px}#drb #chat{padding-top:10px}}
 </style>
 <div id="drb"><div class="app">
 <header>
@@ -236,11 +267,11 @@ speak(m, row, function () { setTimeout(next, 250); });
 function me(text) { add('<div class="row me"><div class="bub">' + esc(text) + "</div></div>"); }
 function ask(opts, cb, cls) {
 dock.className = cls || "";
-dock.innerHTML = "";
+dock.innerHTML = '<div class="yourturn"><span>👇</span> À toi de choisir</div>';
 opts.forEach(function (o, i) {
 var b = document.createElement("button");
 b.className = "opt" + (/question/i.test(o) ? " ask" : (i === 0 && opts.length <= 3 && !cls ? " main" : ""));
-b.style.animationDelay = (i * 0.05) + "s";
+b.style.animationDelay = (0.15 + i * 0.12) + "s, " + (1.2 + i * 0.6) + "s";
 b.textContent = o;
 b.onclick = function () { dock.innerHTML = ""; me(o); setTimeout(function () { cb(o); }, 250); };
 dock.appendChild(b);
@@ -273,7 +304,7 @@ ask(["Oui, je le veux", "J’ai une question"], function (a) {
 if (/question/.test(a)) return other();
 px("TunnelDemarre", {}, true);
 track("Veut le produit", { veut: "Oui" });
-phoneStep();
+zone();
 });
 });
 }
@@ -291,8 +322,8 @@ function track(step, data) {
 send({ type: "visit", step: step, veut: (data && data.veut) || "", zone: S.zone ? (S.zone === "ouaga" ? "Ouaga" : "Autre ville") : "", jour: S.day || "" });
 }
 function phoneStep() {
-prog(30);
-bot(["Super ! Je te réserve tes 2 Green Mask Stick à 3 500 F. C’est quoi ton numéro WhatsApp ?"], function () {
+prog(72);
+bot([S.zone === "ouaga" ? "Super ! Le livreur va t’appeler avant de passer. C’est quoi ton numéro WhatsApp ?" : "Super ! On va te contacter pour l’envoi. C’est quoi ton numéro WhatsApp ?"], function () {
 dock.className = "";
 dock.innerHTML = '<div class="form"><input class="fld" id="ftel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Ton numéro (ex : 70 12 34 56)" aria-label="Ton numéro WhatsApp"><button class="cta" id="telok" onclick="telOk()">Continuer</button><div class="note" style="text-align:center">Juste pour organiser ta livraison.</div></div>';
 var t = document.getElementById("ftel");
@@ -308,9 +339,9 @@ if (v.replace(/[^0-9]/g, "").length < 8) { t.style.borderColor = "#B42335"; t.va
 S.tel = v;
 dock.innerHTML = "";
 me(v);
-send({ type: "lead", step: "Numéro donné", tel: v, prix: 3500 });
+send({ type: "lead", step: "Numéro donné", tel: v, prix: total(), zone: S.zone === "ouaga" ? "Ouaga" : "Autre ville", lieu: S.lieu, jour: S.day });
 px("Lead", { content_name: PROD });
-setTimeout(zone, 250);
+setTimeout(offre, 250);
 }
 
 /* Étape 2 */
@@ -321,8 +352,23 @@ ask(["À Ouaga", "Autre ville"], function (a) {
 S.zone = a === "À Ouaga" ? "ouaga" : "ville";
 px("VilleChoisie", { zone: S.zone }, true);
 track("Ville");
-jour();
+lieuStep();
 });
+});
+}
+
+/* Quartier ou ville */
+function lieuStep() {
+prog(52);
+var ouaga = S.zone === "ouaga";
+bot([ouaga ? "Tu es dans quel quartier de Ouaga ?" : "Tu es dans quelle ville ?"], function () {
+dock.className = "";
+dock.innerHTML = '<div class="form"><input class="fld" id="flieu" placeholder="' + (ouaga ? "Ton quartier (ex : Pissy, Tampouy)" : "Ta ville (ex : Bobo, Koudougou)") + '" aria-label="' + (ouaga ? "Ton quartier" : "Ta ville") + '"><button class="cta" id="lieuok">Continuer</button></div>';
+var f = document.getElementById("flieu");
+function ok() { var v = f.value.trim(); if (v.length < 2) { f.style.borderColor = "#B42335"; f.focus(); return; } S.lieu = v; dock.innerHTML = ""; me(v); track("Quartier"); setTimeout(jour, 250); }
+document.getElementById("lieuok").onclick = ok;
+f.addEventListener("keydown", function (e) { if (e.key === "Enter") ok(); });
+scroll();
 });
 }
 
@@ -332,9 +378,9 @@ prog(62);
 var q = S.zone === "ouaga" ? "Tu veux être livré(e) aujourd’hui ?" : "Tu veux qu’on l’expédie aujourd’hui ?";
 bot([q], function () {
 ask(["Oui", "Non"], function (a) {
-if (a === "Oui") { S.day = "Aujourd’hui"; track("Jour"); return offre(); }
+if (a === "Oui") { S.day = "Aujourd’hui"; track("Jour"); return phoneStep(); }
 bot(["Ok ! Quel jour tu préfères ?"], function () {
-ask(["Demain", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"], function (d) { S.day = d; track("Jour"); offre(); }, "days");
+ask(["Demain", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"], function (d) { S.day = d; track("Jour"); phoneStep(); }, "days");
 });
 });
 });
@@ -345,22 +391,29 @@ function offre() {
 prog(80);
 var ouaga = S.zone === "ouaga";
 var msg = ouaga
-? "Parfait, on te livre à Ouaga " + S.day.toLowerCase() + ". Tu paies à la livraison."
-: "Pas de souci, on t’expédie tes 2 flacons dans ta ville " + S.day.toLowerCase() + ". L’expédition coûte <b>1 000 F</b>, et le paiement se fait <b>avant l’envoi</b> par Mobile Money.";
+? "Parfait, on te livre à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". Tu paies à la livraison."
+: "Pas de souci, on t’expédie tes 2 flacons à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". L’expédition coûte <b>1 000 F</b>, et le paiement se fait <b>avant l’envoi</b> par Mobile Money.";
 px("OffreVue", { zone: S.zone }, true);
 track("Offre vue");
 bot([msg], function () {
 dock.className = "";
 dock.innerHTML = '<div class="form">' +
-'<div class="qbtn sel" style="cursor:default"><b>2 flacons Green Mask Stick</b><em>' + fmt(total()) + '</em></div>' +
+'<div class="qbtn sel" style="cursor:default"><b>2 flacons Green Mask Stick</b><em>' + fmt(PRODUIT) + '</em><small>' + (ouaga ? "Livraison offerte dans Ouaga" : "+ 1 000 F expédition") + '</small></div>' +
 '<div class="note">' + (ouaga
-? "✓ Livraison gratuite dans Ouaga<br>Quartier éloigné : +1 000 F, on te confirme sur WhatsApp<br>✓ Tu paies à la livraison"
-: "Prix avec l’expédition (1 000 F) inclus<br>Paiement avant l’envoi par Mobile Money<br>On t’envoie le numéro sur WhatsApp") + '</div>' +
-'<input class="fld" id="flieu" placeholder="' + (ouaga ? "Ton quartier (ex : Pissy, Tampouy)" : "Ta ville (ex : Bobo, Koudougou)") + '" aria-label="Quartier ou ville">' +
+? "✓ Tu paies à la livraison<br>Quartier éloigné : +1 000 F, on te confirme sur WhatsApp"
+: "Paiement avant l’envoi par Mobile Money<br>On t’envoie le numéro sur WhatsApp") + '</div>' +
+'<div class="recu" id="recu">' + recu() + '</div>' +
 '<button class="cta" id="go" onclick="order()">' + WA_ICON + '<span id="gotxt">Commander · ' + fmt(total()) + '</span></button>' +
 '</div>';
 scroll();
 });
+}
+var PRODUIT = 3500;
+function recu() {
+var liv = total() - PRODUIT;
+return '<div><span>2 flacons Green Mask Stick</span><span>' + fmt(PRODUIT) + '</span></div>' +
+'<div><span>' + (S.zone === "ouaga" ? "Livraison à " : "Expédition à ") + esc(S.lieu) + '</span><span>' + (liv ? "+ " + fmt(liv) : "Offerte") + '</span></div>' +
+'<div class="tot"><span>Total à payer</span><span>' + fmt(total()) + '</span></div>';
 }
 function waOrder() {
 var j = S.day.toLowerCase();
@@ -378,16 +431,14 @@ if (!(navigator.sendBeacon && navigator.sendBeacon(SHEET, d))) fetch(SHEET, { me
 } catch (e) {}
 }
 function order() {
-var lieu = document.getElementById("flieu");
-S.lieu = lieu.value.trim();
-if (!S.lieu) { lieu.style.borderColor = "#B42335"; lieu.focus(); return; }
+if (!S.lieu) return lieuStep();
 logSheet();
 var url = waOrder();
 px("InitiateCheckout", { value: total(), currency: "XOF", num_items: 2 });
 me("2 flacons · " + fmt(total()));
 add('<div class="row">' + AV + '<div class="bub">Merci ! Ta commande est enregistrée. WhatsApp s’ouvre : appuie juste sur <b>Envoyer</b> pour la confirmer.</div></div>');
 prog(100);
-dock.innerHTML = '<div class="go"><a class="cta" href="' + url + '" target="_top" rel="noopener">' + WA_ICON + 'Ouvrir WhatsApp</a><p>WhatsApp ne s’est pas ouvert ? Touche le bouton vert.</p></div>';
+dock.innerHTML = '<div class="go"><a class="cta" href="' + url + '" target="_top" rel="noopener">' + WA_ICON + 'Ouvrir WhatsApp</a><p>WhatsApp ne s’est pas ouvert ? Touche le bouton ci-dessus.</p></div>';
 scroll();
 setTimeout(function () { goWA(url); }, 250);
 }

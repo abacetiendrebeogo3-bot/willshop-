@@ -13,7 +13,7 @@
 | **Enregistreur du tunnel** | `apps-script/tunnel-logger.gs` → autre projet Apps Script | Reçoit les visites, les prospects et les commandes des tunnels |
 | **Google Sheet** | ID `1pTd-mhmjUVUYX1tDb37XChKd23ATgKYhuW9rpLq2Flo` | Base de données |
 | **Tunnel Kit Minceur** | `tunnels/kit-minceur-awa.html` → collé dans Systeme.io | Page de vente en ligne : https://abacetiendrebeogo3.systeme.io/kit-minceur |
-| Tunnel Green Mask | `tunnels/green-mask-actuel.html` (ancienne version « Dr Bébé ») | https://abacetiendrebeogo3.systeme.io/green-mask |
+| Tunnel Green Mask | `tunnels/green-mask-actuel.html` (format chat « Dr Bébé », avec les retouches du Kit du 19/10) | https://abacetiendrebeogo3.systeme.io/green-mask |
 | Médias | `media/` (servis par Vercel sous `/media/...`) | Vidéo d'Awa, images, avis clientes |
 | Assistant IA | `api/chat.js` (fonction Vercel) | Inactif tant que `ANTHROPIC_API_KEY` n'est pas dans Vercel |
 
