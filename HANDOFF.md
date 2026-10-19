@@ -1,0 +1,87 @@
+# WillShop — guide de reprise (pour Antigravity, Cursor ou tout autre assistant de code)
+
+> Donne ce fichier en premier à l'outil : « Lis HANDOFF.md, puis fais [ta demande] ».
+> Langue de travail : français. Le patron s'appelle Wilfried. La boutique est à Ouagadougou (Burkina Faso).
+
+## 1. Vue d'ensemble
+
+| Élément | Où | Rôle |
+|---|---|---|
+| **App WillShop** (PWA) | `index.html` (tout en un seul fichier), `sw.js`, `manifest.webmanifest`, `icons/` | App de l'équipe : Direction, Commerciale, Livreur |
+| Hébergement de l'app | Vercel, projet `willshop-app`, **https://willshop-app.vercel.app** | Se redéploie tout seul à chaque `git push` sur `main` |
+| **Pont Google Sheet** | `apps-script/Code.gs` → projet Apps Script « WillShop Équipe » | API de l'app (connexion par PIN, lecture et écriture des commandes) |
+| **Enregistreur du tunnel** | `apps-script/tunnel-logger.gs` → autre projet Apps Script | Reçoit les visites, les prospects et les commandes des tunnels |
+| **Google Sheet** | ID `1pTd-mhmjUVUYX1tDb37XChKd23ATgKYhuW9rpLq2Flo` | Base de données |
+| **Tunnel Kit Minceur** | `tunnels/kit-minceur-awa.html` → collé dans Systeme.io | Page de vente en ligne : https://abacetiendrebeogo3.systeme.io/kit-minceur |
+| Tunnel Green Mask | `tunnels/green-mask-actuel.html` (ancienne version « Dr Bébé ») | https://abacetiendrebeogo3.systeme.io/green-mask |
+| Médias | `media/` (servis par Vercel sous `/media/...`) | Vidéo d'Awa, images, avis clientes |
+| Assistant IA | `api/chat.js` (fonction Vercel) | Inactif tant que `ANTHROPIC_API_KEY` n'est pas dans Vercel |
+
+## 2. Règles de sécurité (à respecter)
+- **Ne jamais mettre de clé API, de PIN ou de mot de passe dans le code ou le chat.** Les clés vont dans les variables d'environnement Vercel, ajoutées par Wilfried lui-même.
+- Ne jamais lancer une pub ni dépenser d'argent.
+- Ne jamais afficher publiquement le numéro de téléphone d'un client (avis, captures).
+- Toujours prévenir Wilfried avant un gros chantier, et lui montrer un prototype quand c'est visuel.
+
+## 3. Google Sheet : les onglets
+
+| Onglet | Colonnes |
+|---|---|
+| **Commandes** | A Date · B Produit · C Qté · D Prix · E Zone · F Lieu · G Tél · H Jour · I Statut · J Note · K Relances · L Dernière relance · M Session · N Étape · O Livreur · P Paiement · Q Livrée le · R Modifié par · S Payé le · T Encaissé par · U Remis à la caisse le |
+| **Visites** | Arrivée · Produit · Session · Dernière étape · Veut · Zone · Jour · Qté |
+| **Équipe** | Nom · Rôle (Direction / Commercial / Livreur) · Téléphone · Actif · PIN (au format texte) |
+| **Stock** | Produit · Stock actuel · Seuil · Prix d'achat · Prix de vente · Mise à jour |
+| **Mouvements** | Date · Produit · Type · Quantité · Stock après · Par · Note |
+| **Caisse** | Déclaré le · Livreur · Montant · Commandes (lignes) · Statut · Validé par · Validé le · Note |
+| **Journal** | Date · Qui · Action · Ligne · Client · Détail |
+
+- **Statuts** : Prospect, Nouvelle, Confirmée, En livraison, Reprogrammée, Injoignable, Échec, Livrée, Annulée.
+- **Colonne K (Relances)** : jetons séparés par des virgules (`J+1`, `J+3`, `Veille`, `Jour dd/mm`, `Rdd/mm`…).
+
+## 4. Pont Apps Script (`apps-script/Code.gs`)
+- URL d'exécution, utilisée dans `index.html` (constante `API`) et dans `api/chat.js` : `https://script.google.com/macros/s/AKfycbxudwbiZxBeTqbPU5XxCkAx1KsCuzcA8Y3qEbTEERqQ8IB6XX4hDwH7Cs3o8l9Sv8G0/exec`
+- `doPost` reçoit `{action, cred:{nom,pin}, p}` en `Content-Type: text/plain` (pour éviter les soucis CORS) et répond `{ok, data|error}`.
+- Actions : `names`, `login`, `data`, `update`, `addMember`, `setMember`, `remise`, `remiseOk`, `stockMove`, `stockProduct`.
+- **Pour mettre à jour le script** : copier `Code.gs` dans l'éditeur Apps Script, puis Déployer → Gérer les déploiements → crayon → Version : **Nouvelle version** → Déployer. L'URL reste la même.
+
+## 5. Tunnel Kit Minceur (`tunnels/kit-minceur-awa.html`)
+- Format « appel vidéo » avec Awa, la conseillère : vidéo en haut, bulles vertes pour les questions, boutons jaunes pour les réponses, bouton rouge seulement pour « Commander ».
+- **Parcours** : Oui → Ouaga / autre ville → quartier → jour → numéro → récap → Commander (ouvre WhatsApp).
+- **Prix** : 6 500 F + 1 000 F de livraison = **7 500 F** ; 2 kits = 11 000 F. Usage : thé le matin, gélule matin et soir.
+- **Envoi des données** : `send()` et `logSheet()` vers l'enregistreur (constante `SHEET`).
+- **Pixel Meta** `1530587975198974` : événements ViewContent, TunnelDemarre, VilleChoisie, OffreVue, Lead, InitiateCheckout, Contact.
+- **Mise en ligne** : Systeme.io → page Kit Minceur → modifier → élément « Code HTML » → Modifier le code → coller le fichier entier → Économiser → **Sauvegarder** (en haut à droite).
+- Systeme.io refuse un code trop long (environ 100 000 caractères) : garder les images sur Vercel, pas en base64.
+- **Avant chaque mise en ligne**, tester aux tailles 320×568, 360×640, 375×667 et 412×860. Les boutons doivent rester visibles sans défiler.
+
+## 6. App WillShop (`index.html`)
+- **Rôles** : `ceo` (Direction), `sales` (Commerciale), `driver` (Livreur). Les onglets sont définis dans `const ROLES`.
+- **Session** : `localStorage` (`ws_name`, `ws_pin`, `ws_profile`, `ws_cache`). L'app s'ouvre avec les dernières données en cache, puis se met à jour en arrière-plan.
+- **Logique des actions du jour** : `taskFor()`, `salesBuckets()`, `SALES_STEPS`, `TODO_GROUPS`. Les relances suivent `STEPS` (J+1, J+3, J+7, J+14) et les modèles `TEMPLATES`.
+- **Accueil Direction** : `renderHome()`. Commandes : `renderOrders()` / `renderTodo()`. Routine de la commerciale : `renderDay()`.
+- **Après chaque modification**, augmenter le numéro de version dans `sw.js` (`willshop-vN`) pour que les téléphones prennent la nouvelle version.
+- **Mode simple** pour les vieux téléphones : `?simple=1` (sans manifest).
+
+## 7. Chantiers à faire (par ordre de priorité)
+
+### A. Checklist et suivi de la commerciale (validé par Wilfried, à construire)
+1. **Nouvel onglet « Accueil » pour `sales`**, affiché après « Ma journée » (et par défaut quand `ws_dayDone` = aujourd'hui).
+   - Bloc « À faire maintenant » : une ligne par groupe de `TODO_GROUPS`, avec le nombre. Un toucher ouvre Commandes en mode « À faire » sur ce groupe.
+2. **Checklist du jour** (enregistrée dans un nouvel onglet **« Tâches »** : Date · Qui · Tâche · Prévue à · Faite à · Note · Ajoutée par) :
+   - Poster les statuts WhatsApp du matin.
+   - Enregistrer les contacts des nouveaux clients : liste des numéros du jour avec un bouton « Enregistré ✓ » (nouvelle colonne **V « Contact enregistré »** dans Commandes), plus un bouton qui prépare le message *« Enregistre notre numéro pour voir nos nouveautés et promos dans nos statuts 🙏 »*.
+   - **Comptes-rendus à 10 h, 12 h, 14 h, 16 h et 18 h** dans le groupe WhatsApp (horaires confirmés par Wilfried). Le texte est généré automatiquement (commandes confirmées, relances envoyées, contacts enregistrés, injoignables) et partagé avec `https://wa.me/?text=...`. Le bouton marque le compte-rendu comme posté.
+   - Tâches libres ajoutées par la Direction.
+   - Rappel dans l'app quand un compte-rendu est en retard de plus de 30 min.
+3. **Pont** : nouvelles actions `tasks` (lecture), `taskDone`, `taskAdd` (Direction seulement). Champ `contact` autorisé dans `update` (colonne 22). Lire 22 colonnes au lieu de 21.
+4. **Accueil Direction** : bloc « Suivi de Yasmine » (routine x/y, heure des statuts, contacts enregistrés x/y, comptes-rendus ✓/✗, historique sur 7 jours).
+
+### B. Notifications toutes les 2 h (plus tard)
+Web Push : clés VAPID dans les variables Vercel, abonnements enregistrés dans le Sheet, et un déclencheur Apps Script toutes les 2 h qui appelle une fonction Vercel d'envoi (le cron gratuit de Vercel ne tourne qu'une fois par jour). Le Huawei de Yasmine n'a pas les services Google : pour elle, garder les rappels dans l'app.
+
+### C. Tunnel Green Mask avec Awa
+Même modèle que le Kit, livraison à 1 000 F. En attente de la vidéo d'Awa avec le Green Mask.
+
+### D. Plus tard
+- Assistant IA : Wilfried ajoute `ANTHROPIC_API_KEY` dans Vercel.
+- Branchement respond.io (forfait Growth requis pour l'API) ou API WhatsApp Cloud de Meta (projet « Mon Closeur »).
