@@ -379,7 +379,7 @@ ask(["Oui, je le veux", "J’ai une question"], function (a) {
 if (/question/.test(a)) return other();
 px("TunnelDemarre", {}, true);
 track("Veut le produit", { veut: "Oui" });
-phoneStep();
+zone();
 });
 });
 }
@@ -397,8 +397,8 @@ function track(step, data) {
 send({ type: "visit", step: step, veut: (data && data.veut) || "", zone: S.zone ? (S.zone === "ouaga" ? "Ouaga" : "Autre ville") : "", jour: S.day || "" });
 }
 function phoneStep() {
-prog(30);
-bot(["Super ! Je te réserve ton Kit Minceur à 6 500 F (+ 1 000 F de livraison). C’est quoi ton numéro WhatsApp ?"], function () {
+prog(72);
+bot([S.zone === "ouaga" ? "Super ! Le livreur va t’appeler avant de passer. C’est quoi ton numéro WhatsApp ?" : "Super ! On va te contacter pour l’envoi. C’est quoi ton numéro WhatsApp ?"], function () {
 dock.className = "";
 dock.innerHTML = '<div class="form"><input class="fld" id="ftel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Ton numéro (ex : 70 12 34 56)" aria-label="Ton numéro WhatsApp"><button class="cta" id="telok" onclick="telOk()">Continuer</button><div class="note" style="text-align:center">Juste pour organiser ta livraison.</div></div>';
 var t = document.getElementById("ftel");
@@ -414,9 +414,9 @@ if (v.replace(/[^0-9]/g, "").length < 8) { t.style.borderColor = "#B42335"; t.va
 S.tel = v;
 dock.innerHTML = "";
 me(v);
-send({ type: "lead", step: "Numéro donné", tel: v, prix: 7500 });
+send({ type: "lead", step: "Numéro donné", tel: v, prix: 7500, zone: S.zone === "ouaga" ? "Ouaga" : "Autre ville", lieu: S.lieu, jour: S.day });
 px("Lead", { content_name: PROD });
-setTimeout(zone, 250);
+setTimeout(offre, 250);
 }
 
 /* Étape 2 */
@@ -426,7 +426,7 @@ bot(["Super ! Tu es où ?"], function () {
 ask(["À Ouaga", "Autre ville"], function (a) {
 S.zone = a === "À Ouaga" ? "ouaga" : "ville";
 px("VilleChoisie", { zone: S.zone }, true);
-track("Ville");
+track("Veut le produit", { veut: "Oui" });
 lieuStep();
 });
 });
@@ -452,9 +452,9 @@ prog(62);
 var q = S.zone === "ouaga" ? "Tu veux être livré(e) aujourd’hui ?" : "Tu veux qu’on l’expédie aujourd’hui ?";
 bot([q], function () {
 ask(["Oui", "Non"], function (a) {
-if (a === "Oui") { S.day = "Aujourd’hui"; track("Jour"); return offre(); }
+if (a === "Oui") { S.day = "Aujourd’hui"; track("Veut le produit", { veut: "Oui" }); return phoneStep(); }
 bot(["Ok ! Quel jour tu préfères ?"], function () {
-ask(["Demain", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"], function (d) { S.day = d; track("Jour"); offre(); }, "days");
+ask(["Demain", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"], function (d) { S.day = d; track("Veut le produit", { veut: "Oui" }); phoneStep(); }, "days");
 });
 });
 });
