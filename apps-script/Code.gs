@@ -104,6 +104,24 @@ var FIELDS = {
   driver: { paye: 0, statut: 9, note: 10, paiement: 16, livreeLe: 17, jour: 8 }
 };
 
+// ---------- Tâches de la commerciale ----------
+// Onglet « Tâches » : Date | Qui | Type | Clé | Faite à | Note | Ajoutée par
+// Types : statuts · contact (clé = numéro) · cr (clé = heure du compte-rendu) · libre (clé = identifiant)
+function tasksSheet_() {
+  var ss = ss_(), sh = ss.getSheetByName("Tâches");
+  if (!sh) { sh = ss.insertSheet("Tâches"); sh.appendRow(["Date", "Qui", "Type", "Clé", "Faite à", "Note", "Ajoutée par"]); sh.setFrozenRows(1); sh.getRange("A:D").setNumberFormat("@"); }
+  return sh;
+}
+function day_(d) { return Utilities.formatDate(d || new Date(), "GMT", "dd/MM/yyyy"); }
+function tasks_(days) {
+  var sh = tasksSheet_(), n = sh.getLastRow();
+  if (n < 2) return [];
+  var keep = {}; for (var i = 0; i < days; i++) keep[day_(new Date(Date.now() - i * 86400000))] = 1;
+  return sh.getRange(2, 1, n - 1, 7).getDisplayValues().map(function (r, i) {
+    return { id: i + 2, date: r[0], qui: r[1], type: r[2], cle: r[3], faite: r[4], note: r[5], par: r[6] };
+  }).filter(function (t) { return keep[t.date] || (t.type === "libre" && !t.faite); });
+}
+
 function api(action, cred, p) {
   if (action === "names") return names();
   var me = auth_(cred), role = roleOf_(me.role);
@@ -119,6 +137,7 @@ function api(action, cred, p) {
     if (role !== "driver") res.stock = stockRows_().map(function (x) { return { produit: x.produit, stock: x.stock, seuil: x.seuil, achat: role === "ceo" ? x.achat : 0, vente: x.vente, maj: x.maj }; });
     var rem = remises_();
     if (role === "driver") res.remises = rem.filter(function (x) { return x.livreur === me.nom; }).slice(-10);
+    if (role !== "driver") { var tk = tasks_(7); res.tasks = role === "ceo" ? tk : tk.filter(function (x) { return x.qui === me.nom; }); }
     if (role === "ceo") {
       res.remises = rem.slice(-40);
       var js = ss.getSheetByName("Journal"), jn = js.getLastRow();
@@ -250,6 +269,35 @@ function api(action, cred, p) {
     var seuil = Math.max(0, Math.round(Number(p.seuil) || 0)), achat = Math.max(0, Math.round(Number(p.achat) || 0)), vente = Math.max(0, Math.round(Number(p.vente) || 0));
     if (ex) { ssh.getRange(ex.row, 3, 1, 3).setValues([[seuil, achat || "", vente || ""]]); ssh.getRange(ex.row, 6).setValue(stamp_()); }
     else ssh.appendRow([name, 0, seuil, achat || "", vente || "", stamp_()]);
+    return { ok: true };
+  }
+  if (action === "taskDone") {
+    if (role === "driver") throw new Error("Réservé à l'équipe commerciale");
+    var tsh = tasksSheet_(), type = String(p.type || ""), cle = String(p.cle || "").slice(0, 40), note = String(p.note || "").slice(0, 300);
+    if (!/^(statuts|contact|cr|libre)$/.test(type)) throw new Error("Tâche inconnue");
+    var lk4 = LockService.getScriptLock(); lk4.waitLock(10000);
+    try {
+      if (type === "libre") {
+        var t0 = tasks_(60).filter(function (x) { return x.type === "libre" && String(x.id) === cle; })[0];
+        if (!t0) throw new Error("Tâche introuvable");
+        tsh.getRange(t0.id, 5).setValue(stamp_());
+        journal_(me.nom, "Tâche faite : " + t0.note, "", "", "");
+        return { ok: true };
+      }
+      var exists = tasks_(1).some(function (x) { return x.qui === me.nom && x.type === type && x.cle === cle; });
+      if (!exists) tsh.appendRow(["'" + day_(), me.nom, type, "'" + cle, stamp_(), note, ""]);
+      var lbl = type === "statuts" ? "Statuts WhatsApp postés" : type === "cr" ? "Compte-rendu de " + cle + " h posté" : "Contact enregistré";
+      journal_(me.nom, lbl, "", type === "contact" ? "'" + cle : "", "");
+      return { ok: true };
+    } finally { lk4.releaseLock(); }
+  }
+  if (action === "taskAdd") {
+    if (role !== "ceo") throw new Error("Réservé à la direction");
+    var texte = String(p.texte || "").trim().slice(0, 200), qui = String(p.qui || "").trim();
+    if (!texte || !qui) throw new Error("Tâche ou personne manquante");
+    tasksSheet_().appendRow(["'" + day_(), qui, "libre", "", "", texte, me.nom]);
+    var sh5 = tasksSheet_(); sh5.getRange(sh5.getLastRow(), 4).setValue("'" + sh5.getLastRow());
+    journal_(me.nom, "Tâche ajoutée pour " + qui + " : " + texte, "", "", "");
     return { ok: true };
   }
   throw new Error("Action inconnue");
