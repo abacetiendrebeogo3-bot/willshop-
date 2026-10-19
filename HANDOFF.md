@@ -64,7 +64,8 @@
 
 ## 7. Chantiers à faire (par ordre de priorité)
 
-### A. Checklist et suivi de la commerciale (validé par Wilfried, à construire)
+### A. Checklist et suivi de la commerciale — ✅ FAIT le 19/10 (pont v5)
+Réalisé avec l'onglet « Tâches » (Date · Qui · Type · Clé · Faite à · Note · Ajoutée par), sans colonne V dans Commandes : les contacts enregistrés sont des lignes de type `contact` dont la clé est le numéro. Code : `renderSalesHome()`, `teamDay()`, `crText()`, `renderTeamFollow()`. Spécification d'origine :
 1. **Nouvel onglet « Accueil » pour `sales`**, affiché après « Ma journée » (et par défaut quand `ws_dayDone` = aujourd'hui).
    - Bloc « À faire maintenant » : une ligne par groupe de `TODO_GROUPS`, avec le nombre. Un toucher ouvre Commandes en mode « À faire » sur ce groupe.
 2. **Checklist du jour** (enregistrée dans un nouvel onglet **« Tâches »** : Date · Qui · Tâche · Prévue à · Faite à · Note · Ajoutée par) :

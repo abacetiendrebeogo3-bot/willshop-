@@ -270,6 +270,39 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 .chain .step b{font-size:21px!important}
 .chain .step span{font-size:11px!important;overflow-wrap:anywhere}
 .chain .step em{display:block;font-style:normal;font-size:11px;font-weight:700;color:var(--bx);margin-top:2px}
+
+/* Tâches de la commerciale */
+:root{--g-red:#C8102E;--g-orange:#E07A00;--g-green:#1E8E4E;--g-blue:#2F6FD6;--g-grey:#6B6B6B}
+.tasks{gap:0;padding:4px 14px}
+.task{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.task .tick{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff}
+.task.ok .tick{background:var(--g-green);border-color:var(--g-green)}
+.task .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.task .tx small{color:var(--mut);font-size:12.5px;line-height:1.35}
+.task.ok .tx b{text-decoration:line-through;opacity:.6}
+.sublist{margin:0 0 8px 36px;display:flex;flex-direction:column;gap:6px}
+.subi{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--line);border-radius:12px}
+.subi.ok{opacity:.65}
+.subi .acts{display:flex;gap:6px}
+.crs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0 0 12px 36px}
+.cr{border:1px solid var(--line);border-radius:12px;padding:6px 4px;text-align:center;display:flex;flex-direction:column;gap:3px;align-items:center;font-size:12px}
+.cr b{font-size:14px}
+.cr.ok{background:rgba(30,142,78,.1);border-color:var(--g-green);color:var(--g-green)}
+.cr.due{border-color:var(--g-red)}
+.cr .btn{padding:0 6px;min-height:30px;font-size:11.5px}
+@media (max-width:380px){.crs{grid-template-columns:repeat(3,minmax(0,1fr));margin-left:0}.sublist{margin-left:0}}
+.follow{gap:6px}
+.crdot{display:inline-grid;place-items:center;width:26px;height:22px;border-radius:7px;margin-left:3px;font-size:11px;font-weight:700;background:var(--line);color:var(--mut)}
+.crdot.ok{background:var(--g-green);color:#fff}
+.crdot.ko{background:var(--g-red);color:#fff}
+.hist{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:4px}
+.hd{text-align:center;border-radius:10px;background:var(--bg);padding:4px 0;font-size:11px}
+.hd i{display:block;font-style:normal;color:var(--faint)}
+.hd b{font-size:12.5px}
+.hd.today{outline:1.5px solid var(--bx)}
+.addtask{display:flex;gap:6px;margin-top:6px}
+.addtask .field{flex:1;min-height:40px;margin:0}
 </style>
 </head>
 <body>
@@ -337,7 +370,7 @@ const ICONS = {
 };
 const ROLES = {
   ceo:    [["home", "Accueil"], ["orders", "Commandes"], ["stock", "Stock"], ["team", "Équipe"], ["ai", "Assistant"]],
-  sales:  [["day", "Ma journée"], ["orders", "Commandes"], ["clients", "Clients"], ["ai", "Assistant"]],
+  sales:  [["day", "Ma journée"], ["home", "Accueil"], ["orders", "Commandes"], ["clients", "Clients"], ["ai", "Assistant"]],
   driver: [["runs", "Livraisons"], ["history", "Historique"]]
 };
 const I_WA = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3c-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>';
@@ -347,7 +380,7 @@ const I_SPARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 
 /* ---------- État ---------- */
 let sample = null, cred = null, myName = "", realRole = null, drivers = [], stock = [], moves = [], stockPanel = null, remises = [], journal = [];
-let orders = [], visits = [], team = [];
+let orders = [], visits = [], team = [], tasks = [];
 let loaded = false, visitsLoaded = false, teamLoaded = false, lastSync = null;
 let role = "ceo";
 let tab = "home";
@@ -411,7 +444,7 @@ function rowFrom(v, i) {
     derniere: v[11] || "", sid: v[12] || "", etape: v[13] || "",
     livreur: v[14] || "", paiement: v[15] || "", livreeLe: parseDate(v[16]),
     // paiement : date, qui a encaissé, remise à la caisse (anciennes lignes : payées à la livraison)
-    payeLe: parseDate(v[18]) || (/^livr/i.test(v[8] || "") && v[15] ? parseDate(v[16]) : null), payePar: v[19] || "", remisLe: parseDate(v[20])
+    payeLe: parseDate(v[18]) || (/^livr/i.test(v[8] || "") && v[15] ? parseDate(v[16]) : null), payePar: v[19] || "", remisLe: parseDate(v[20]), modifLe: parseDate(String(v[17] || "").split("·").pop())
   };
 }
 // Date de livraison prévue à partir du jour choisi dans le tunnel
@@ -498,6 +531,7 @@ function applyData(d) {
     if (d.moves) moves = d.moves;
     if (d.remises) remises = d.remises;
     if (d.journal) journal = d.journal;
+    if (d.tasks) tasks = d.tasks;
     loaded = true;
 }
 document.getElementById("refresh").onclick = () => load();
@@ -581,7 +615,7 @@ function logout(msg) { store("ws_pin", null); store("ws_profile", null); store("
 function startTab(r) {
   const tabs = ROLES[r].map(x => x[0]), saved = String(store("ws_tab") || "").split("|");
   if (saved[1] === dayKey() && tabs.includes(saved[0])) return saved[0];
-  if (r === "sales" && store("ws_dayDone") === dayKey()) return "orders";
+  if (r === "sales" && store("ws_dayDone") === dayKey()) return "home";
   return tabs[0];
 }
 function start(r) {
@@ -798,6 +832,7 @@ function renderReview() {
     </section>`;
 }
 function renderHome() {
+  if (role === "sales") return renderSalesHome();
   if (reviewStep >= 0) return renderReview();
   const s = stats(), al = alerts(), fu = funnel(), sb = salesBuckets();
   const max = Math.max(1, ...s.days.map(d => d.n));
@@ -830,6 +865,7 @@ function renderHome() {
     <h2>À faire maintenant</h2>
     <div class="alerts">${al.length ? al.slice(0, 5).map((a, i) => `<button class="alert ${a.lvl}" data-alert="${i}"><span class="dot"></span><span>${esc(alText(a))}</span>${/stock/i.test(a.t) && a.n <= 0 ? "" : `<span class="n">${a.n}</span>`}<span class="chev">›</span></button>`).join("") : `<div class="calm">✓ Rien de bloquant. Tout est sous contrôle.</div>`}</div>
 
+    ${renderTeamFollow()}
     <h2>Tunnel aujourd'hui</h2>
     ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="chain">${chain.map((x, i) => `${i ? `<div class="arrow">›</div>` : ""}<div class="step"><b>${x[1]}</b><span>${x[0]}</span>${i ? `<em>${chain[i - 1][1] ? Math.round(x[1] / chain[i - 1][1] * 100) : 0} %</em>` : `<em>&nbsp;</em>`}</div>`).join("")}</div>
       ${worst && worst.lost > 0 ? `<p class="verdict">On perd le plus de monde entre <b>${worst.from[0].toLowerCase()}</b> et <b>${worst.to[0].toLowerCase()}</b> : ${worst.lost} personne${worst.lost > 1 ? "s" : ""}.</p>` : ""}
@@ -876,7 +912,7 @@ function ordersSwitch() {
 function renderTodo() {
   const b = salesBuckets(), total = TODO_GROUPS.reduce((n, g) => n + b[g.k].length, 0);
   return `<h1>Commandes</h1><p class="sub">${total ? total + " client" + (total > 1 ? "s" : "") + " à traiter aujourd'hui, du plus urgent au moins urgent." : "Rien à faire pour le moment 👍"}</p>${ordersSwitch()}
-    ${total ? TODO_GROUPS.filter(g => b[g.k].length).map(g => `<section class="tgroup g-${g.c}"><div class="tg-head"><span class="dot"></span><h2>${g.t}</h2><span class="tg-n">${b[g.k].length}</span></div><p class="tg-d">${g.d}</p>
+    ${total ? TODO_GROUPS.filter(g => b[g.k].length).map(g => `<section class="tgroup g-${g.c}" id="grp-${g.k}"><div class="tg-head"><span class="dot"></span><h2>${g.t}</h2><span class="tg-n">${b[g.k].length}</span></div><p class="tg-d">${g.d}</p>
       <div class="list">${b[g.k].map(x => orderCard(x.o, { task: x.t, color: g.c })).join("")}</div></section>`).join("") : empty("Toutes les commandes sont à jour. Les nouvelles apparaîtront ici automatiquement.")}`;
 }
 function renderOrders() {
@@ -942,10 +978,104 @@ function renderDay() {
     <div class="steps" role="list">${SALES_STEPS.map((s, i) => `<button class="stp ${b[s.k].length ? "" : "done"}" role="listitem" data-step-go="${i}" ${i === salesStep ? 'aria-current="step"' : ""}>${s.t}<b>${b[s.k].length || "✓"}</b></button>`).join("")}</div>
     <div class="progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
     ${done ? `<div class="step-head"><span class="eyebrow">Fin de routine</span><h2 style="margin:4px 0">Bravo, ta routine est faite 👏</h2><p class="sub">Les compteurs se mettent à jour à chaque nouvelle commande. Reviens dans quelques heures.</p></div>
-      <div class="next"><button class="btn pri" data-tabgo="orders">Voir mes commandes →</button><button class="btn ghost" data-step-go="0">Recommencer</button></div>`
+      <div class="next"><button class="btn pri" data-tabgo="home">Aller à mon accueil →</button><button class="btn ghost" data-step-go="0">Recommencer</button></div>`
     : `<div class="step-head"><span class="eyebrow">Étape ${salesStep + 1} sur ${SALES_STEPS.length}</span><h2 style="margin:4px 0">${cur.t} <span class="count">${b[cur.k].length}</span></h2><p class="sub">${cur.d}</p></div>
       <div class="list" style="margin-top:12px">${b[cur.k].length ? b[cur.k].map(x => orderCard(x.o, { task: x.t })).join("") : empty("Rien dans cette étape. 👍")}</div>
       <div class="next"><button class="btn pri" data-step-go="${salesStep + 1}">${salesStep + 1 < SALES_STEPS.length ? "Étape suivante · " + SALES_STEPS[salesStep + 1].t : "Terminer"} →</button></div>`}`;
+}
+
+/* ---------- Commerciale : accueil, tâches du jour, comptes-rendus ---------- */
+const CR_HOURS = [10, 12, 14, 16, 18];
+const TODAY_STR = () => new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+let jumpGroup = null;
+function myTasks(who, dateStr) { return tasks.filter(t => t.qui === who && t.date === (dateStr || TODAY_STR())); }
+function newClients(day = today()) {
+  const seen = new Set();
+  return orders.filter(o => !isProspect(o) && !is(o, /^annul/i) && sameDay(o.date, day) && o.tel).filter(o => { const k = waNumber(o.tel); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+function teamDay(who, day = today()) {
+  const ds = day.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const tk = myTasks(who, ds), nc = newClients(day);
+  const done = k => tk.find(t => t.type === k);
+  const crs = CR_HOURS.map(h => ({ h, t: tk.find(t => t.type === "cr" && Number(t.cle) === h) }));
+  const contacts = nc.filter(o => tk.some(t => t.type === "contact" && t.cle === waNumber(o.tel)));
+  const libres = tasks.filter(t => t.qui === who && t.type === "libre" && (t.date === ds || !t.faite));
+  const now = new Date(), isToday = sameDay(day, now);
+  const dueCr = crs.filter(c => !isToday || now.getHours() * 60 + now.getMinutes() >= c.h * 60);
+  const items = [!!done("statuts"), ...nc.map(o => contacts.includes(o)), ...dueCr.map(c => !!c.t), ...libres.map(t => !!t.faite)];
+  return { tk, nc, statuts: done("statuts"), crs, contacts, libres, dueCr, score: items.filter(Boolean).length, total: items.length };
+}
+function crText(h) {
+  const t0 = today(), d = teamDay(myName);
+  const conf = orders.filter(o => is(o, /^(confirm|en livr|livr)/i) && o.modifLe && sameDay(o.modifLe, t0)).length;
+  const rel = orders.filter(o => o.derniere && sameDay(parseDate(o.derniere), t0)).length;
+  const lines = [
+    `📊 Point de ${h} h – ${myName}`,
+    `✅ Commandes confirmées aujourd'hui : ${conf}`,
+    `📨 Relances envoyées : ${rel}`,
+    `📇 Contacts enregistrés : ${d.contacts.length}/${d.nc.length}`,
+    `🆕 À confirmer : ${orders.filter(o => is(o, /^nouv/i)).length}`,
+    `📞 Injoignables : ${orders.filter(o => is(o, /^injoig/i)).length}`,
+    `📦 Livraisons prévues aujourd'hui : ${orders.filter(o => isToDeliver(o) && (deliveryDate(o) || 0) <= t0).length}`,
+    `🟢 Statuts WhatsApp : ${d.statuts ? "postés à " + String(d.statuts.faite).slice(11, 16) : "pas encore"}`
+  ];
+  return lines.join("\n");
+}
+async function taskDone(type, cle, note, okText) {
+  const tmp = { date: TODAY_STR(), qui: myName, type, cle: String(cle), faite: new Date().toLocaleString("fr-FR").replace(",", ""), note: note || "" };
+  if (type === "libre") { const x = tasks.find(t => String(t.id) === String(cle)); if (x) x.faite = tmp.faite; } else tasks.push(tmp);
+  render();
+  try { await api("taskDone", { type, cle: String(cle), note }); toast(okText || "Noté ✓"); load(true); }
+  catch (e) { banner("Pas enregistré : " + errorCopy(e)); load(true); }
+}
+async function taskAdd(qui, texte) {
+  try { await api("taskAdd", { qui, texte }); toast("Tâche ajoutée pour " + qui); load(true); }
+  catch (e) { banner("Pas enregistré : " + errorCopy(e)); }
+}
+function renderSalesHome() {
+  const b = salesBuckets(), d = teamDay(myName), now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
+  const late = d.crs.filter(c => !c.t && mins >= c.h * 60 + 30);
+  const hhmm = t => String(t || "").slice(11, 16);
+  const ask = "Bonjour 🙏 c'est WillShop. Merci pour ta commande ! Enregistre notre numéro dans tes contacts pour voir nos nouveautés et nos promos dans nos statuts WhatsApp 😊";
+  const todo = TODO_GROUPS.filter(g => b[g.k].length);
+  const h = now.getHours();
+  return `<h1>${h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"} ${esc(myName)}</h1>
+    <p class="sub">Ma routine aujourd'hui : <b>${d.score}/${d.total}</b></p>
+    <div class="progress" aria-hidden="true"><span style="width:${d.total ? Math.round(d.score / d.total * 100) : 100}%"></span></div>
+    ${late.length ? `<div class="banner err" style="margin-top:12px">⏰ Compte-rendu de ${late.map(c => c.h + " h").join(", ")} pas encore posté dans le groupe.</div>` : ""}
+
+    <h2>À faire maintenant</h2>
+    <div class="alerts">${todo.length ? todo.map(g => `<button class="alert" data-todo="${g.k}"><span class="dot" style="background:var(--g-${g.c})"></span><span>${g.t}</span><span class="n">${b[g.k].length}</span><span class="chev">›</span></button>`).join("") : `<div class="calm">✓ Tous les clients sont à jour. Les nouvelles commandes apparaîtront ici.</div>`}</div>
+
+    <h2>Mes tâches du jour</h2>
+    <div class="tasks card">
+      <div class="task ${d.statuts ? "ok" : ""}"><span class="tick">${d.statuts ? "✓" : ""}</span><div class="tx"><b>Poster les statuts WhatsApp du matin</b><small>${d.statuts ? "Fait à " + hhmm(d.statuts.faite) : "Photos des produits, avis clientes, promo du jour"}</small></div>${d.statuts ? "" : `<button class="btn small ok" data-task="statuts">C'est fait ✓</button>`}</div>
+
+      <div class="task ${d.nc.length && d.contacts.length === d.nc.length ? "ok" : ""}"><span class="tick">${d.nc.length && d.contacts.length === d.nc.length ? "✓" : ""}</span><div class="tx"><b>Enregistrer les contacts des clients du jour · ${d.contacts.length}/${d.nc.length}</b><small>Enregistre le numéro, puis demande au client d'enregistrer le nôtre pour voir nos statuts.</small></div></div>
+      ${d.nc.length ? `<div class="sublist">${d.nc.map(o => { const ok = d.contacts.includes(o); return `<div class="subi ${ok ? "ok" : ""}"><span><b>${esc(o.tel)}</b> <span class="meta">${esc(o.lieu)}</span></span>${ok ? `<span class="meta">✓ enregistré</span>` : `<span class="acts"><a class="btn small" href="${esc(waLink(o.tel, ask))}" target="_blank" rel="noopener">${I_WA} Message</a><button class="btn small ok" data-contact="${esc(waNumber(o.tel))}">Enregistré ✓</button></span>`}</div>`; }).join("")}</div>` : `<p class="meta" style="margin:0 0 6px 36px">Pas encore de nouveau client aujourd'hui.</p>`}
+
+      <div class="task"><span class="tick">${d.dueCr.length && d.dueCr.every(c => c.t) ? "✓" : ""}</span><div class="tx"><b>Comptes-rendus dans le groupe WhatsApp</b><small>À 10 h, 12 h, 14 h, 16 h et 18 h. Le texte est écrit tout seul.</small></div></div>
+      <div class="crs">${d.crs.map(c => { const due = mins >= c.h * 60; return `<div class="cr ${c.t ? "ok" : due ? "due" : ""}"><b>${c.h} h</b><span>${c.t ? "✓ " + hhmm(c.t.faite) : due ? "à poster" : "plus tard"}</span>${!c.t && due ? `<button class="btn small pri" data-cr="${c.h}">${I_WA} Envoyer</button>` : ""}</div>`; }).join("")}</div>
+
+      ${d.libres.map(t => `<div class="task ${t.faite ? "ok" : ""}"><span class="tick">${t.faite ? "✓" : ""}</span><div class="tx"><b>${esc(t.note)}</b><small>${t.faite ? "Fait à " + hhmm(t.faite) : "Demandé par " + esc(t.par || "la direction")}</small></div>${t.faite ? "" : `<button class="btn small ok" data-libre="${t.id}">Fait ✓</button>`}</div>`).join("")}
+    </div>`;
+}
+function renderTeamFollow() {
+  const sellers = (team.length ? team.filter(m => /commerc/i.test(m.role) && m.actif !== false).map(m => m.nom) : [...new Set(tasks.map(t => t.qui))]);
+  if (!sellers.length) return "";
+  const hhmm = t => String(t || "").slice(11, 16), t0 = today();
+  return `<h2>Suivi de l'équipe commerciale</h2>${sellers.map(n => {
+    const d = teamDay(n);
+    const hist = [6, 5, 4, 3, 2, 1].map(i => { const day = new Date(t0.getTime() - i * DAY), x = teamDay(n, day); return `<div class="hd"><i>${day.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3)}</i><b>${x.total ? Math.round(x.score / x.total * 100) + "%" : "–"}</b></div>`; }).join("");
+    return `<div class="card follow">
+      <div class="c-top"><div class="place">${esc(n)}</div><div class="amt">${d.score}/${d.total}</div></div>
+      <div class="fact"><span>Statuts WhatsApp</span><b>${d.statuts ? "✓ " + hhmm(d.statuts.faite) : "✗ pas encore"}</b></div>
+      <div class="fact"><span>Contacts enregistrés</span><b>${d.contacts.length}/${d.nc.length}</b></div>
+      <div class="fact"><span>Comptes-rendus</span><b>${d.crs.map(c => `<span class="crdot ${c.t ? "ok" : d.dueCr.includes(c) ? "ko" : ""}" title="${c.h} h">${c.h}</span>`).join("")}</b></div>
+      ${d.libres.length ? d.libres.map(t => `<div class="fact"><span>${esc(t.note)}</span><b>${t.faite ? "✓ " + hhmm(t.faite) : "en attente"}</b></div>`).join("") : ""}
+      <div class="hist">${hist}<div class="hd today"><i>auj.</i><b>${d.total ? Math.round(d.score / d.total * 100) + "%" : "–"}</b></div></div>
+      <form class="addtask" data-addtask="${esc(n)}"><input class="field" placeholder="Ajouter une tâche pour ${esc(n)}…" maxlength="200"><button class="btn small pri">Ajouter</button></form>
+    </div>`; }).join("")}`;
 }
 
 /* ---------- Livreur ---------- */
@@ -1132,6 +1262,12 @@ function bind() {
   view.querySelectorAll("[data-rev]").forEach(b => b.onclick = () => { const v = b.dataset.rev; if (v === "end") { reviewStep = -1; store("ws_review", dayKey()); } else reviewStep = +v; window.scrollTo(0, 0); render(); });
   view.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { setRole("ceo", b.dataset.go); });
   view.querySelectorAll("[data-step-go]").forEach(b => b.onclick = () => { salesStep = Math.min(+b.dataset.stepGo, SALES_STEPS.length); if (salesStep >= SALES_STEPS.length) store("ws_dayDone", dayKey()); window.scrollTo(0, 0); render(); });
+  view.querySelectorAll("[data-task]").forEach(b => b.onclick = () => taskDone(b.dataset.task, "matin", "", "Statuts notés ✓"));
+  view.querySelectorAll("[data-contact]").forEach(b => b.onclick = () => taskDone("contact", b.dataset.contact, "", "Contact noté ✓"));
+  view.querySelectorAll("[data-libre]").forEach(b => b.onclick = () => taskDone("libre", b.dataset.libre, "", "Tâche faite ✓"));
+  view.querySelectorAll("[data-cr]").forEach(b => b.onclick = () => { const h = b.dataset.cr; window.open("https://wa.me/?text=" + encodeURIComponent(crText(h)), "_blank"); setTimeout(() => taskDone("cr", h, "", "Compte-rendu de " + h + " h noté ✓"), 600); });
+  view.querySelectorAll("[data-todo]").forEach(b => b.onclick = () => { ordersMode = "todo"; jumpGroup = b.dataset.todo; tab = "orders"; store("ws_tab", tab + "|" + dayKey()); render(); const el = document.getElementById("grp-" + jumpGroup); if (el) el.scrollIntoView({ behavior: "smooth" }); else window.scrollTo(0, 0); });
+  view.querySelectorAll("[data-addtask]").forEach(fm => fm.onsubmit = e => { e.preventDefault(); const i = fm.querySelector("input"), v = i.value.trim(); if (!v) return; i.value = ""; taskAdd(fm.dataset.addtask, v); });
   view.querySelectorAll("[data-feed]").forEach(b => b.onclick = () => { showFeed = !showFeed; render(); });
   view.querySelectorAll("[data-scroll]").forEach(b => b.onclick = () => { const el = document.getElementById(b.dataset.scroll); if (el) el.scrollIntoView({ behavior: "smooth" }); });
   view.querySelectorAll("[data-tabgo]").forEach(b => b.onclick = () => { tab = b.dataset.tabgo; store("ws_tab", tab + "|" + dayKey()); window.scrollTo(0, 0); render(); });
