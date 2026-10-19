@@ -151,9 +151,17 @@ body.drb-on{overflow:hidden}
 #drb .opt:hover{background:#FFE15A!important}
 #drb .opt.ask{background:#fff!important;border:1.5px dashed #B9C3BB!important;color:#55605a!important;box-shadow:none}
 #drb .qbtn.sel{border-color:#E0B800;background:#FFF8DC;box-shadow:0 0 0 2px #FCD116}
-#drb .cta{background:#CE1126!important;color:#fff!important;animation:pulseR 2.4s infinite!important}
-#drb .cta:hover{background:#B00E20!important}
+#drb .cta{background:#FCD116!important;color:#1d1d1b!important;border:2px solid #E0B800!important;animation:none!important;box-shadow:0 3px 0 #C9A400}
+#drb .cta#go{background:#CE1126!important;color:#fff!important;border:0!important;animation:pulseR 2.4s infinite!important}
+#drb .cta#go:hover{background:#B00E20!important}
 @keyframes pulseR{0%{box-shadow:0 0 0 0 rgba(206,17,38,.45)}70%{box-shadow:0 0 0 12px rgba(206,17,38,0)}100%{box-shadow:0 0 0 0 rgba(206,17,38,0)}}
+#drb header.vc{transition:height .35s ease,min-height .35s ease}
+#drb.compact header.vc{height:34vh;height:34dvh;min-height:190px}
+#drb .recu{margin:8px 0}
+@media (max-height:700px){#drb.compact header.vc{height:28vh;height:28dvh;min-height:150px}#drb .note{padding:7px 10px;font-size:13px}#drb .qbtn{padding:8px 10px}}
+@media (max-height:600px){#drb.compact header.vc{height:22vh;height:22dvh;min-height:120px}}
+#drb.compact .fxo .mc{opacity:0!important;transition:opacity .3s}
+#drb.compact .ptag{transform:scale(.72);transform-origin:right bottom}
 </style>
 <div id="drb"><div class="app">
 <header class="vc">
@@ -289,6 +297,7 @@ updSnd();
 
 var S = {};
 var chat = document.getElementById("chat"), dock = document.getElementById("dock");
+try { new MutationObserver(function () { document.getElementById("drb").classList.toggle("compact", !!dock.querySelector(".form, .qty")); }).observe(dock, { childList: true, subtree: true }); } catch (e) {}
 
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function scroll() { [30, 400].forEach(function (ms) { setTimeout(function () { chat.scrollTop = chat.scrollHeight; }, ms); }); }
@@ -388,7 +397,7 @@ send({ type: "visit", step: step, veut: (data && data.veut) || "", zone: S.zone 
 }
 function phoneStep() {
 prog(30);
-bot(["Super ! Je te réserve ton Kit Minceur à 6 500 F. C’est quoi ton numéro WhatsApp ?"], function () {
+bot(["Super ! Je te réserve ton Kit Minceur à 6 500 F (+ 1 000 F de livraison). C’est quoi ton numéro WhatsApp ?"], function () {
 dock.className = "";
 dock.innerHTML = '<div class="form"><input class="fld" id="ftel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Ton numéro (ex : 70 12 34 56)" aria-label="Ton numéro WhatsApp"><button class="cta" id="telok" onclick="telOk()">Continuer</button><div class="note" style="text-align:center">Juste pour organiser ta livraison.</div></div>';
 var t = document.getElementById("ftel");
