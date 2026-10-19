@@ -142,6 +142,15 @@ body.drb-on{overflow:hidden}
 #drb .hv video{width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block}
 #drb img.av{border-radius:12px;object-fit:cover;width:38px;height:38px;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 #drb .note{font-size:13.5px;line-height:1.5;color:var(--mut);background:var(--soft);border-radius:12px;padding:10px 12px}
+
+#drb .recu{background:#FFF8DC;border:1.5px dashed #E0B800;border-radius:12px;padding:10px 12px;margin:10px 0;font:500 14px 'DM Sans',sans-serif;color:#1d1d1b}
+#drb .recu div{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+#drb .recu .tot{border-top:1px solid #E0B800;margin-top:4px;padding-top:7px;font-weight:800;font-size:17px}
+#drb .qbtn small{display:block;font-size:11.5px;color:#6b6b66;margin-top:2px}
+#drb .opt,#drb .opt.main{background:#FCD116!important;border:2px solid #E0B800!important;color:#1d1d1b!important;box-shadow:0 3px 0 #C9A400}
+#drb .opt:hover{background:#FFE15A!important}
+#drb .opt.ask{background:#fff!important;border:1.5px dashed #B9C3BB!important;color:#55605a!important;box-shadow:none}
+#drb .qbtn.sel{border-color:#E0B800;background:#FFF8DC;box-shadow:0 0 0 2px #FCD116}
 </style>
 <div id="drb"><div class="app">
 <header class="vc">
@@ -452,12 +461,13 @@ dock.className = "";
 var p = PRIX[S.zone];
 dock.innerHTML = '<div class="form">' +
 '<div class="qty">' +
-'<button class="qbtn sel" id="q1" onclick="setQty(1)"><b>1 kit</b><em>' + fmt(p[0]) + '</em></button>' +
-'<button class="qbtn" id="q2" onclick="setQty(2)"><span class="tag">−3 000 F</span><b>2 kits</b><em>' + fmt(p[1]) + '</em></button>' +
+'<button class="qbtn sel" id="q1" onclick="setQty(1)"><b>1 kit</b><em>' + fmt(p[0] - 1000) + '</em><small>+ 1 000 F livraison</small></button>' +
+'<button class="qbtn" id="q2" onclick="setQty(2)"><span class="tag">−3 000 F</span><b>2 kits</b><em>' + fmt(p[1] - 1000) + '</em><small>+ 1 000 F livraison</small></button>' +
 '</div>' +
 '<div class="note">' + (ouaga
-? "✓ Livraison à " + esc(S.lieu) + " : 1 000 F inclus dans le prix<br>✓ Tu paies à la livraison<br>⏳ Prix promo valable jusqu'à minuit"
-: "✓ Expédition à " + esc(S.lieu) + " : 1 000 F inclus dans le prix<br>Paiement avant l’envoi par Mobile Money<br>On t’envoie le numéro sur WhatsApp") + '</div>' +
+? "✓ Tu paies à la livraison<br>⏳ Prix promo valable jusqu'à minuit"
+: "Paiement avant l’envoi par Mobile Money<br>On t’envoie le numéro sur WhatsApp") + '</div>' +
+'<div class="recu" id="recu">' + recu() + '</div>' +
 '<button class="cta" id="go" onclick="order()">' + WA_ICON + '<span id="gotxt">Commander · ' + fmt(total()) + '</span></button>' +
 '</div>';
 scroll();
@@ -468,6 +478,13 @@ S.qty = n;
 document.getElementById("q1").className = "qbtn" + (n === 1 ? " sel" : "");
 document.getElementById("q2").className = "qbtn" + (n === 2 ? " sel" : "");
 document.getElementById("gotxt").textContent = "Commander · " + fmt(total());
+document.getElementById("recu").innerHTML = recu();
+}
+function recu() {
+var liv = 1000, prod = total() - liv;
+return '<div><span>' + (S.qty > 1 ? S.qty + ' Kits Minceur' : '1 Kit Minceur') + '</span><span>' + fmt(prod) + '</span></div>' +
+'<div><span>' + (S.zone === "ouaga" ? "Livraison à " : "Expédition à ") + esc(S.lieu) + '</span><span>+ ' + fmt(liv) + '</span></div>' +
+'<div class="tot"><span>Total à payer</span><span>' + fmt(total()) + '</span></div>';
 }
 function waOrder() {
 var j = S.day.toLowerCase();
