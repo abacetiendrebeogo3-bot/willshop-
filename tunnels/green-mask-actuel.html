@@ -289,7 +289,7 @@ if (f) f(custom ? "trackCustom" : "track", ev, data || {});
 } catch (e) {}
 }
 var S = { qty: 1 };
-var PRIX = { ouaga: [3500], ville: [4500] };
+var PRIX = { ouaga: [4500], ville: [4500] };
 function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " F"; }
 function total() { return PRIX[S.zone][S.qty - 1]; }
 
@@ -391,16 +391,16 @@ function offre() {
 prog(80);
 var ouaga = S.zone === "ouaga";
 var msg = ouaga
-? "Parfait, on te livre à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". Tu paies à la livraison."
+? "Parfait, on te livre à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". La livraison coûte <b>1 000 F</b>, et tu paies à la livraison."
 : "Pas de souci, on t’expédie tes 2 flacons à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". L’expédition coûte <b>1 000 F</b>, et le paiement se fait <b>avant l’envoi</b> par Mobile Money.";
 px("OffreVue", { zone: S.zone }, true);
 track("Offre vue");
 bot([msg], function () {
 dock.className = "";
 dock.innerHTML = '<div class="form">' +
-'<div class="qbtn sel" style="cursor:default"><b>2 flacons Green Mask Stick</b><em>' + fmt(PRODUIT) + '</em><small>' + (ouaga ? "Livraison offerte dans Ouaga" : "+ 1 000 F expédition") + '</small></div>' +
+'<div class="qbtn sel" style="cursor:default"><b>2 flacons Green Mask Stick</b><em>' + fmt(PRODUIT) + '</em><small>' + (ouaga ? "+ 1 000 F livraison" : "+ 1 000 F expédition") + '</small></div>' +
 '<div class="note">' + (ouaga
-? "✓ Tu paies à la livraison<br>Quartier éloigné : +1 000 F, on te confirme sur WhatsApp"
+? "✓ Tu paies à la livraison"
 : "Paiement avant l’envoi par Mobile Money<br>On t’envoie le numéro sur WhatsApp") + '</div>' +
 '<div class="recu" id="recu">' + recu() + '</div>' +
 '<button class="cta" id="go" onclick="order()">' + WA_ICON + '<span id="gotxt">Commander · ' + fmt(total()) + '</span></button>' +
@@ -418,7 +418,7 @@ return '<div><span>2 flacons Green Mask Stick</span><span>' + fmt(PRODUIT) + '</
 function waOrder() {
 var j = S.day.toLowerCase();
 var t = S.zone === "ouaga"
-? "Bonjour WillShop, je veux le Green Mask Stick (2 flacons, " + fmt(total()) + "), livraison " + j + ". Je suis à Ouaga. Mon quartier : " + S.lieu + ". Mon numéro : " + S.tel
+? "Bonjour WillShop, je veux le Green Mask Stick (2 flacons, " + fmt(total()) + " avec la livraison), livraison " + j + ". Je suis à Ouaga. Mon quartier : " + S.lieu + ". Mon numéro : " + S.tel
 : "Bonjour WillShop, je veux le Green Mask Stick (2 flacons, " + fmt(total()) + " avec l’expédition), envoi " + j + ". Je suis à " + S.lieu + ". Mon numéro : " + S.tel;
 return "https://api.whatsapp.com/send?phone=" + WA + "&text=" + encodeURIComponent(t);
 }
