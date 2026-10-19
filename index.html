@@ -399,6 +399,29 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 .act.k-amber{--c:var(--gold);--s:var(--gold-soft)} .act.k-blue{--c:var(--info);--s:var(--info-soft)} .act.k-grey{--c:var(--mut);--s:var(--sunk)} .act.k-bx{--c:var(--bx);--s:var(--bx-soft)}
 .k-red{--c:var(--bad);--s:var(--bad-soft)} .k-green{--c:var(--ok);--s:var(--ok-soft)} .k-orange{--c:var(--warn);--s:var(--warn-soft)}
 .k-amber{--c:var(--gold);--s:var(--gold-soft)} .k-blue{--c:var(--info);--s:var(--info-soft)} .k-grey{--c:var(--mut);--s:var(--sunk)} .k-bx{--c:var(--bx);--s:var(--bx-soft)}
+
+/* ===== Ordinateur : menu à gauche, accueil sur deux colonnes ===== */
+.dcols{display:block}
+@media (min-width:1000px){
+  body{padding-left:240px}
+  nav.tabs{top:0;bottom:0;right:auto;width:240px;border-top:0;border-right:1px solid var(--line);flex-direction:column;justify-content:flex-start;padding:22px 14px 20px;padding-left:max(14px,env(safe-area-inset-left,0px))}
+  nav.tabs::before{content:"Menu";font:700 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:0 14px 12px}
+  nav.tabs .in{flex-direction:column;gap:4px;max-width:none;margin:0}
+  nav.tabs button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;border-radius:14px;font-size:14.5px;color:var(--mut);transition:background .15s}
+  nav.tabs button:hover{background:var(--sunk)}
+  nav.tabs button[aria-selected="true"]{background:var(--bx-soft);color:var(--bx)}
+  nav.tabs button[aria-selected="true"]::before{display:none}
+  nav.tabs .badge{position:static;margin-left:auto}
+  .wrap{padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px));padding-block:0 48px}
+  .toast{bottom:28px;left:calc(50% + 120px)}
+  h1{font-size:30px;margin-top:24px}
+  .dcols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:start}
+  .dcol > h2:first-child{margin-top:26px}
+  .bubbles{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .flow .bubbles{grid-template-columns:1fr}
+  .ocard:hover,.bub:hover,.tile:hover,.alert:hover{box-shadow:0 6px 20px rgba(60,30,20,.10)}
+}
+@media (min-width:1500px){.list.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){.bub,.ocard,.act,.tile,.wsub,.wsheet.anim,.wscrim.anim{animation:none!important}}
 </style>
 </head>
@@ -1057,6 +1080,7 @@ function renderHome() {
     </div>
 
     ${todo ? `<h2>Commandes à traiter <span class="count">${todo}</span></h2>${todoBubbles(sb, "", "data-todo")}` : ""}
+    <div class="dcols"><div class="dcol">
     <h2>À faire maintenant</h2>
     <div class="alerts">${al.length ? al.slice(0, 5).map((a, i) => `<button class="alert ${a.lvl}" data-alert="${i}"><span class="dot"></span><span>${esc(alText(a))}</span>${/stock/i.test(a.t) && a.n <= 0 ? "" : `<span class="n">${a.n}</span>`}<span class="chev">›</span></button>`).join("") : `<div class="calm">✓ Rien de bloquant. Tout est sous contrôle.</div>`}</div>
 
@@ -1066,6 +1090,7 @@ function renderHome() {
       ${worst && worst.lost > 0 ? `<p class="verdict">On perd le plus de monde entre <b>${worst.from[0].toLowerCase()}</b> et <b>${worst.to[0].toLowerCase()}</b> : ${worst.lost} personne${worst.lost > 1 ? "s" : ""}.</p>` : ""}
       ${fu.questions ? `<p class="meta" style="margin:4px 2px 0">${pl(fu.questions, "personne")} ont touché « J'ai une question ».</p>` : ""}` : empty("Pas encore de visite aujourd'hui.")}
 
+    </div><div class="dcol">
     <h2 id="caisse">Caisse</h2>
     <div class="card cashcard">
       <div class="cash-top"><span>Encaissé aujourd'hui</span><b>${F(cashTotal)}</b></div>
@@ -1083,7 +1108,8 @@ function renderHome() {
     </div>
     ${sample ? `<h2>Bilan du jour</h2>
     <div id="bilanBox">${bilan ? `<div class="note">${esc(bilan)}</div>` : empty("L'IA lit tes chiffres et te dit quoi faire en priorité.")}</div>
-    <div class="actions" style="margin-top:10px"><button class="btn gold" id="bilanBtn">${I_SPARK} ${bilan ? "Refaire le bilan" : "Faire le bilan"}</button></div>` : ""}`;
+    <div class="actions" style="margin-top:10px"><button class="btn gold" id="bilanBtn">${I_SPARK} ${bilan ? "Refaire le bilan" : "Faire le bilan"}</button></div>` : ""}
+    </div></div>`;
 }
 const FILTERS = {
   all: ["Toutes", () => true], pro: ["Prospects", isProspect], nouv: ["Nouvelles", o => is(o, /^nouv/i)],
