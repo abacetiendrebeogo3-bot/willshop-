@@ -61,6 +61,8 @@
 - **Accueil Direction** : `renderHome()`. Commandes : `renderOrders()` / `renderTodo()`. Routine de la commerciale : `renderDay()`.
 - **Après chaque modification**, augmenter le numéro de version dans `sw.js` (`willshop-vN`) pour que les téléphones prennent la nouvelle version.
 - **Mode simple** pour les vieux téléphones : `?simple=1` (sans manifest).
+- **Présentation en bulles (19/10)** : `todoBubbles()` (étapes en bulles, Commandes « À faire » + accueils Direction et Commerciale), `orderCard()` = carte simple qui ouvre la feuille d'actions `sheetHtml()` / `bindSheet()` (état `sh`). Couleurs : classes `k-red`, `k-green`, etc.
+- **Tags clients** : enregistrés au début de la colonne J (Note) sous la forme `[Tags: VIP, Fidèle]` ; `tagsOf()` les lit, `noteText()` donne la note sans les tags.
 
 ## 7. Chantiers à faire (par ordre de priorité)
 
