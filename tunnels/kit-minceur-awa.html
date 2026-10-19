@@ -177,6 +177,16 @@ body.drb-on{overflow:hidden}
 @keyframes finger{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 @keyframes tap{0%,100%{transform:translate(0,0) scale(1)}45%{transform:translate(-6px,-8px) scale(1.1)}60%{transform:translate(-6px,-6px) scale(.92)}}
 @media (prefers-reduced-motion:reduce){#drb .opt{animation:popIn .3s both!important}#drb .opt.main::after,#drb .yourturn span{animation:none}}
+
+/* Mise en page souple : la vidéo prend la place restante, les réponses restent toujours visibles */
+#drb .app{overflow-y:auto}
+#drb header.vc{flex:1 1 0!important;height:auto!important;min-height:120px!important;max-height:60vh!important;max-height:60dvh!important}
+#drb #stage{max-height:none!important;overflow:visible!important}
+#drb #dock{flex:none!important;max-height:none!important;overflow:visible!important}
+#drb .subt{flex:none}
+@media (max-height:700px){#drb .fxo .mc.l3,#drb .fxo .mc.r2,#drb .fxo .mc.r1{display:none}#drb .yourturn{margin:0}}
+@media (max-height:600px){#drb .fxo .mc{display:none}#drb .ptag{transform:scale(.7);transform-origin:right bottom}}
+@media (max-width:340px){#drb .promo{font-size:10.5px;padding:5px 8px}}
 </style>
 <div id="drb"><div class="app">
 <header class="vc">
