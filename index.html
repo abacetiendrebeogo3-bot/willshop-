@@ -263,6 +263,13 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 .feed .fi:last-of-type{border-bottom:0}
 .feed .fi .t{flex:none;width:3em;color:var(--faint);font-variant-numeric:tabular-nums}
 .feed .fi b{font-weight:700}
+
+.chain{padding:12px 6px!important}
+.chain .arrow{width:12px!important;color:var(--faint);font-size:18px;align-items:flex-start!important;padding-top:4px}
+.chain .arrow::before{content:none!important}
+.chain .step b{font-size:21px!important}
+.chain .step span{font-size:11px!important;overflow-wrap:anywhere}
+.chain .step em{display:block;font-style:normal;font-size:11px;font-weight:700;color:var(--bx);margin-top:2px}
 </style>
 </head>
 <body>
@@ -824,7 +831,7 @@ function renderHome() {
     <div class="alerts">${al.length ? al.slice(0, 5).map((a, i) => `<button class="alert ${a.lvl}" data-alert="${i}"><span class="dot"></span><span>${esc(alText(a))}</span>${/stock/i.test(a.t) && a.n <= 0 ? "" : `<span class="n">${a.n}</span>`}<span class="chev">›</span></button>`).join("") : `<div class="calm">✓ Rien de bloquant. Tout est sous contrôle.</div>`}</div>
 
     <h2>Tunnel aujourd'hui</h2>
-    ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="chain">${chain.map((x, i) => `${i ? `<div class="arrow"><span>${chain[i - 1][1] ? Math.round(x[1] / chain[i - 1][1] * 100) : 0} %</span></div>` : ""}<div class="step"><b>${x[1]}</b><span>${x[0]}</span></div>`).join("")}</div>
+    ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="chain">${chain.map((x, i) => `${i ? `<div class="arrow">›</div>` : ""}<div class="step"><b>${x[1]}</b><span>${x[0]}</span>${i ? `<em>${chain[i - 1][1] ? Math.round(x[1] / chain[i - 1][1] * 100) : 0} %</em>` : `<em>&nbsp;</em>`}</div>`).join("")}</div>
       ${worst && worst.lost > 0 ? `<p class="verdict">On perd le plus de monde entre <b>${worst.from[0].toLowerCase()}</b> et <b>${worst.to[0].toLowerCase()}</b> : ${worst.lost} personne${worst.lost > 1 ? "s" : ""}.</p>` : ""}
       ${fu.questions ? `<p class="meta" style="margin:4px 2px 0">${pl(fu.questions, "personne")} ont touché « J'ai une question ».</p>` : ""}` : empty("Pas encore de visite aujourd'hui.")}
 
