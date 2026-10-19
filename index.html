@@ -235,6 +235,34 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 .g-blue .dot,.g-blue .tg-n,.b-blue{background:#2F6FD6}
 .g-grey .dot,.g-grey .tg-n,.b-grey{background:#6B6B6B}
 .tband{margin:-13px -14px 0;padding:7px 14px;border-radius:15px 15px 0 0;color:#fff;font-weight:800;font-size:13px;letter-spacing:.01em}
+
+/* Accueil sobre */
+.hero .big,.kpi b,.alert .n,.cash b,.amt,.fact b,.tile b,.chain b,.cash-top b{font-family:var(--sans);font-variant-numeric:tabular-nums lining-nums}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--bx);text-decoration:underline;cursor:pointer}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+@media (min-width:600px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;text-align:left;font:inherit;color:inherit;cursor:pointer;min-width:0}
+.tile .l{font-size:12.5px;font-weight:600;color:var(--mut)}
+.tile b{font-size:26px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+.tile small{font-size:12px;color:var(--faint)}
+.tile.hot{border-color:var(--bx);box-shadow:inset 4px 0 0 var(--bx)}
+.chain{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 8px}
+.chain .step{flex:1;text-align:center;min-width:0}
+.chain .step b{display:block;font-size:22px;font-weight:800}
+.chain .step span{display:block;font-size:11.5px;color:var(--mut);line-height:1.2}
+.chain .arrow{flex:none;display:flex;align-items:center;justify-content:center;width:34px;position:relative}
+.chain .arrow::before{content:"→";position:absolute;top:2px;color:var(--faint)}
+.chain .arrow span{font-size:11px;font-weight:700;color:var(--bx);margin-top:18px}
+.verdict{margin:8px 2px 0;font-size:13.5px}
+.cashcard{gap:4px}
+.cash-top{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:2px}
+.cash-top span{font-weight:600;color:var(--mut)}
+.cash-top b{font-size:24px;font-weight:800}
+.feed{gap:0;padding:4px 14px}
+.feed .fi{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.35}
+.feed .fi:last-of-type{border-bottom:0}
+.feed .fi .t{flex:none;width:3em;color:var(--faint);font-variant-numeric:tabular-nums}
+.feed .fi b{font-weight:700}
 </style>
 </head>
 <body>
@@ -316,7 +344,7 @@ let orders = [], visits = [], team = [];
 let loaded = false, visitsLoaded = false, teamLoaded = false, lastSync = null;
 let role = "ceo";
 let tab = "home";
-let filter = "all", query = "", salesStep = 0, ordersMode = store("ws_omode") || "todo";
+let showFeed = false, filter = "all", query = "", salesStep = 0, ordersMode = store("ws_omode") || "todo";
 let me = "";
 let panel = null;           // { row, kind } panneau ouvert côté livreur
 let aiMsg = {};             // messages IA par ligne
@@ -764,46 +792,60 @@ function renderReview() {
 }
 function renderHome() {
   if (reviewStep >= 0) return renderReview();
-  const s = stats(), al = alerts(), fu = funnel(), fmax = Math.max(1, fu.total);
+  const s = stats(), al = alerts(), fu = funnel(), sb = salesBuckets();
   const max = Math.max(1, ...s.days.map(d => d.n));
-  const h = new Date().getHours();
-  const cashTotal = PAIEMENTS.reduce((t, m) => t + s.cash[m].today, 0);
+  const h = new Date().getHours(), t0 = today();
+  const todo = Object.values(sb).reduce((n, l) => n + l.length, 0);
+  const toDeliver = orders.filter(o => isToDeliver(o) && (deliveryDate(o) || 0) <= t0).length;
+  const pl = (n, w) => n + " " + w + (n > 1 ? "s" : "");
+  // Tunnel : 4 étapes, taux d'une étape à l'autre
+  const st = fu.steps, pick = l => (st.find(x => x.l === l) || { n: 0 }).n;
+  const chain = [["Visiteurs", fu.total], ["Ont dit Oui", pick("Ont dit « Oui »")], ["Numéro", pick("Numéro laissé")], ["Commandes", pick("Ont commandé")]];
+  let worst = null;
+  chain.forEach((c, i) => { if (i > 1) { const lost = chain[i - 1][1] - c[1]; if (!worst || lost > worst.lost) worst = { lost, from: chain[i - 1], to: c }; } });
+  // Caisse : seulement les lignes utiles
+  const c = caisse(), cashTotal = PAIEMENTS.reduce((t, m) => t + s.cash[m].today, 0);
+  const cashLines = [...PAIEMENTS.filter(m => s.cash[m].today).map(m => [m, F(s.cash[m].today)]),
+    ...(c.avances.length ? [["Avances (payées, pas encore livrées)", F(c.avTotal) + " · " + c.avances.length]] : []),
+    ...Object.keys(c.enMain).map(n => ["Espèces chez " + esc(n), F(c.enMain[n].total)])];
+  const alText = a => /stock/i.test(a.t) && a.n <= 0 ? a.t.replace(/ \(disponibles\)/, "").replace(/^Rupture de stock : /, "Stock épuisé : ") : a.t;
+  const tile = (go, l, v, sub, hot) => `<button class="tile${hot ? " hot" : ""}" ${go}><span class="l">${l}</span><b>${v}</b><small>${sub}</small></button>`;
   return `
     <h1>${h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"} ${esc(myName)}</h1>
-    <p class="sub">${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · <button class="btn small ghost" data-rev="0" style="min-height:30px;padding:0 8px">Revoir la revue du matin</button></p>
-    <section class="hero" aria-label="Résumé du jour">
-      <span class="eyebrow">Encaissé aujourd'hui</span>
-      <div class="big">${F(s.collected)}</div>
-      <div class="row2"><span><b>${s.paidCount}</b> paiement${s.paidCount > 1 ? "s" : ""}</span><span><b>${s.deliveredToday}</b> livrée${s.deliveredToday > 1 ? "s" : ""}</span><span><b>${s.tOrders.length}</b> commande${s.tOrders.length > 1 ? "s" : ""} reçue${s.tOrders.length > 1 ? "s" : ""} · ${F(s.todayValue)}</span><span>Taux de livraison <b>${s.rate} %</b></span></div>
-    </section>
-    <div class="kpis">
-      <div class="kpi"><span class="l">À confirmer</span><b>${s.toCall}</b><small>statut « Nouvelle »</small></div>
-      <div class="kpi"><span class="l">Prospects du jour</span><b>${s.prospectsToday}</b><small>numéro laissé</small></div>
-      <div class="kpi"><span class="l">En livraison</span><b>${s.onRoad}</b><small>sur la route</small></div>
-      <div class="kpi"><span class="l">Relances du jour</span><b>${s.due.length}</b><small>J+1 · J+3 · J+7 · J+14</small></div>
+    <p class="sub">${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · <button class="linkbtn" data-rev="0">revue du matin</button></p>
+    <div class="tiles">
+      ${tile('data-tabgo="orders"', "À traiter", todo, todo ? "clients à contacter" : "tout est à jour", todo > 0)}
+      ${tile('data-tabgo="orders"', "Commandes du jour", s.tOrders.length, F(s.todayValue))}
+      ${tile('data-tabgo="orders"', "À livrer aujourd'hui", toDeliver, pl(s.deliveredToday, "livrée") + " aujourd'hui")}
+      ${tile('data-scroll="caisse"', "Encaissé aujourd'hui", F(s.collected), pl(s.paidCount, "paiement"))}
     </div>
-    <h2>Points d'attention</h2>
-    <div class="alerts">${al.length ? al.map((a, i) => `<button class="alert ${a.lvl}" data-alert="${i}"><span class="dot"></span><span>${esc(a.t)}</span><span class="n">${a.n}</span><span class="chev">›</span></button>`).join("") : `<div class="calm">Rien de bloquant. Tout est sous contrôle.</div>`}</div>
+
+    <h2>À faire maintenant</h2>
+    <div class="alerts">${al.length ? al.slice(0, 5).map((a, i) => `<button class="alert ${a.lvl}" data-alert="${i}"><span class="dot"></span><span>${esc(alText(a))}</span>${/stock/i.test(a.t) && a.n <= 0 ? "" : `<span class="n">${a.n}</span>`}<span class="chev">›</span></button>`).join("") : `<div class="calm">✓ Rien de bloquant. Tout est sous contrôle.</div>`}</div>
+
     <h2>Tunnel aujourd'hui</h2>
-    ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="funnel">${fu.steps.map(x => `<div class="fstep"><span>${esc(x.l)}</span><div class="ftrack"><span style="width:${Math.round(x.n / fmax * 100)}%"></span></div><b>${x.n} <i>${Math.round(x.n / fmax * 100)}%</i></b></div>`).join("")}${fu.questions ? `<p class="meta" style="margin:2px 0 0">${fu.questions} personne${fu.questions > 1 ? "s ont" : " a"} touché « J'ai une question ».</p>` : ""}</div>` : empty("Pas encore de visite aujourd'hui.")}
-    <h2 id="caisse">Caisse <span class="count">encaissé aujourd'hui · ${F(cashTotal)}</span></h2>
-    <div class="cash">${PAIEMENTS.map(m => `<div><span>${m}</span><b>${F(s.cash[m].today)}</b><small>7 j : ${F(s.cash[m].week)}</small></div>`).join("")}</div>
-    ${(() => { const c = caisse(); const names = Object.keys(c.enMain); return `
-    <div class="facts card" style="margin-top:10px;gap:0">
-      <div class="fact"><span>Avances reçues (payées, pas encore livrées)</span><b>${F(c.avTotal)} · ${c.avances.length}</b></div>
-      ${names.length ? names.map(n => `<div class="fact"><span>Espèces chez ${esc(n)}${c.enMain[n].declare ? ` <span class="pill s-conf">remise déclarée</span>` : ""}</span><b>${F(c.enMain[n].total)}</b></div>`).join("") : `<div class="fact"><span>Espèces chez les livreurs</span><b>0 F</b></div>`}
+    ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="chain">${chain.map((x, i) => `${i ? `<div class="arrow"><span>${chain[i - 1][1] ? Math.round(x[1] / chain[i - 1][1] * 100) : 0} %</span></div>` : ""}<div class="step"><b>${x[1]}</b><span>${x[0]}</span></div>`).join("")}</div>
+      ${worst && worst.lost > 0 ? `<p class="verdict">On perd le plus de monde entre <b>${worst.from[0].toLowerCase()}</b> et <b>${worst.to[0].toLowerCase()}</b> : ${worst.lost} personne${worst.lost > 1 ? "s" : ""}.</p>` : ""}
+      ${fu.questions ? `<p class="meta" style="margin:4px 2px 0">${pl(fu.questions, "personne")} ont touché « J'ai une question ».</p>` : ""}` : empty("Pas encore de visite aujourd'hui.")}
+
+    <h2 id="caisse">Caisse</h2>
+    <div class="card cashcard">
+      <div class="cash-top"><span>Encaissé aujourd'hui</span><b>${F(cashTotal)}</b></div>
+      ${cashLines.length ? cashLines.map(([l, v]) => `<div class="fact"><span>${l}</span><b>${v}</b></div>`).join("") : `<p class="meta" style="margin:0">Aucun paiement enregistré aujourd'hui pour l'instant.</p>`}
     </div>
     ${c.aValider.length ? `<div class="list" style="margin-top:10px">${c.aValider.map(r => `<div class="card"><div class="c-top"><div><div class="place">${esc(r.livreur)} dit avoir remis</div><div class="meta">${esc(r.date)} · ${String(r.lignes).split(/[,\s]+/).filter(Boolean).length} livraison(s)</div></div><div class="amt">${F(r.montant)}</div></div>
-      <div class="actions"><button class="btn small ok" data-remise="${r.id}">Reçu ✓</button><button class="btn small ghost" data-remise-refus="${r.id}">Pas reçu</button></div></div>`).join("")}</div>` : ""}`; })()}
-    <h2>Suivi en direct</h2>
-    <div class="card" style="gap:0;padding:4px 14px">${journal.length ? journal.slice(0, 15).map(j => `<div class="fact" style="align-items:flex-start"><span><b style="font:600 14px var(--sans)">${esc(j[1])}</b> ${esc(j[2])}${j[4] ? ` <span class="meta">· ${esc(j[4])}</span>` : ""}</span><span class="meta" style="white-space:nowrap">${esc(String(j[0]).slice(0, 5) === new Date().toLocaleDateString("fr-FR").slice(0, 5) ? String(j[0]).slice(11, 16) : String(j[0]).slice(0, 5))}</span></div>`).join("") : `<div class="calm">Les actions de l'équipe apparaîtront ici : confirmations, paiements, livraisons, remises.</div>`}</div>
+      <div class="actions"><button class="btn small ok" data-remise="${r.id}">Reçu ✓</button><button class="btn small ghost" data-remise-refus="${r.id}">Pas reçu</button></div></div>`).join("")}</div>` : ""}
+
+    <h2>Activité récente</h2>
+    <div class="card feed">${journal.length ? journal.slice(0, showFeed ? 30 : 5).map(j => `<div class="fi"><span class="t">${esc(String(j[0]).slice(0, 10) === new Date().toLocaleDateString("fr-FR") ? String(j[0]).slice(11, 16) : String(j[0]).slice(0, 5))}</span><span><b>${esc(j[1])}</b> · ${esc(j[2])}${j[4] ? ` <span class="meta">${esc(j[4])}</span>` : ""}</span></div>`).join("") + (journal.length > 5 ? `<button class="linkbtn" data-feed="1" style="margin:8px 0 4px">${showFeed ? "Voir moins" : "Voir plus (" + Math.min(30, journal.length) + ")"}</button>` : "") : `<p class="meta" style="margin:10px 0">Les actions de l'équipe s'afficheront ici.</p>`}</div>
+
     <h2>Commandes · 7 derniers jours</h2>
     <div class="bars" role="img" aria-label="Commandes par jour sur 7 jours">
       ${s.days.map(d => `<div class="bar ${d.today ? "today" : ""}" style="height:${Math.round(d.n / max * 100)}%"><em>${d.n || ""}</em><i>${d.d.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3)}</i></div>`).join("")}
     </div>
-    <h2>Bilan du jour</h2>
+    ${sample ? `<h2>Bilan du jour</h2>
     <div id="bilanBox">${bilan ? `<div class="note">${esc(bilan)}</div>` : empty("L'IA lit tes chiffres et te dit quoi faire en priorité.")}</div>
-    <div class="actions" style="margin-top:10px"><button class="btn gold" id="bilanBtn" ${sample ? "" : "hidden"}>${I_SPARK} ${bilan ? "Refaire le bilan" : "Faire le bilan"}</button></div>`;
+    <div class="actions" style="margin-top:10px"><button class="btn gold" id="bilanBtn">${I_SPARK} ${bilan ? "Refaire le bilan" : "Faire le bilan"}</button></div>` : ""}`;
 }
 const FILTERS = {
   all: ["Toutes", () => true], pro: ["Prospects", isProspect], nouv: ["Nouvelles", o => is(o, /^nouv/i)],
@@ -1083,6 +1125,8 @@ function bind() {
   view.querySelectorAll("[data-rev]").forEach(b => b.onclick = () => { const v = b.dataset.rev; if (v === "end") { reviewStep = -1; store("ws_review", dayKey()); } else reviewStep = +v; window.scrollTo(0, 0); render(); });
   view.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { setRole("ceo", b.dataset.go); });
   view.querySelectorAll("[data-step-go]").forEach(b => b.onclick = () => { salesStep = Math.min(+b.dataset.stepGo, SALES_STEPS.length); if (salesStep >= SALES_STEPS.length) store("ws_dayDone", dayKey()); window.scrollTo(0, 0); render(); });
+  view.querySelectorAll("[data-feed]").forEach(b => b.onclick = () => { showFeed = !showFeed; render(); });
+  view.querySelectorAll("[data-scroll]").forEach(b => b.onclick = () => { const el = document.getElementById(b.dataset.scroll); if (el) el.scrollIntoView({ behavior: "smooth" }); });
   view.querySelectorAll("[data-tabgo]").forEach(b => b.onclick = () => { tab = b.dataset.tabgo; store("ws_tab", tab + "|" + dayKey()); window.scrollTo(0, 0); render(); });
   view.querySelectorAll("[data-omode]").forEach(b => b.onclick = () => { ordersMode = b.dataset.omode; store("ws_omode", ordersMode); window.scrollTo(0, 0); render(); });
   view.querySelectorAll("[data-alert]").forEach(b => b.onclick = () => {
