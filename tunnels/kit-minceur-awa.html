@@ -439,10 +439,20 @@ t.addEventListener("focus", function () { setTimeout(function () { t.scrollIntoV
 scroll();
 });
 }
+/* Numéro burkinabè : 8 chiffres (indicatif +226 accepté), pas de suite bidon */
+function telBF(v) {
+var d = v.replace(/[^0-9+]/g, "");
+if (/^(\+|00)/.test(d)) { if (!/^(\+|00)226/.test(d)) return ""; d = d.replace(/^(\+|00)226/, ""); }
+d = d.replace(/\D/g, "");
+if (d.length !== 8 || !/^[2567]/.test(d)) return "";
+if (/^(\d)\1{7}$/.test(d) || "0123456789".indexOf(d) >= 0 || "9876543210".indexOf(d) >= 0) return "";
+return d.replace(/(\d{2})(?=\d)/g, "$1 ");
+}
 function telOk() {
 var t = document.getElementById("ftel");
-var v = t.value.replace(/[^0-9+ ]/g, "").trim();
-if (v.replace(/[^0-9]/g, "").length < 8) { t.style.borderColor = "#B42335"; t.value = ""; t.placeholder = "Écris ton numéro ici (8 chiffres)"; t.focus(); return; }
+var v = t.value.replace(/[^0-9+ ]/g, "").trim(), n = telBF(v);
+if (!n) { t.style.borderColor = "#B42335"; t.value = ""; t.placeholder = /^(\+|00)(?!226)/.test(v) ? "Mets ton numéro du Burkina (8 chiffres)" : "Écris ton vrai numéro (8 chiffres)"; t.focus(); return; }
+v = n;
 S.tel = v;
 dock.innerHTML = "";
 me(v);
@@ -458,12 +468,18 @@ bot(["Super ! Tu es où ?"], function () {
 ask(["À Ouaga", "Autre ville"], function (a) {
 S.zone = a === "À Ouaga" ? "ouaga" : "ville";
 px("VilleChoisie", { zone: S.zone }, true);
-track("Veut le produit", { veut: "Oui" });
+track("Ville", { veut: "Oui" });
+if (S.zone === "ville") return bot(["On expédie partout au Burkina 🚚 L’expédition coûte seulement <b>1 000 F</b>, et tu paies par Mobile Money avant l’envoi."], lieuStep);
 lieuStep();
 });
 });
 }
 
+/* Nom de lieu crédible : au moins 3 lettres, une voyelle, pas d'e-mail ni de lettres répétées */
+function lieuOk(v) {
+var l = v.replace(/[^A-Za-z\u00C0-\u00FF]/g, "");
+return l.length >= 3 && /[aeiou\u00E0\u00E2\u00E4\u00E9\u00E8\u00EA\u00EB\u00EE\u00EF\u00F4\u00F6\u00F9\u00FB\u00FC]/i.test(l) && !/@/.test(v) && !/(.)\1\1/i.test(l);
+}
 /* Quartier ou ville, tout de suite */
 function lieuStep() {
 var ouaga = S.zone === "ouaga";
@@ -471,7 +487,7 @@ bot([ouaga ? "Tu es dans quel quartier de Ouaga ?" : "Tu es dans quelle ville ?"
 dock.className = "";
 dock.innerHTML = '<div class="form"><input class="fld" id="flieu" placeholder="' + (ouaga ? "Ton quartier (ex : Pissy, Tampouy)" : "Ta ville (ex : Bobo, Koudougou)") + '" aria-label="' + (ouaga ? "Ton quartier" : "Ta ville") + '"><button class="cta" id="lieuok">Continuer</button></div>';
 var f = document.getElementById("flieu");
-function ok() { var v = f.value.trim(); if (v.length < 2) { f.style.borderColor = "#B42335"; f.focus(); return; } S.lieu = v; dock.innerHTML = ""; me(v); track("Quartier"); setTimeout(jour, 250); }
+function ok() { var v = f.value.trim(); if (!lieuOk(v)) { f.style.borderColor = "#B42335"; f.value = ""; f.placeholder = ouaga ? "Écris le nom de ton quartier (ex : Pissy)" : "Écris le nom de ta ville (ex : Bobo)"; f.focus(); return; } S.lieu = v; dock.innerHTML = ""; me(v); track("Quartier"); setTimeout(jour, 250); }
 document.getElementById("lieuok").onclick = ok;
 f.addEventListener("keydown", function (e) { if (e.key === "Enter") ok(); });
 scroll();
@@ -481,12 +497,16 @@ scroll();
 /* Jour */
 function jour() {
 prog(62);
-var q = S.zone === "ouaga" ? "Tu veux être livré(e) aujourd’hui ?" : "Tu veux qu’on l’expédie aujourd’hui ?";
+var late = new Date().getHours() >= 20, first = late ? "Demain" : "Aujourd’hui";
+var q = late ? (S.zone === "ouaga" ? "On peut te livrer demain ?" : "On peut l’expédier demain ?")
+: (S.zone === "ouaga" ? "Tu veux être livré(e) aujourd’hui ?" : "Tu veux qu’on l’expédie aujourd’hui ?");
+var DAYS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"], d0 = new Date().getDay(), more = [];
+for (var i = late ? 2 : 1; i <= 7; i++) more.push(i === 1 ? "Demain" : DAYS[(d0 + i) % 7]);
 bot([q], function () {
 ask(["Oui", "Non"], function (a) {
-if (a === "Oui") { S.day = "Aujourd’hui"; track("Veut le produit", { veut: "Oui" }); return phoneStep(); }
+if (a === "Oui") { S.day = first; track("Jour", { veut: "Oui" }); return phoneStep(); }
 bot(["Ok ! Quel jour tu préfères ?"], function () {
-ask(["Demain", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"], function (d) { S.day = d; track("Veut le produit", { veut: "Oui" }); phoneStep(); }, "days");
+ask(more, function (d) { S.day = d; track("Jour", { veut: "Oui" }); phoneStep(); }, "days");
 });
 });
 });
