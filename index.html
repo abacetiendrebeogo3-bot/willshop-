@@ -820,6 +820,28 @@ function clients() {
   return [...map.values()].sort((a, b) => (b.last || 0) - (a.last || 0));
 }
 // Parcours du client : chaque jour, chaque client a au plus une action, la plus urgente
+// Fidélisation : clients déjà livrés, relancés après la livraison (jetons F+3, F+10, F+25, F+45 dans la colonne Relances)
+const FID_STEPS = [3, 10, 25, 45];
+const T_FID = {
+  3:  "Bonjour 😊 c'est WillShop. Tu as bien reçu ton {produit} ? Tu as pu commencer ? Si tu as la moindre question sur l'utilisation, je suis là 🙏",
+  10: "Bonjour ! Ça fait une dizaine de jours avec ton {produit} 😊 Tu sens déjà une différence ? Ton avis nous aide beaucoup, même en une phrase 🙏",
+  25: "Bonjour 👋 c'est WillShop. Ton {produit} doit bientôt être terminé. Pour garder tes résultats, tu veux qu'on te livre le suivant ? Dis-moi le jour qui t'arrange 🙂",
+  45: "Bonjour 😊 c'est WillShop. On a des nouveautés en ce moment. Tu veux que je t'envoie les photos et les prix ?"
+};
+const deliveredOn = o => o.livreeLe || o.payeLe || o.modifLe || deliveryDate(o) || o.date;
+function fidStep(o, now = new Date()) {
+  if (!is(o, /^livr/i) || !o.tel) return null;
+  if (/\[Tags?:[^\]]*Ne pas relancer/i.test(o.note || "")) return null;
+  const d = deliveredOn(o); if (!d) return null;
+  // seulement la commande la plus récente de ce client
+  if (orders.some(x => x !== o && x.tel === o.tel && !is(x, /^annul/i) && (x.date || 0) > (o.date || 0))) return null;
+  const age = daysBetween(d, now), done = new Set(o.toks.map(t => (/^F\+(\d+)/i.exec(t) || [])[1]).filter(Boolean).map(Number));
+  let due = null;
+  for (const st of FID_STEPS) if (age >= st && !done.has(st)) due = st;
+  // une étape plus récente déjà faite : ne pas revenir en arrière
+  if (due && [...done].some(x => x > due)) return null;
+  return due;
+}
 const T_DAY = {
   jour: "Bonjour 👋 c'est WillShop. On te livre ton {produit} aujourd'hui à {lieu}. Tu es disponible à quelle heure ?",
   veille: "Bonsoir 👋 c'est WillShop. On te livre ton {produit} demain à {lieu}. Tu seras disponible ? À quelle heure ça t'arrange ?",
@@ -837,6 +859,8 @@ function taskFor(o, now = new Date()) {
   if (isProspect(o) && o.date && daysBetween(o.date, now) === 0 && !hasTok(o, "J+0")) return { k: "hot", tok: "J+0", msg: fill(T_DAY.hot, o), label: "Premier message" };
   if (isProblem(o) && !hasTok(o, rTok)) return { k: "problem", tok: rTok, msg: fill(T_DAY.problem, o), label: "Rattraper le client" };
   if (isToDeliver(o) && !o.livreur && dd && daysBetween(t0, dd) <= 1) return { k: "assign", label: "Choisir un livreur" };
+  const fs = fidStep(o, now);
+  if (fs) return { k: "fid", step: fs, tok: "F+" + fs, msg: fill(T_FID[fs], o), label: "Fidélisation J+" + fs };
   return null;
 }
 const SALES_STEPS = [
@@ -846,7 +870,8 @@ const SALES_STEPS = [
   { k: "veille", t: "Livraisons de demain", d: "Rappelle-leur que la livraison est demain." },
   { k: "hot", t: "Prospects du jour", d: "Ils ont laissé leur numéro sans finir. Un petit message suffit souvent." },
   { k: "problem", t: "Problèmes", d: "Injoignables et livraisons ratées. Propose un nouveau jour." },
-  { k: "assign", t: "À attribuer", d: "Choisis le livreur pour les livraisons d'aujourd'hui et de demain." }
+  { k: "assign", t: "À attribuer", d: "Choisis le livreur pour les livraisons d'aujourd'hui et de demain." },
+  { k: "fid", t: "Fidélisation", d: "Clients déjà livrés : prends des nouvelles, demande leur avis, propose de racheter." }
 ];
 function salesBuckets() {
   const now = new Date(), b = Object.fromEntries(SALES_STEPS.map(s => [s.k, []]));
@@ -885,7 +910,8 @@ const GICON = {
   jour: ICONS.runs, relance: '<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/>',
   hot: '<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.3 1.5 1 2.5 2 2.5-.5-3 0-5.5 1-8z"/>',
   veille: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
-  problem: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>', assign: ICONS.team
+  problem: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>', assign: ICONS.team,
+  fid: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>'
 };
 const AIC = {
   wa: '<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-2-2l.8-1-1-2z"/>',
@@ -897,7 +923,7 @@ const AIC = {
   stat: '<path d="M4 6h16M4 12h10M4 18h6"/>', check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>', chev: '<path d="M9 6l6 6-6 6"/>'
 };
-const TASK_COLOR = { call: "red", jour: "green", relance: "orange", hot: "amber", veille: "blue", problem: "grey", assign: "blue" };
+const TASK_COLOR = { call: "red", jour: "green", relance: "orange", hot: "amber", veille: "blue", problem: "grey", assign: "blue", fid: "bx" };
 const NEXT_Q = {
   call: "Écris ou appelle pour confirmer la commande, puis touche le bouton.",
   jour: "Préviens le client que la livraison arrive aujourd'hui.",
@@ -905,7 +931,8 @@ const NEXT_Q = {
   hot: "Il a laissé son numéro sans finir. Envoie ce petit message.",
   veille: "Rappelle-lui que la livraison est demain.",
   problem: "Rattrape le client et propose-lui un nouveau jour.",
-  assign: "Choisis qui livre ce client."
+  assign: "Choisis qui livre ce client.",
+  fid: "Client déjà livré. Envoie ce message pour garder le lien et le faire racheter."
 };
 const TAGS = ["VIP", "Fidèle", "Nouveau client", "Pressé", "Hésitant", "Ne pas relancer"];
 const TAG_CLS = { "VIP": "t-vip", "Fidèle": "t-fid", "Nouveau client": "t-new", "Pressé": "t-vite", "Hésitant": "t-hes", "Ne pas relancer": "t-stop" };
@@ -1124,7 +1151,8 @@ const TODO_GROUPS = [
   { k: "hot", c: "orange", t: "Prospects du jour", d: "Numéro laissé sans finir la commande." },
   { k: "veille", c: "blue", t: "Livraisons de demain", d: "Rappel de la veille." },
   { k: "problem", c: "grey", t: "Injoignables · échecs", d: "Propose un nouveau jour." },
-  { k: "assign", c: "blue", t: "Livreur à choisir", d: "Livraisons d'aujourd'hui ou demain sans livreur." }
+  { k: "assign", c: "blue", t: "Livreur à choisir", d: "Livraisons d'aujourd'hui ou demain sans livreur." },
+  { k: "fid", c: "bx", t: "Fidélisation", d: "Clients livrés : prendre des nouvelles, demander un avis, proposer de racheter. Le message est prêt." }
 ];
 function ordersSwitch() {
   const n = loaded ? Object.values(salesBuckets()).reduce((a, l) => a + l.length, 0) : 0;

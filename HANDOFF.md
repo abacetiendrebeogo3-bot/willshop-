@@ -62,6 +62,7 @@
 - **Après chaque modification**, augmenter le numéro de version dans `sw.js` (`willshop-vN`) pour que les téléphones prennent la nouvelle version.
 - **Mode simple** pour les vieux téléphones : `?simple=1` (sans manifest).
 - **Présentation en bulles (19/10)** : `todoBubbles()` (étapes en bulles, Commandes « À faire » + accueils Direction et Commerciale), `orderCard()` = carte simple qui ouvre la feuille d'actions `sheetHtml()` / `bindSheet()` (état `sh`). Couleurs : classes `k-red`, `k-green`, etc.
+- **Fidélisation** : clients livrés relancés à J+3, J+10, J+25 et J+45 après la livraison (`FID_STEPS`, `T_FID`, `fidStep()`), jetons `F+3`… dans la colonne K. Bulle « Fidélisation ». Le tag « Ne pas relancer » les bloque.
 - **Tags clients** : enregistrés au début de la colonne J (Note) sous la forme `[Tags: VIP, Fidèle]` ; `tagsOf()` les lit, `noteText()` donne la note sans les tags.
 
 ## 7. Chantiers à faire (par ordre de priorité)
