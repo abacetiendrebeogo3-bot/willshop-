@@ -444,14 +444,14 @@ function telBF(v) {
 var d = v.replace(/[^0-9+]/g, "");
 if (/^(\+|00)/.test(d)) { if (!/^(\+|00)226/.test(d)) return ""; d = d.replace(/^(\+|00)226/, ""); }
 d = d.replace(/\D/g, "");
-if (d.length !== 8 || !/^[2567]/.test(d)) return "";
+if (d.length !== 8 || !/^[0-7]/.test(d)) return "";
 if (/^(\d)\1{7}$/.test(d) || "0123456789".indexOf(d) >= 0 || "9876543210".indexOf(d) >= 0) return "";
 return d.replace(/(\d{2})(?=\d)/g, "$1 ");
 }
 function telOk() {
 var t = document.getElementById("ftel");
 var v = t.value.replace(/[^0-9+ ]/g, "").trim(), n = telBF(v);
-if (!n) { t.style.borderColor = "#B42335"; t.value = ""; t.placeholder = /^(\+|00)(?!226)/.test(v) ? "Mets ton numéro du Burkina (8 chiffres)" : "Écris ton vrai numéro (8 chiffres)"; t.focus(); return; }
+if (!n) { t.style.borderColor = "#B42335"; t.value = ""; t.placeholder = /^(\+|00)(?!226)/.test(v) ? "Mets ton numéro du Burkina (8 chiffres)" : "Vérifie ton numéro (8 chiffres)"; t.focus(); return; }
 v = n;
 S.tel = v;
 dock.innerHTML = "";
