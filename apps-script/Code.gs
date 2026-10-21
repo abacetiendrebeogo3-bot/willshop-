@@ -99,8 +99,8 @@ function remises_() {
 }
 
 var FIELDS = {
-  ceo:    { paye: 0, statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, paiement: 16, livreeLe: 17, jour: 8, lieu: 6 },
-  sales:  { paye: 0, statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, jour: 8, lieu: 6 },
+  ceo:    { paye: 0, statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, paiement: 16, livreeLe: 17, jour: 8, lieu: 6, source: 22, type: 23, dateRelance: 24, creePar: 25, nom: 26 },
+  sales:  { paye: 0, statut: 9, note: 10, relances: 11, derniere: 12, livreur: 15, jour: 8, lieu: 6, source: 22, type: 23, dateRelance: 24, creePar: 25, nom: 26 },
   driver: { paye: 0, statut: 9, note: 10, paiement: 16, livreeLe: 17, jour: 8 }
 };
 
@@ -129,7 +129,13 @@ function api(action, cred, p) {
 
   if (action === "data") {
     var ss = ss_(), sh = ss.getSheetByName("Commandes"), n = sh.getLastRow();
-    var rows = n < 2 ? [] : sh.getRange(2, 1, n - 1, 21).getDisplayValues();
+    if (sh.getMaxColumns() < 26) sh.insertColumnsAfter(sh.getMaxColumns(), 26 - sh.getMaxColumns());
+    var h = sh.getRange(1, 1, 1, 26).getValues()[0];
+    var headers = ["Date", "Produit", "Qté", "Prix", "Zone", "Lieu", "Tél", "Jour", "Statut", "Note", "Relances", "Dernière relance", "Session", "Étape", "Livreur", "Paiement", "Livrée le", "Modifié par", "Payé le", "Encaissé par", "Remis à la caisse le", "Source", "Type", "Date relance", "Créé par", "Nom client"];
+    for (var colIdx = 21; colIdx < 26; colIdx++) {
+      if (!h[colIdx]) sh.getRange(1, colIdx + 1).setValue(headers[colIdx]);
+    }
+    var rows = n < 2 ? [] : sh.getRange(2, 1, n - 1, 26).getDisplayValues();
     var out = rows.map(function (r, i) { return { row: i + 2, v: r }; });
     if (role === "driver") out = out.filter(function (x) { return x.v[14] === me.nom; });
     var t = team_();
@@ -152,6 +158,70 @@ function api(action, cred, p) {
     return res;
   }
 
+  if (action === "addOrder") {
+    if (role === "driver") throw new Error("Réservé à la commerciale et à la direction");
+    var nom = String(p.nom || "").trim().slice(0, 100);
+    var tel = String(p.tel || "").trim().slice(0, 30);
+    if (!nom) throw new Error("Nom du client obligatoire");
+    if (!tel) throw new Error("Téléphone obligatoire");
+    var produit = String(p.produit || "").trim().slice(0, 100);
+    if (!produit) throw new Error("Produit obligatoire");
+    var qte = Math.max(1, Math.round(Number(p.qte) || 1));
+    var prix = Math.max(0, Math.round(Number(p.prix) || 0));
+    var zone = String(p.zone || "Ouagadougou").trim().slice(0, 50);
+    var lieu = String(p.lieu || "").trim().slice(0, 100);
+    var source = String(p.source || "WhatsApp direct").trim().slice(0, 50);
+    var type = String(p.type || "commande").toLowerCase();
+    var isProm = type === "promesse";
+    var dateRelance = isProm ? String(p.dateRelance || "").trim().slice(0, 30) : "";
+    var statut = isProm ? "Promesse" : "Confirmée";
+    var jour = isProm ? "À convenir" : String(p.jour || "Aujourd'hui").trim().slice(0, 50);
+    var note = String(p.note || "").trim().slice(0, 400);
+    if (nom) note = ("[Client: " + nom + "] " + note).trim();
+
+    var lkAdd = LockService.getScriptLock();
+    lkAdd.waitLock(10000);
+    try {
+      var shCmd = ss_().getSheetByName("Commandes");
+      if (shCmd.getMaxColumns() < 26) shCmd.insertColumnsAfter(shCmd.getMaxColumns(), 26 - shCmd.getMaxColumns());
+      var nowStr = stamp_();
+      var newRow = [
+        nowStr,
+        produit,
+        qte,
+        prix,
+        zone,
+        lieu,
+        "'" + tel,
+        jour,
+        statut,
+        note,
+        "",
+        "",
+        "MANUEL-" + Date.now(),
+        isProm ? "Promesse d'achat" : "Commande manuelle",
+        "",
+        "",
+        "",
+        me.nom + " · " + nowStr,
+        "",
+        "",
+        "",
+        source,
+        type,
+        dateRelance,
+        me.nom,
+        nom
+      ];
+      shCmd.appendRow(newRow);
+      var rowNum = shCmd.getLastRow();
+      journal_(me.nom, "Nouvelle " + (isProm ? "promesse" : "commande") + " (" + source + ")", rowNum, tel, produit + " · " + (nom || lieu));
+      return { ok: true, row: rowNum };
+    } finally {
+      lkAdd.releaseLock();
+    }
+  }
+
   if (action === "update") {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
@@ -161,7 +231,7 @@ function api(action, cred, p) {
       if (!(row >= 2 && row <= sh2.getLastRow())) throw new Error("Commande introuvable");
       if (role === "driver" && sh2.getRange(row, 15).getDisplayValue() !== me.nom) throw new Error("Cette livraison n'est pas à toi");
       var allowed = FIELDS[role], patch = (p && p.patch) || {};
-      var before = sh2.getRange(row, 1, 1, 21).getDisplayValues()[0], wasDelivered = /^livr/i.test(before[8]);
+      var before = sh2.getRange(row, 1, 1, 26).getDisplayValues()[0], wasDelivered = /^livr/i.test(before[8]);
       var client = before[6], notes = [];
       // « paye » : le client a payé (mode = Espèces / Orange Money / Moov Money)
       if (patch.paye !== undefined) {

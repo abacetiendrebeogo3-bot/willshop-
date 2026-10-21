@@ -424,6 +424,74 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 @media (min-width:1500px){.list.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:640px){.chain{flex-wrap:wrap;row-gap:12px}.chain .step{flex:1 0 30%}.chain .arrow{display:none}}
 @media (prefers-reduced-motion:reduce){.bub,.ocard,.act,.tile,.wsub,.wsheet.anim,.wscrim.anim{animation:none!important}}
+
+/* Bouton flottant + Ajouter */
+.fab{position:fixed;right:18px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:7;background:var(--bx-fill);color:var(--on-bx);border:1.5px solid var(--gold-fill);border-radius:99px;padding:12px 18px 12px 14px;font:700 14.5px var(--sans);display:inline-flex;align-items:center;gap:7px;box-shadow:0 8px 24px rgba(128,0,32,.35),0 2px 6px rgba(0,0,0,.15);cursor:pointer;transition:transform .15s cubic-bezier(.2,.9,.25,1),box-shadow .15s}
+.fab:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 12px 28px rgba(128,0,32,.45)}
+.fab:active{transform:scale(.96)}
+.fab svg{width:19px;height:19px;flex:none}
+@media (min-width:1000px){.fab{right:36px;bottom:32px;padding:14px 22px 14px 18px;font-size:15px}}
+
+/* Badges source & promesse */
+.tg-src{display:inline-flex;align-items:center;gap:4px;font-weight:700}
+.tg-src.src-wa{background:#E7F7ED;color:#1B7339}
+.tg-src.src-call{background:#E8EEF8;color:#205295}
+.tg-src.src-tun{background:var(--sunk);color:var(--mut)}
+.tg-src.src-bao{background:var(--gold-soft);color:var(--gold)}
+.tg-src.src-oth{background:#F3E8FF;color:#6B21A8}
+.kb-prom{background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold-fill);font-weight:700}
+.tg-rel{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.tg-rel.due{background:var(--bad-soft);color:var(--bad);animation:pulse-due 1.8s infinite}
+@keyframes pulse-due{0%,100%{opacity:1}50%{opacity:.65}}
+
+/* Actions promesses sur carte */
+.prom-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);align-items:center}
+.prom-acts .btn{min-height:34px;padding:0 10px;font-size:12.5px}
+
+/* Modal Formulaire Commande Manuelle */
+.m-type-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--sunk);padding:4px;border-radius:14px;margin-bottom:14px}
+.m-type-btn{border:0;background:none;padding:10px 8px;border-radius:10px;font:700 13.5px var(--sans);color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.m-type-btn[aria-pressed="true"]{background:var(--surface);color:var(--bx);box-shadow:var(--shadow)}
+.flab{display:block;font-size:12.5px;font-weight:600;color:var(--mut);margin:8px 0 4px}
+.flab b{color:var(--bad)}
+.tel-wrap{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.tel-pfx{padding:0 12px;font:700 14px var(--sans);color:var(--gold);background:var(--gold-soft);border-right:1px solid var(--line);height:44px;display:grid;place-items:center;flex:none}
+.tel-wrap .field{border:0;border-radius:0;background:none}
+.src-chips{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
+.src-chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 12px;font:600 12.5px var(--sans);color:var(--ink);cursor:pointer;transition:all .15s}
+.src-chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.prom-box{background:var(--gold-soft);border:1px solid var(--gold-fill);border-radius:14px;padding:12px;margin:10px 0;display:flex;flex-direction:column;gap:8px}
+.quick-days{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.quick-day{border:1px solid var(--gold);background:var(--surface);border-radius:8px;padding:4px 9px;font:600 11.5px var(--sans);color:var(--ink);cursor:pointer}
+
+/* Stats Canaux & Taux Conversion Promesses */
+.chan-seg{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:12px 0 14px;-webkit-overflow-scrolling:touch}
+.chan-chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font:600 13px var(--sans);color:var(--ink);cursor:pointer;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.chan-chip[aria-pressed="true"]{background:var(--bx-fill);color:var(--on-bx);border-color:var(--bx-fill);box-shadow:var(--shadow)}
+.chan-chip .c{font-size:11.5px;padding:2px 7px;border-radius:99px;background:var(--sunk);color:inherit}
+.chan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0 16px}
+.chan-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.chan-card .top-r{display:flex;justify-content:space-between;align-items:center}
+.chan-card .v-big{font:800 24px/1.1 var(--serif);font-variant-numeric:tabular-nums;color:var(--ink);margin:4px 0}
+.chan-card .share-bar{height:6px;background:var(--sunk);border-radius:99px;overflow:hidden;margin:4px 0 2px}
+.chan-card .share-fill{height:100%;border-radius:99px;transition:width .4s ease}
+.prom-stat-card{background:linear-gradient(135deg,var(--surface) 0%,var(--sunk) 100%);border:1.5px solid var(--gold-fill);border-radius:20px;padding:18px;margin:14px 0;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+.prom-stat-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.prom-rate-badge{font:800 32px/1 var(--serif);color:var(--gold);display:flex;align-items:baseline;gap:6px}
+.prom-rate-badge small{font:600 12px var(--sans);color:var(--mut)}
+.prom-stat-pills{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.prom-pill{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.prom-pill small{font-size:11.5px;color:var(--mut);font-weight:600}
+.prom-pill b{font:700 15px/1.2 var(--sans);font-variant-numeric:tabular-nums}
+
+/* CRM & Fiche Client */
+.crm-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;transition:box-shadow .2s,transform .15s}
+.crm-card:hover{box-shadow:0 6px 20px rgba(60,30,20,.12)}
+.crm-top{display:flex;gap:12px;align-items:flex-start}
+.crm-avatar{width:48px;height:48px;border-radius:16px;background:var(--sunk);color:var(--bx);font:700 18px var(--sans);display:grid;place-items:center;flex:none}
+.crm-fid-banner{background:var(--bx-soft);border:1px solid var(--bx);border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px}
+.crm-hist-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.crm-hist-item:last-child{border-bottom:none}
 </style>
 </head>
 <body>
@@ -449,6 +517,11 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 </div>
 <nav class="tabs" aria-label="Sections" id="nav" hidden><div class="in" role="tablist" id="tabs"></div></nav>
 <div class="toast" id="toast" hidden></div>
+<button class="fab" id="fabAdd" hidden aria-label="Ajouter une commande manuelle">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+  <span>Ajouter</span>
+</button>
+<div id="orderModalRoot"></div>
 
 <script>
 /* ---------- Réglages ---------- */
@@ -556,6 +629,7 @@ function statusClass(st) {
 const tokList = k => String(k || "").split(/[,;]+/).map(x => x.trim()).filter(Boolean);
 const relOf = toks => toks.map(t => /^J\+(\d+)/i.exec(t)).filter(Boolean).map(m => +m[1]);
 function rowFrom(v, i) {
+  const nomTag = (v[9] || "").match(/\[Client:\s*([^\]]+)\]/i);
   return {
     row: i + 2, date: parseDate(v[0]),
     produit: v[1] || "", qte: Number(v[2]) || 1, prix: Number(String(v[3]).replace(/\D/g, "")) || 0,
@@ -565,8 +639,34 @@ function rowFrom(v, i) {
     derniere: v[11] || "", sid: v[12] || "", etape: v[13] || "",
     livreur: v[14] || "", paiement: v[15] || "", livreeLe: parseDate(v[16]),
     // paiement : date, qui a encaissé, remise à la caisse (anciennes lignes : payées à la livraison)
-    payeLe: parseDate(v[18]) || (/^livr/i.test(v[8] || "") && v[15] ? parseDate(v[16]) : null), payePar: v[19] || "", remisLe: parseDate(v[20]), modifLe: parseDate(String(v[17] || "").split("·").pop())
+    payeLe: parseDate(v[18]) || (/^livr/i.test(v[8] || "") && v[15] ? parseDate(v[16]) : null), payePar: v[19] || "", remisLe: parseDate(v[20]), modifLe: parseDate(String(v[17] || "").split("·").pop()),
+    // Nouvelles colonnes : source, type, dateRelance, creePar, nom
+    source: v[21] || "Tunnel",
+    type: (v[22] || (/^promesse/i.test(v[8] || "") ? "promesse" : "commande")).toLowerCase(),
+    dateRelance: parseDate(v[23]) || (v[23] ? parseDate(v[23] + " 09:00:00") : null),
+    dateRelanceRaw: v[23] || "",
+    creePar: v[24] || (v[21] ? "" : "Tunnel"),
+    nom: v[25] || (nomTag ? nomTag[1].trim() : "") || ""
   };
+}
+const isPromise = o => (o.type === "promesse" || is(o, /^promesse/i)) && !is(o, /^annul/i);
+const isPromiseDue = (o, now = new Date()) => {
+  if (!isPromise(o) || !o.dateRelance) return false;
+  return sameDay(o.dateRelance, now) || startOfDay(o.dateRelance) <= startOfDay(now);
+};
+function sourceBadge(src) {
+  if (!src) return "";
+  const s = String(src).toLowerCase();
+  let cls = "src-oth", icon = "📌";
+  if (s.includes("whatsapp")) { cls = "src-wa"; icon = "💬"; }
+  else if (s.includes("appel")) { cls = "src-call"; icon = "📞"; }
+  else if (s.includes("tunnel")) { cls = "src-tun"; icon = "🌐"; }
+  else if (s.includes("bouche")) { cls = "src-bao"; icon = "🗣️"; }
+  return `<span class="tg tg-src ${cls}">${icon} ${esc(src)}</span>`;
+}
+function msgForPromesse(o) {
+  const nomPart = o.nom ? " " + o.nom : "";
+  return `Bonjour${nomPart} 👋 c'est WillShop. Comme convenu, je te recontacte pour ton ${o.produit || "produit"} (${F(o.prix)}). Tu veux qu'on planifie ta livraison quel jour ?`;
 }
 // Date de livraison prévue à partir du jour choisi dans le tunnel
 function deliveryDate(o) {
@@ -587,7 +687,7 @@ function dueStep(o, now = new Date()) {
   for (const s of STEPS) if (age >= s && !done.has(s)) due = s;
   return due;
 }
-const fill = (t, o) => t.replace("{produit}", o.produit || "ta commande").replace("{prix}", F(o.prix)).replace("{jour}", (o.jour || "aujourd'hui").toLowerCase()).replace("{lieu}", o.lieu || "ton quartier");
+const fill = (t, o) => t.replace("{nom}", o.nom ? o.nom : "").replace("{produit}", o.produit || "ta commande").replace("{prix}", F(o.prix)).replace("{jour}", (o.jour || "aujourd'hui").toLowerCase()).replace("{lieu}", o.lieu || "ton quartier");
 function msgFor(o, t) { return aiMsg[o.row] || (t && t.msg) || ""; }
 function toast(t) {
   const el = document.getElementById("toast"); el.textContent = t; el.hidden = false;
@@ -749,31 +849,90 @@ function start(r) {
 
 /* ---------- Calculs ---------- */
 const livreurs = () => drivers.slice();
-function stats() {
+let dirSourceFilter = "all";
+
+function channelStats() {
+  const sources = ["WhatsApp direct", "Tunnel", "Appel", "Bouche-à-oreille", "Autre"];
+  const realOrders = orders.filter(o => !isProspect(o) && !isPromise(o));
+  const totalDelivered = realOrders.filter(o => is(o, /^livr/i));
+  const totalDeliveredCA = totalDelivered.reduce((s, o) => s + (o.prix || 0), 0);
+  const totalOrdersCA = realOrders.reduce((s, o) => s + (o.prix || 0), 0);
+
+  return sources.map(src => {
+    const list = realOrders.filter(o => (o.source || "Tunnel") === src);
+    const delivered = list.filter(o => is(o, /^livr/i));
+    const ca = delivered.reduce((s, o) => s + (o.prix || 0), 0);
+    const potential = list.reduce((s, o) => s + (o.prix || 0), 0);
+    const delivRate = list.length ? Math.round((delivered.length / list.length) * 100) : 0;
+    const share = totalDeliveredCA > 0 ? Math.round((ca / totalDeliveredCA) * 100) : (totalOrdersCA > 0 ? Math.round((potential / totalOrdersCA) * 100) : 0);
+    const avgBasket = delivered.length ? Math.round(ca / delivered.length) : (list.length ? Math.round(potential / list.length) : 0);
+
+    return {
+      source: src,
+      count: list.length,
+      deliveredCount: delivered.length,
+      ca,
+      potential,
+      delivRate,
+      share,
+      avgBasket
+    };
+  }).filter(c => c.count > 0 || c.source === "Tunnel" || c.source === "WhatsApp direct");
+}
+
+function promiseStats() {
+  const isOrWasPromesse = o => isPromise(o) || o.etape === "Promesse d'achat" || /\[Convertie en commande/i.test(o.note || "") || /\[Annulée:.*\]/i.test(o.note || "") || o.statut === "Promesse";
+  const all = orders.filter(isOrWasPromesse);
+  const active = all.filter(o => isPromise(o) && !is(o, /^annul/i));
+  const due = active.filter(o => isPromiseDue(o));
+  const converted = all.filter(o => !isPromise(o) && !is(o, /^annul/i) && (o.statut === "Confirmée" || o.statut === "En livraison" || is(o, /^livr/i) || /\[Convertie/i.test(o.note || "")));
+  const cancelled = all.filter(o => is(o, /^annul/i));
+  const convRate = all.length ? Math.round((converted.length / all.length) * 100) : 0;
+  const convertedCA = converted.reduce((s, o) => s + (o.prix || 0), 0);
+  const convertedDeliveredCA = converted.filter(o => is(o, /^livr/i)).reduce((s, o) => s + (o.prix || 0), 0);
+
+  return {
+    total: all.length,
+    active: active.length,
+    due: due.length,
+    converted: converted.length,
+    cancelled: cancelled.length,
+    convRate,
+    convertedCA,
+    convertedDeliveredCA
+  };
+}
+
+function stats(srcFilter = dirSourceFilter) {
   const now = new Date(), t0 = today();
-  const real = orders.filter(o => !isProspect(o));
+  const baseOrders = (srcFilter && srcFilter !== "all")
+    ? orders.filter(o => (o.source || "Tunnel") === srcFilter)
+    : orders;
+  const real = baseOrders.filter(o => !isProspect(o) && !isPromise(o));
   const tOrders = real.filter(o => sameDay(o.date, t0));
-  const deliveredToday = orders.filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, t0));
+  const deliveredToday = baseOrders.filter(o => is(o, /^livr/i) && sameDay(o.livreeLe, t0));
   const days = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(t0.getTime() - i * DAY);
     days.push({ d, n: real.filter(o => sameDay(o.date, d)).length, today: i === 0 });
   }
-  const paidToday = orders.filter(o => o.payeLe && sameDay(o.payeLe, t0) && !is(o, /^annul/i));
+  const paidToday = baseOrders.filter(o => o.payeLe && sameDay(o.payeLe, t0) && !is(o, /^annul/i));
   const cash = mode => {
-    const all = orders.filter(o => o.payeLe && o.paiement === mode && !is(o, /^annul/i));
+    const all = baseOrders.filter(o => o.payeLe && o.paiement === mode && !is(o, /^annul/i));
     return { today: all.filter(o => sameDay(o.payeLe, t0)).reduce((s, o) => s + o.prix, 0), week: all.filter(o => daysBetween(o.payeLe, now) < 7).reduce((s, o) => s + o.prix, 0) };
   };
   const delivered = real.filter(o => is(o, /^livr/i));
   return {
     real, tOrders, todayValue: tOrders.reduce((s, o) => s + o.prix, 0),
     collected: paidToday.reduce((s, o) => s + o.prix, 0), paidCount: paidToday.length, deliveredToday: deliveredToday.length,
-    prospectsToday: orders.filter(o => isProspect(o) && sameDay(o.date, t0)).length,
-    toCall: orders.filter(o => is(o, /^nouv/i)).length,
-    onRoad: orders.filter(o => is(o, /^en livr/i)).length,
+    prospectsToday: baseOrders.filter(o => isProspect(o) && sameDay(o.date, t0)).length,
+    promessesToday: baseOrders.filter(o => isPromise(o) && sameDay(o.date, t0)).length,
+    promessesDueCount: baseOrders.filter(o => isPromiseDue(o, now)).length,
+    toCall: baseOrders.filter(o => is(o, /^nouv/i)).length,
+    onRoad: baseOrders.filter(o => is(o, /^en livr/i)).length,
     rate: real.length ? Math.round(delivered.length / real.length * 100) : 0,
     days, cash: Object.fromEntries(PAIEMENTS.map(m => [m, cash(m)])),
-    due: orders.map(o => ({ o, step: dueStep(o, now) })).filter(x => x.step)
+    due: baseOrders.map(o => ({ o, step: dueStep(o, now) })).filter(x => x.step)
   };
 }
 // Caisse : avances, argent chez les livreurs, remises à valider
@@ -808,15 +967,47 @@ function funnel(day = today()) {
   const reach = s => list.filter(v => STEPS_ORDER.indexOf(v.step) >= STEPS_ORDER.indexOf(s)).length;
   return { total: list.length, steps: FUNNEL.map(([k, l]) => ({ l, n: k === "Arrivée" ? list.length : reach(k) })), questions: list.filter(v => v.step === "Question").length };
 }
+let clientFilter = "all"; // "all" | "fidele" | "fid_due" | "wa" | "tunnel" | "promesse"
 function clients() {
   const map = new Map();
   for (const o of orders) {
     const k = waNumber(o.tel) || ("x" + o.row);
-    if (!map.has(k)) map.set(k, { tel: o.tel, lieu: o.lieu, orders: [], spent: 0, livrees: 0, last: null, products: new Set() });
+    if (!map.has(k)) {
+      map.set(k, {
+        k,
+        tel: o.tel,
+        cleanTel: waNumber(o.tel) || ("x" + o.row),
+        nom: o.nom || "",
+        lieu: o.lieu || "",
+        orders: [],
+        spent: 0,
+        livrees: 0,
+        last: null,
+        products: new Set(),
+        sources: new Set(),
+        promesses: []
+      });
+    }
     const c = map.get(k);
-    c.orders.push(o); c.products.add(o.produit);
-    if (is(o, /^livr/i)) { c.spent += o.prix; c.livrees++; }
-    if (o.date && (!c.last || o.date > c.last)) { c.last = o.date; c.lieu = o.lieu || c.lieu; }
+    c.orders.push(o);
+    if (o.produit) c.products.add(o.produit);
+    if (o.source) c.sources.add(o.source);
+    if (isPromise(o)) c.promesses.push(o);
+    if (!c.nom && o.nom) c.nom = o.nom;
+    if (is(o, /^livr/i)) { c.spent += (o.prix || 0); c.livrees++; }
+    if (o.date && (!c.last || o.date > c.last)) {
+      c.last = o.date;
+      if (o.lieu) c.lieu = o.lieu;
+      if (o.nom) c.nom = o.nom;
+    }
+  }
+
+  const now = new Date();
+  for (const c of map.values()) {
+    c.orders.sort((a, b) => (b.date || 0) - (a.date || 0));
+    const lastDeliv = c.orders.find(o => is(o, /^livr/i));
+    const t = lastDeliv ? taskFor(lastDeliv, now) : null;
+    c.fid = (t && t.k === "fid") ? t : null;
   }
   return [...map.values()].sort((a, b) => (b.last || 0) - (a.last || 0));
 }
@@ -852,6 +1043,18 @@ const T_DAY = {
 const stampLabel = () => new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
 const hasTok = (o, t) => o.toks.some(x => x.toLowerCase() === t.toLowerCase());
 function taskFor(o, now = new Date()) {
+  if (isPromise(o)) {
+    if (isPromiseDue(o, now) && !hasTok(o, "Promesse " + stampLabel())) {
+      const isLate = startOfDay(o.dateRelance) < startOfDay(now);
+      return {
+        k: "promesse",
+        tok: "Promesse " + stampLabel(),
+        msg: msgForPromesse(o),
+        label: isLate ? "Promesse en retard (" + o.dateRelance.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) + ")" : "Promesse à relancer"
+      };
+    }
+    return null;
+  }
   const t0 = today(), dd = deliveryDate(o), step = dueStep(o, now), dTok = "Jour " + stampLabel(), rTok = "R" + stampLabel();
   if (isToDeliver(o) && !is(o, /^en livr/i) && dd && dd <= t0 && !hasTok(o, dTok)) return { k: "jour", tok: dTok, msg: fill(T_DAY.jour, o), label: dd < t0 ? "En retard, prévue le " + dd.toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "Livraison aujourd'hui" };
   if (is(o, /^nouv/i) && !step) return { k: "call", msg: fill(T_CONFIRM, o), label: "Message de confirmation" };
@@ -867,6 +1070,7 @@ function taskFor(o, now = new Date()) {
 const SALES_STEPS = [
   { k: "jour", t: "Livraisons du jour", d: "Ces clients ont choisi aujourd'hui. Préviens-les que la livraison arrive." },
   { k: "call", t: "À confirmer", d: "Nouvelles commandes. Envoie le message, puis passe-les en « Confirmée »." },
+  { k: "promesse", t: "Promesses à relancer", d: "Clients qui ont promis d'acheter. Relance-les aujourd'hui." },
   { k: "relance", t: "Relances", d: "Le message est déjà écrit. Touche WhatsApp et envoie : la relance se note toute seule." },
   { k: "veille", t: "Livraisons de demain", d: "Rappelle-leur que la livraison est demain." },
   { k: "hot", t: "Prospects du jour", d: "Ils ont laissé leur numéro sans finir. Un petit message suffit souvent." },
@@ -878,6 +1082,7 @@ function salesBuckets() {
   const now = new Date(), b = Object.fromEntries(SALES_STEPS.map(s => [s.k, []]));
   for (const o of orders) { const t = taskFor(o, now); if (t && b[t.k]) b[t.k].push({ o, t }); }
   b.call.sort((x, y) => (x.o.date || 0) - (y.o.date || 0));
+  if (b.promesse) b.promesse.sort((x, y) => (x.o.dateRelance || 0) - (y.o.dateRelance || 0));
   b.relance.sort((x, y) => x.t.step - y.t.step);
   return b;
 }
@@ -886,6 +1091,7 @@ function forgotten() {
   const now = new Date(), h = now.getHours(), b = salesBuckets(), out = [], pl = (n, a, z = "s") => n + " " + a + (n > 1 ? z : "");
   const late = b.call.filter(x => now - x.o.date > 2 * 3600000).length;
   if (late) out.push(pl(late, "commande") + " pas confirmée" + (late > 1 ? "s" : "") + " depuis plus de 2 h");
+  if (b.promesse && b.promesse.length) out.push(pl(b.promesse.length, "promesse d'achat") + " à relancer aujourd'hui");
   if (h >= 10 && b.jour.length) out.push(pl(b.jour.length, "client") + " livré" + (b.jour.length > 1 ? "s" : "") + " aujourd'hui pas encore prévenu" + (b.jour.length > 1 ? "s" : ""));
   if (h >= 12 && b.relance.length) out.push(pl(b.relance.length, "relance") + " pas encore envoyée" + (b.relance.length > 1 ? "s" : ""));
   if (h >= 17 && b.veille.length) out.push(pl(b.veille.length, "livraison") + " de demain pas encore rappelée" + (b.veille.length > 1 ? "s" : ""));
@@ -908,6 +1114,7 @@ function driverSelect(o) {
 const SV = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const GICON = {
   call: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  promesse: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   jour: ICONS.runs, relance: '<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/>',
   hot: '<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.3 1.5 1 2.5 2 2.5-.5-3 0-5.5 1-8z"/>',
   veille: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
@@ -924,9 +1131,10 @@ const AIC = {
   stat: '<path d="M4 6h16M4 12h10M4 18h6"/>', check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>', chev: '<path d="M9 6l6 6-6 6"/>'
 };
-const TASK_COLOR = { call: "red", jour: "green", relance: "orange", hot: "amber", veille: "blue", problem: "grey", assign: "blue", fid: "bx" };
+const TASK_COLOR = { call: "red", promesse: "orange", jour: "green", relance: "orange", hot: "amber", veille: "blue", problem: "grey", assign: "blue", fid: "bx" };
 const NEXT_Q = {
   call: "Écris ou appelle pour confirmer la commande, puis touche le bouton.",
+  promesse: "Relance ce client comme convenu pour convertir sa promesse d'achat en commande confirmée.",
   jour: "Préviens le client que la livraison arrive aujourd'hui.",
   relance: "Le message de relance est prêt. Envoie-le sur WhatsApp.",
   hot: "Il a laissé son numéro sans finir. Envoie ce petit message.",
@@ -948,7 +1156,15 @@ function statusColor(o) {
   if (is(o, /^(en livr|reprog|livr)/i)) return "green";
   return "grey";
 }
-const iniOf = o => { const l = String(o.lieu || "").replace(/[^A-Za-zÀ-ÿ ]/g, " ").trim(); return l ? l.split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase() : String(o.tel || "").replace(/\D/g, "").slice(-2) || "?"; };
+const iniOf = o => {
+  if (o.nom) {
+    const parts = String(o.nom).replace(/[^A-Za-zÀ-ÿ ]/g, " ").trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  }
+  const l = String(o.lieu || "").replace(/[^A-Za-zÀ-ÿ ]/g, " ").trim();
+  return l ? l.split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase() : String(o.tel || "").replace(/\D/g, "").slice(-2) || "?";
+};
 let sh = null, shAnim = false;
 function openSheet(row, v) { const fresh = !sh; sh = { row, v: v || "main" }; shAnim = fresh; render(); }
 function closeSheet() { sh = null; render(); }
@@ -958,11 +1174,24 @@ function todoBubbles(b, active, attr) {
 }
 function sheetHtml() {
   const o = orders.find(x => x.row === sh.row); if (!o) { sh = null; return ""; }
-  const t = taskFor(o), col = t ? TASK_COLOR[t.k] : statusColor(o), tags = tagsOf(o);
-  const text = (t && t.msg ? msgFor(o, t) : "") || aiMsg[o.row] || fill("Bonjour 👋 c'est WillShop, au sujet de ta commande de {produit} ({prix}).", o);
-  const top = `<div class="grab"></div><div class="sh-top k-${col}"><span class="pic">${esc(iniOf(o))}</span><div style="min-width:0"><h3>${esc(o.lieu || o.tel || "Client")}</h3>
+  const t = taskFor(o), isProm = isPromise(o);
+  const col = isProm ? "orange" : (t ? TASK_COLOR[t.k] : statusColor(o)), tags = tagsOf(o);
+  const relDue = isPromiseDue(o);
+  const relDateStr = o.dateRelance ? o.dateRelance.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }) : (o.dateRelanceRaw || "");
+  const title = o.nom ? `${o.nom}${o.lieu ? " · " + o.lieu : ""}` : (o.lieu || o.tel || "Client");
+  const text = (isProm ? msgForPromesse(o) : ((t && t.msg ? msgFor(o, t) : "") || aiMsg[o.row] || fill("Bonjour 👋 c'est WillShop, au sujet de ta commande de {produit} ({prix}).", o)));
+  const top = `<div class="grab"></div><div class="sh-top k-${col}"><span class="pic">${esc(iniOf(o))}</span><div style="min-width:0"><h3>${esc(title)}</h3>
     <p>${esc(o.produit)}${o.qte > 1 ? " × " + o.qte : ""} · <b>${F(o.prix)}</b>${o.jour ? " · " + esc(o.jour.toLowerCase()) : ""}</p>
-    <div class="oc-tags"><span class="kb">${esc(o.statut)}</span>${o.livreur ? `<span class="tg">🛵 ${esc(o.livreur)}</span>` : ""}${o.payeLe ? `<span class="tg t-fid">Payé · ${esc(o.paiement)}</span>` : ""}${tagChips(o)}</div></div>
+    <div class="oc-tags">
+      <span class="kb">${esc(isProm ? "Promesse" : (t ? t.label : o.statut))}</span>
+      ${isProm ? `<span class="kb kb-prom">🤝 Promesse</span>` : ""}
+      ${isProm && relDateStr ? `<span class="tg tg-rel ${relDue ? "due" : ""}">📅 Relance : ${esc(relDateStr)}</span>` : ""}
+      ${sourceBadge(o.source)}
+      ${o.livreur ? `<span class="tg">🛵 ${esc(o.livreur)}</span>` : ""}
+      ${o.payeLe ? `<span class="tg t-fid">Payé · ${esc(o.paiement)}</span>` : ""}
+      ${o.creePar && o.creePar !== "Tunnel" ? `<span class="tg">👤 ${esc(o.creePar)}</span>` : ""}
+      ${tagChips(o)}
+    </div></div>
     <button class="shx" data-sclose aria-label="Fermer">${SV(AIC.x)}</button></div>`;
   const back = `<button class="shback" data-sv="main">‹ Retour</button>`;
   const wa = `<a class="bigb" href="${esc(waLink(o.tel, text))}" target="_blank" rel="noopener" ${t && t.tok ? `data-sdone="1"` : ""}>${SV(AIC.wa)} Envoyer sur WhatsApp</a>`;
@@ -971,21 +1200,42 @@ function sheetHtml() {
   let body = "";
   if (sh.v === "main") {
     let next = "";
-    if (t && t.k === "call") next = `<div class="msg-box">${esc(text)}</div><div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><a class="btn" href="${esc(waLink(o.tel, text))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a><a class="btn" href="${esc(telLink(o.tel))}">${I_PHONE} Appeler</a></div><button class="bigb" data-sstat="Confirmée">${SV(AIC.check)} Commande confirmée</button>`;
-    else if (t && t.k === "assign") next = drvChoices();
-    else if (t) next = `<div class="msg-box">${esc(text)}</div>${wa}${t.k === "problem" ? `<button class="btn" data-sv="day">Choisir un nouveau jour</button>` : ""}${t.tok ? `<button class="linkb" data-sskip>Déjà fait, sans message</button>` : ""}`;
-    else if (isToDeliver(o) && !o.livreur) next = drvChoices();
-    body = `${t || (isToDeliver(o) && !o.livreur) ? `<div class="nextb k-${col}"><small>Prochaine étape · ${esc(t ? t.label : "Choisir un livreur")}</small><div class="q">${NEXT_Q[t ? t.k : "assign"]}</div>${next}</div>` : `<div class="nextb k-${col}"><small>Prochaine étape</small><div class="q">Rien à faire pour l'instant sur cette commande.</div></div>`}
-      <div class="acts">${[["wa", "Écrire", "k-green"], ["call", "Appeler", "k-blue"], ["info", "Infos client", "k-grey"], ["tag", "Tags", "k-amber"], ["drv", "Livreur", "k-blue"], ["pay", "Payé", "k-green"], ["day", "Autre jour", "k-orange"], ["stat", "Statut", "k-bx"]].map(([k, l, c], i) =>
+    if (isProm) {
+      next = `<div class="msg-box">${esc(text)}</div>
+        <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <a class="btn" href="${esc(waLink(o.tel, text))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a>
+          <a class="btn" href="${esc(telLink(o.tel))}">${I_PHONE} Appeler</a>
+        </div>
+        <button class="bigb ok" data-convert="${o.row}" style="margin-top:8px">${SV(AIC.check)} Convertir en commande confirmée</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+          <button class="btn" data-postpone="${o.row}">📅 Reporter</button>
+          <button class="btn ghost" data-cancel-prom="${o.row}">Annuler</button>
+        </div>`;
+      body = `<div class="nextb k-orange">
+        <small>Promesse d'achat · Relance ${relDateStr ? "prévue le " + relDateStr : "à définir"}</small>
+        <div class="q">${esc(o.note ? noteText(o) : "Client qui a promis d'acheter. Relance-le pour convenir de la livraison.")}</div>
+        ${next}
+      </div>
+      <div class="acts">${[["wa", "Écrire", "k-green"], ["call", "Appeler", "k-blue"], ["info", "Infos client", "k-grey"], ["tag", "Tags", "k-amber"], ["stat", "Statut", "k-bx"]].map(([k, l, c], i) =>
         k === "call" ? `<a class="act ${c}" href="${esc(telLink(o.tel))}" style="animation-delay:${i * 25}ms"><span class="ic">${SV(AIC.call)}</span>${l}</a>`
         : `<button class="act ${c}" data-sv="${k}" style="animation-delay:${i * 25}ms"><span class="ic">${SV(AIC[k])}</span>${l}</button>`).join("")}</div>`;
+    } else {
+      if (t && t.k === "call") next = `<div class="msg-box">${esc(text)}</div><div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><a class="btn" href="${esc(waLink(o.tel, text))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a><a class="btn" href="${esc(telLink(o.tel))}">${I_PHONE} Appeler</a></div><button class="bigb" data-sstat="Confirmée">${SV(AIC.check)} Commande confirmée</button>`;
+      else if (t && t.k === "assign") next = drvChoices();
+      else if (t) next = `<div class="msg-box">${esc(text)}</div>${wa}${t.k === "problem" ? `<button class="btn" data-sv="day">Choisir un nouveau jour</button>` : ""}${t.tok ? `<button class="linkb" data-sskip>Déjà fait, sans message</button>` : ""}`;
+      else if (isToDeliver(o) && !o.livreur) next = drvChoices();
+      body = `${t || (isToDeliver(o) && !o.livreur) ? `<div class="nextb k-${col}"><small>Prochaine étape · ${esc(t ? t.label : "Choisir un livreur")}</small><div class="q">${NEXT_Q[t ? t.k : "assign"]}</div>${next}</div>` : `<div class="nextb k-${col}"><small>Prochaine étape</small><div class="q">Rien à faire pour l'instant sur cette commande.</div></div>`}
+        <div class="acts">${[["wa", "Écrire", "k-green"], ["call", "Appeler", "k-blue"], ["info", "Infos client", "k-grey"], ["tag", "Tags", "k-amber"], ["drv", "Livreur", "k-blue"], ["pay", "Payé", "k-green"], ["day", "Autre jour", "k-orange"], ["stat", "Statut", "k-bx"]].map(([k, l, c], i) =>
+          k === "call" ? `<a class="act ${c}" href="${esc(telLink(o.tel))}" style="animation-delay:${i * 25}ms"><span class="ic">${SV(AIC.call)}</span>${l}</a>`
+          : `<button class="act ${c}" data-sv="${k}" style="animation-delay:${i * 25}ms"><span class="ic">${SV(AIC[k])}</span>${l}</button>`).join("")}</div>`;
+    }
   } else if (sh.v === "wa") {
     body = `${back}<div class="wsub"><div class="msg-box">${esc(text)}</div>${wa}<div class="actions"><button class="btn small" data-copy="${esc(text)}">Copier le message</button>${sample ? `<button class="btn small ghost" data-act="ai">${I_SPARK} Message IA</button>` : ""}</div></div>`;
   } else if (sh.v === "info") {
     const same = orders.filter(x => x.tel && x.tel === o.tel).sort((a, b) => (b.date || 0) - (a.date || 0));
     const spent = same.filter(x => is(x, /^livr/i)).reduce((n, x) => n + x.prix, 0);
     const fact = (l, v) => v ? `<div class="fact"><span>${l}</span><b>${v}</b></div>` : "";
-    body = `${back}<div class="wsub"><div class="facts2">${fact("Téléphone", `<span style="user-select:all">${esc(o.tel)}</span>`)}${fact("Quartier", esc(o.lieu))}${fact("Ville / zone", esc(o.zone))}${fact("Commandé le", fmtDate(o.date))}${fact("Livraison", esc(o.jour))}${fact("Livreur", esc(o.livreur) || "Pas encore choisi")}${fact("Paiement", o.payeLe ? esc(o.paiement) + (o.payePar ? " · " + esc(o.payePar) : "") : "Pas encore payé")}${fact("Relances", esc(o.toks.join(", ")))}${fact("Arrêté à", isProspect(o) ? esc(o.etape || "Numéro donné") : "")}${fact("Note", esc(noteText(o)))}${fact("Total déjà dépensé", F(spent))}</div>
+    body = `${back}<div class="wsub"><div class="facts2">${fact("Nom", esc(o.nom))}${fact("Téléphone", `<span style="user-select:all">${esc(o.tel)}</span>`)}${fact("Source", esc(o.source || "Tunnel"))}${fact("Créé par", esc(o.creePar || "Tunnel"))}${fact("Quartier", esc(o.lieu))}${fact("Ville / zone", esc(o.zone))}${fact("Date création", fmtDate(o.date))}${fact("Livraison", esc(o.jour))}${fact("Date de relance", o.dateRelance ? fmtDate(o.dateRelance) : (o.dateRelanceRaw || ""))}${fact("Livreur", esc(o.livreur) || "Pas encore choisi")}${fact("Paiement", o.payeLe ? esc(o.paiement) + (o.payePar ? " · " + esc(o.payePar) : "") : "Pas encore payé")}${fact("Relances", esc(o.toks.join(", ")))}${fact("Arrêté à", isProspect(o) ? esc(o.etape || "Numéro donné") : "")}${fact("Note", esc(noteText(o)))}${fact("Total déjà dépensé", F(spent))}</div>
       <div class="actions"><button class="btn small" data-copy="${esc(o.tel)}">Copier le numéro</button></div>
       ${same.length > 1 ? `<span class="eyebrow">Toutes ses commandes (${same.length})</span><div class="hist2">${same.map(x => `<div><span>${esc(x.produit)} · ${fmtDate(x.date)}</span><b>${esc(x.statut)}</b></div>`).join("")}</div>` : `<p class="ghint">Première commande de ce client.</p>`}</div>`;
   } else if (sh.v === "tag") {
@@ -1022,17 +1272,46 @@ function bindSheet() {
     change(o, { note }, { note }, nt.length ? "Tags : " + nt.join(", ") : "Tags retirés");
   });
 }
-document.addEventListener("keydown", e => { if (e.key === "Escape" && sh) closeSheet(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { if (orderModalState && orderModalState.open) closeOrderModal(); else if (sh) closeSheet(); } });
 
 function orderCard(o, opts = {}) {
   const t = opts.task === undefined ? taskFor(o) : opts.task;
-  const col = t ? TASK_COLOR[t.k] || "grey" : statusColor(o);
+  const isProm = isPromise(o);
+  const col = isProm ? "orange" : (t ? TASK_COLOR[t.k] || "grey" : statusColor(o));
   const sub = [o.produit + (o.qte > 1 ? " × " + o.qte : ""), o.jour ? o.jour.toLowerCase() : fmtDate(o.date)].filter(Boolean).join(" · ");
+  const title = o.nom ? `${o.nom}${o.lieu ? " · " + o.lieu : ""}` : (o.lieu || o.tel || "Client");
+  const relDue = isPromiseDue(o);
+  const relDateStr = o.dateRelance ? o.dateRelance.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }) : (o.dateRelanceRaw || "");
+
   return `<button class="ocard k-${col}" data-open="${o.row}">
     <span class="pic">${esc(iniOf(o))}</span>
-    <span class="oc-m"><span class="oc-t">${esc(o.lieu || o.tel || "Client")}</span><span class="oc-d">${esc(sub)}</span>
-      <span class="oc-tags"><span class="kb">${esc(t ? t.label : o.statut)}</span>${isProspect(o) && !t ? `<span class="tg">Arrêté à : ${esc(o.etape || "Numéro donné")}</span>` : ""}${o.livreur ? `<span class="tg">🛵 ${esc(o.livreur)}</span>` : ""}${o.payeLe ? `<span class="tg t-fid">Payé</span>` : ""}${tagChips(o)}</span></span>
-    <span class="oc-r"><b>${F(o.prix)}</b>${SV(AIC.chev)}</span></button>`;
+    <span class="oc-m">
+      <span class="oc-t">${esc(title)}</span>
+      <span class="oc-d">${esc(sub)}</span>
+      <span class="oc-tags">
+        <span class="kb">${esc(isProm ? "Promesse" : (t ? t.label : o.statut))}</span>
+        ${isProm ? `<span class="kb kb-prom">🤝 Promesse</span>` : ""}
+        ${isProm && relDateStr ? `<span class="tg tg-rel ${relDue ? "due" : ""}">${relDue ? "⏰ " : "📅 "}Relance : ${esc(relDateStr)}</span>` : ""}
+        ${sourceBadge(o.source)}
+        ${isProspect(o) && !t ? `<span class="tg">Arrêté à : ${esc(o.etape || "Numéro donné")}</span>` : ""}
+        ${o.livreur ? `<span class="tg">🛵 ${esc(o.livreur)}</span>` : ""}
+        ${o.payeLe ? `<span class="tg t-fid">Payé</span>` : ""}
+        ${o.creePar && o.creePar !== "Tunnel" ? `<span class="tg">👤 ${esc(o.creePar)}</span>` : ""}
+        ${tagChips(o)}
+      </span>
+      ${isProm && o.note ? `<span class="oc-d" style="margin-top:5px;font-style:italic">💬 ${esc(noteText(o))}</span>` : ""}
+      ${isProm ? `
+        <span class="prom-acts" onclick="event.stopPropagation()">
+          <a class="btn small" href="${esc(waLink(o.tel, msgForPromesse(o)))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a>
+          <a class="btn small" href="${esc(telLink(o.tel))}">${I_PHONE} Appeler</a>
+          <button class="btn small ok" data-convert="${o.row}">${SV(AIC.check)} Convertir en commande</button>
+          <button class="btn small" data-postpone="${o.row}">Reporter</button>
+          <button class="btn small ghost" data-cancel-prom="${o.row}">Annuler</button>
+        </span>
+      ` : ""}
+    </span>
+    <span class="oc-r"><b>${F(o.prix)}</b>${SV(AIC.chev)}</span>
+  </button>`;
 }
 
 /* ---------- Direction : revue du matin, une étape à la fois ---------- */
@@ -1079,7 +1358,8 @@ function renderReview() {
 function renderHome() {
   if (role === "sales") return renderSalesHome();
   if (reviewStep >= 0) return renderReview();
-  const s = stats(), al = alerts(), fu = funnel(), sb = salesBuckets();
+  const s = stats(dirSourceFilter), al = alerts(), fu = funnel(), sb = salesBuckets();
+  const chStats = channelStats(), ps = promiseStats();
   const max = Math.max(1, ...s.days.map(d => d.n));
   const h = new Date().getHours(), t0 = today();
   const todo = Object.values(sb).reduce((n, l) => n + l.length, 0);
@@ -1100,6 +1380,32 @@ function renderHome() {
   return `
     <h1>${h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"} ${esc(myName)}</h1>
     <p class="sub">${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · <button class="linkbtn" data-rev="0">revue du matin</button></p>
+    
+    <!-- Filtre par canal de vente -->
+    <div class="chan-seg" role="tablist" aria-label="Filtrer par canal">
+      <button class="chan-chip" data-dir-src="all" aria-pressed="${dirSourceFilter === 'all'}">
+        📊 Tous les canaux <span class="c">${orders.filter(o => !isProspect(o) && !isPromise(o)).length}</span>
+      </button>
+      <button class="chan-chip" data-dir-src="WhatsApp direct" aria-pressed="${dirSourceFilter === 'WhatsApp direct'}">
+        💬 WhatsApp direct <span class="c">${orders.filter(o => o.source === 'WhatsApp direct').length}</span>
+      </button>
+      <button class="chan-chip" data-dir-src="Tunnel" aria-pressed="${dirSourceFilter === 'Tunnel'}">
+        🌐 Tunnel <span class="c">${orders.filter(o => !o.source || o.source === 'Tunnel').length}</span>
+      </button>
+      <button class="chan-chip" data-dir-src="Appel" aria-pressed="${dirSourceFilter === 'Appel'}">
+        📞 Appel <span class="c">${orders.filter(o => o.source === 'Appel').length}</span>
+      </button>
+      <button class="chan-chip" data-dir-src="Bouche-à-oreille" aria-pressed="${dirSourceFilter === 'Bouche-à-oreille'}">
+        🗣️ Bouche-à-oreille <span class="c">${orders.filter(o => o.source === 'Bouche-à-oreille').length}</span>
+      </button>
+    </div>
+    ${dirSourceFilter !== "all" ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--sunk);border:1.5px solid var(--bx);border-radius:14px;padding:9px 14px;margin-bottom:12px">
+        <span style="font-size:13.5px">Vue filtrée sur le canal : <b>${esc(dirSourceFilter)}</b></span>
+        <button class="btn small ghost" data-dir-src="all">Réinitialiser (Tous)</button>
+      </div>
+    ` : ""}
+
     <div class="tiles">
       ${tile('data-tabgo="orders"', "À traiter", todo, todo ? "clients à contacter" : "tout est à jour", todo > 0)}
       ${tile('data-tabgo="orders"', "Commandes du jour", s.tOrders.length, F(s.todayValue))}
@@ -1111,6 +1417,79 @@ function renderHome() {
     <div class="dcols"><div class="dcol">
     <h2>À faire maintenant</h2>
     <div class="alerts">${al.length ? al.slice(0, 5).map((a, i) => `<button class="alert ${a.lvl}" data-alert="${i}"><span class="dot"></span><span>${esc(alText(a))}</span>${/stock/i.test(a.t) && a.n <= 0 ? "" : `<span class="n">${a.n}</span>`}<span class="chev">›</span></button>`).join("") : `<div class="calm">✓ Rien de bloquant. Tout est sous contrôle.</div>`}</div>
+
+    <!-- Comparatif des canaux de vente -->
+    <h2>Performance par canal de vente</h2>
+    <div class="chan-grid">
+      ${chStats.map(cs => {
+        const isCur = dirSourceFilter === cs.source;
+        const barCol = cs.source.includes("WhatsApp") ? "#25D366" : cs.source.includes("Tunnel") ? "var(--bx)" : cs.source.includes("Appel") ? "#3B82F6" : "var(--gold)";
+        return `
+          <div class="chan-card" style="${isCur ? 'border-color:var(--bx);box-shadow:var(--shadow)' : ''}">
+            <div class="top-r">
+              <span style="font-weight:700;font-size:14.5px">${cs.source === "WhatsApp direct" ? "💬 " : cs.source === "Tunnel" ? "🌐 " : cs.source === "Appel" ? "📞 " : cs.source === "Bouche-à-oreille" ? "🗣️ " : "✨ "}${esc(cs.source)}</span>
+              <span class="tg" style="font-weight:700">${cs.share} % du CA</span>
+            </div>
+            <div class="v-big">${F(cs.ca)}</div>
+            <div class="share-bar"><div class="share-fill" style="width:${cs.share}%;background:${barCol}"></div></div>
+            <div class="meta" style="display:flex;justify-content:space-between;margin-top:2px">
+              <span><b>${cs.deliveredCount}</b> livrées / ${cs.count} cmd</span>
+              <span>Taux livr. : <b>${cs.delivRate} %</b></span>
+            </div>
+            <div class="meta" style="display:flex;justify-content:space-between">
+              <span>Potentiel commandé :</span>
+              <b>${F(cs.potential)}</b>
+            </div>
+            <div class="actions" style="margin-top:6px">
+              <button class="btn small ${isCur ? 'pri' : 'ghost'}" data-dir-src="${isCur ? 'all' : esc(cs.source)}">
+                ${isCur ? "Filtré ✓" : "Filtrer ce canal"}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+
+    <!-- Carte Taux de conversion des promesses -->
+    <div class="prom-stat-card">
+      <div class="prom-stat-head">
+        <div>
+          <span class="eyebrow" style="color:var(--bx)">Relances & Ventes manuelles</span>
+          <h3 style="margin:2px 0;font:700 20px var(--serif)">Taux de conversion des promesses</h3>
+          <p style="margin:0;font-size:13px;color:var(--mut)">Relances effectuées par Yasmine sur WhatsApp et Appel</p>
+        </div>
+        <div class="prom-rate-badge">
+          ${ps.convRate} %
+          <small>converties</small>
+        </div>
+      </div>
+      <div class="prom-stat-pills">
+        <div class="prom-pill">
+          <small>Total promesses</small>
+          <b>${ps.total}</b>
+        </div>
+        <div class="prom-pill" style="border-color:var(--ok)">
+          <small>Converties en commande</small>
+          <b style="color:var(--ok)">${ps.converted} (${F(ps.convertedCA)})</b>
+        </div>
+        <div class="prom-pill" style="${ps.due ? 'border-color:var(--bad)' : ''}">
+          <small>À relancer aujourd'hui</small>
+          <b style="${ps.due ? 'color:var(--bad)' : ''}">${ps.due} ${ps.due ? '⚠️' : '✓'}</b>
+        </div>
+        <div class="prom-pill">
+          <small>En attente / Reportées</small>
+          <b>${ps.active}</b>
+        </div>
+        <div class="prom-pill">
+          <small>Annulées</small>
+          <b style="color:var(--mut)">${ps.cancelled}</b>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn small pri" data-todo="promesse">Voir les promesses à relancer →</button>
+        <button class="btn small" data-tabgo="orders" data-filter="promesses">Toutes les promesses (${ps.total})</button>
+      </div>
+    </div>
 
     ${renderTeamFollow()}
     <h2>Tunnel aujourd'hui</h2>
@@ -1140,13 +1519,20 @@ function renderHome() {
     </div></div>`;
 }
 const FILTERS = {
-  all: ["Toutes", () => true], pro: ["Prospects", isProspect], nouv: ["Nouvelles", o => is(o, /^nouv/i)],
-  conf: ["Confirmées", o => is(o, /^confirm/i)], road: ["En route", o => is(o, /^(en livr|reprog)/i)],
-  pb: ["Problèmes", isProblem], livr: ["Livrées", o => is(o, /^livr/i)], annul: ["Annulées", o => is(o, /^annul/i)],
-  nodriver: ["Sans livreur", o => isToDeliver(o) && !o.livreur]
+  all: ["Toutes", () => true],
+  promesses: ["Promesses / À relancer", isPromise],
+  pro: ["Prospects", isProspect],
+  nouv: ["Nouvelles", o => is(o, /^nouv/i) && !isPromise(o)],
+  conf: ["Confirmées", o => is(o, /^confirm/i) && !isPromise(o)],
+  road: ["En route", o => is(o, /^(en livr|reprog)/i) && !isPromise(o)],
+  pb: ["Problèmes", isProblem],
+  livr: ["Livrées", o => is(o, /^livr/i)],
+  annul: ["Annulées", o => is(o, /^annul/i)],
+  nodriver: ["Sans livreur", o => isToDeliver(o) && !o.livreur && !isPromise(o)]
 };
 const TODO_GROUPS = [
   { k: "call", c: "red", t: "À confirmer", d: "Nouvelles commandes : appelle ou écris tout de suite." },
+  { k: "promesse", c: "orange", t: "Promesses à relancer", d: "Clients qui ont promis d'acheter. Relance-les aujourd'hui." },
   { k: "jour", c: "green", t: "À livrer aujourd'hui", d: "Préviens le client que la livraison arrive." },
   { k: "relance", c: "orange", t: "À relancer aujourd'hui", d: "Le message est prêt : touche WhatsApp et envoie." },
   { k: "hot", c: "orange", t: "Prospects du jour", d: "Numéro laissé sans finir la commande." },
@@ -1178,16 +1564,81 @@ function renderOrders() {
     <div class="chips">${Object.entries(FILTERS).map(([k, [l, fn]]) => `<button class="chip" data-filter="${k}" aria-pressed="${filter === k}">${l}<span class="c">${orders.filter(fn).length}</span></button>`).join("")}</div>
     <div class="list grid">${list.length ? list.slice(0, 80).map(o => orderCard(o, { task: taskFor(o) })).join("") : empty(orders.length ? "Aucune commande pour ce filtre." : "Les commandes de tes tunnels apparaîtront ici.")}</div>`;
 }
+
+const CLIENT_FILTERS = {
+  all: ["Tous les clients", () => true],
+  fidele: ["Fidèles (2+ achats)", c => c.livrees >= 2],
+  fid_due: ["Relances fidélisation dues", c => !!c.fid],
+  wa: ["WhatsApp direct", c => c.sources.has("WhatsApp direct")],
+  tunnel: ["Tunnel", c => c.sources.has("Tunnel") || !c.sources.size],
+  promesse: ["Avec promesse", c => c.promesses.length > 0]
+};
+
 function renderClients() {
   const cs = clients(), q = query.trim().toLowerCase();
-  const list = cs.filter(c => !q || [c.tel, c.lieu, ...c.products].join(" ").toLowerCase().includes(q));
-  return `<h1>Clients</h1><p class="sub">${cs.length} numéros · ${cs.filter(c => c.livrees).length} ont déjà acheté</p>
-    <div style="margin-top:14px"><input class="search" id="q" type="search" placeholder="Chercher un client, un quartier, un produit…" value="${esc(query)}" aria-label="Chercher"></div>
-    <div class="list">${list.length ? list.slice(0, 80).map(c => `<article class="card">
-      <div class="c-top"><div><div class="who">${esc(c.tel)}</div><div class="place">${esc(c.lieu)}</div><div class="meta">${[...c.products].map(esc).join(" · ")}</div></div>
-      <div><div class="amt">${F(c.spent)}</div><div class="meta" style="text-align:right">${c.orders.length} commande${c.orders.length > 1 ? "s" : ""}</div>${c.livrees >= 2 ? `<div style="text-align:right"><span class="pill s-conf">Fidèle</span></div>` : c.livrees ? "" : `<div style="text-align:right"><span class="pill s-mut">Pas encore acheté</span></div>`}</div></div>
-      <div class="actions"><a class="btn small pri" href="${esc(waLink(c.tel, ""))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a><button class="btn small" data-copy="${esc(c.tel)}">Copier le numéro</button></div>
-    </article>`).join("") : empty(cs.length ? "Aucun client trouvé." : "Tes clients apparaîtront ici dès la première commande.")}</div>`;
+  const list = cs.filter(c => (CLIENT_FILTERS[clientFilter] ? CLIENT_FILTERS[clientFilter][1](c) : true))
+    .filter(c => !q || [c.nom, c.tel, c.lieu, ...c.products, ...c.sources].join(" ").toLowerCase().includes(q));
+
+  return `<h1>Clients · CRM</h1>
+    <p class="sub">${cs.length} clients uniques · ${cs.filter(c => c.livrees).length} ont déjà acheté · ${cs.filter(c => c.sources.has("WhatsApp direct")).length} via WhatsApp</p>
+    <div style="margin-top:14px">
+      <input class="search" id="q" type="search" placeholder="Chercher un nom, numéro, quartier, produit, source…" value="${esc(query)}" aria-label="Chercher">
+    </div>
+    <div class="chips">
+      ${Object.entries(CLIENT_FILTERS).map(([k, [l, fn]]) => `
+        <button class="chip" data-client-filter="${k}" aria-pressed="${clientFilter === k}">
+          ${l}<span class="c">${cs.filter(fn).length}</span>
+        </button>
+      `).join("")}
+    </div>
+    <div class="list">${list.length ? list.slice(0, 80).map(c => {
+      const isVip = c.spent >= 50000;
+      const srcBadges = [...c.sources].map(sourceBadge).join(" ");
+      const prodsList = [...c.products].map(esc).join(" · ");
+      const name = c.nom || "Client " + c.tel;
+      const ini = esc(iniOf({ nom: c.nom, tel: c.tel, lieu: c.lieu }));
+      
+      return `
+        <article class="card crm-card">
+          <div class="crm-top">
+            <div class="crm-avatar">${ini}</div>
+            <div style="min-width:0;flex:1">
+              <div class="who" style="font-size:16px">${esc(name)}</div>
+              <div class="place" style="font-size:13.5px">${esc(c.lieu || "Ouagadougou")}${c.nom ? " · <span style='user-select:all'>" + esc(c.tel) + "</span>" : ""}</div>
+              <div class="meta" style="margin-top:3px">${prodsList || "Aucun produit"}</div>
+              <div class="oc-tags" style="margin-top:6px">
+                ${srcBadges}
+                ${c.livrees >= 2 ? `<span class="pill s-conf">Fidèle (${c.livrees} livrées)</span>` : c.livrees === 1 ? `<span class="pill s-ok">Acheté (1)</span>` : `<span class="pill s-mut">Prospect / Promesse</span>`}
+                ${isVip ? `<span class="pill" style="background:var(--gold-soft);color:var(--gold)">👑 VIP</span>` : ""}
+                ${c.promesses.length ? `<span class="kb kb-prom">🤝 ${c.promesses.length} promesse(s)</span>` : ""}
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div class="amt">${F(c.spent)}</div>
+              <div class="meta">${c.orders.length} commande${c.orders.length > 1 ? "s" : ""}</div>
+            </div>
+          </div>
+
+          ${c.fid ? `
+            <div class="crm-fid-banner">
+              <div>
+                <b>✨ Relance fidélisation F+${c.fid.step} due</b>
+                <div style="font-size:12px;color:var(--mut);margin-top:2px">Message prêt pour garder le lien et faire racheter</div>
+              </div>
+              <a class="btn small pri" href="${esc(waLink(c.tel, c.fid.msg))}" target="_blank" rel="noopener">${I_WA} Relancer</a>
+            </div>
+          ` : ""}
+
+          <div class="actions" style="margin-top:4px">
+            <a class="btn small pri" href="${esc(waLink(c.tel, ""))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a>
+            <a class="btn small" href="${esc(telLink(c.tel))}">${I_PHONE} Appeler</a>
+            <button class="btn small" data-client-view="${esc(c.cleanTel)}">Fiche complète</button>
+            <button class="btn small" data-client-new-order="${esc(c.cleanTel)}">+ Commande</button>
+            <button class="btn small ghost" data-copy="${esc(c.tel)}">Copier n°</button>
+          </div>
+        </article>
+      `;
+    }).join("") : empty(cs.length ? "Aucun client trouvé pour ce filtre." : "Tes clients apparaîtront ici dès la première commande.")}</div>`;
 }
 function renderTeam() {
   const t0 = today();
@@ -1468,6 +1919,722 @@ async function stockMove(produit, type, qte, note) {
   catch (e) { x.stock = prev; render(); banner("Stock pas enregistré : " + esc(e.message)); }
 }
 
+/* ---------- Commande manuelle (WhatsApp, Appel, etc.) & Promesses ---------- */
+let orderModalState = {
+  open: false,
+  type: "commande",
+  source: "WhatsApp direct",
+  dateRelance: ""
+};
+
+function getTomorrowDateStr() {
+  const d = new Date(Date.now() + 86400000);
+  return d.toISOString().slice(0, 10);
+}
+
+function existingProducts() {
+  const map = new Map();
+  stock.forEach(s => {
+    if (s.produit) map.set(s.produit, { nom: s.produit, prix: s.vente || 0, stock: s.stock });
+  });
+  orders.forEach(o => {
+    if (o.produit && !map.has(o.produit)) {
+      const pUnit = o.prix && o.qte ? Math.round(o.prix / o.qte) : (o.prix || 0);
+      map.set(o.produit, { nom: o.produit, prix: pUnit, stock: 0 });
+    }
+  });
+  return Array.from(map.values());
+}
+
+function openOrderModal() {
+  orderModalState.open = true;
+  orderModalState.type = "commande";
+  orderModalState.source = "WhatsApp direct";
+  orderModalState.dateRelance = getTomorrowDateStr();
+  renderOrderModal();
+}
+
+function closeOrderModal() {
+  orderModalState.open = false;
+  const root = document.getElementById("orderModalRoot");
+  if (root) root.innerHTML = "";
+  document.body.style.overflow = sh ? "hidden" : "";
+}
+
+function setOrderType(t) {
+  orderModalState.type = t;
+  renderOrderModal();
+}
+
+function setOrderSource(s) {
+  orderModalState.source = s;
+  renderOrderModal();
+}
+
+function setQuickRelance(days) {
+  const d = new Date(Date.now() + days * 86400000);
+  orderModalState.dateRelance = d.toISOString().slice(0, 10);
+  const input = document.getElementById("moDateRelance");
+  if (input) input.value = orderModalState.dateRelance;
+}
+
+function onModalProductChange() {
+  const sel = document.getElementById("moProduit");
+  const qteInput = document.getElementById("moQte");
+  const prixInput = document.getElementById("moPrix");
+  if (!sel || !prixInput) return;
+  const prods = existingProducts();
+  const found = prods.find(p => p.nom === sel.value);
+  const qte = Math.max(1, +(qteInput ? qteInput.value : 1) || 1);
+  if (found && found.prix > 0) {
+    prixInput.value = found.prix * qte;
+  }
+}
+
+function onModalQteChange() {
+  const sel = document.getElementById("moProduit");
+  const qteInput = document.getElementById("moQte");
+  const prixInput = document.getElementById("moPrix");
+  if (!sel || !prixInput || !qteInput) return;
+  const prods = existingProducts();
+  const found = prods.find(p => p.nom === sel.value);
+  const qte = Math.max(1, +qteInput.value || 1);
+  if (found && found.prix > 0) {
+    prixInput.value = found.prix * qte;
+  }
+}
+
+function cleanTel226(val) {
+  let s = String(val || "").trim().replace(/[\s\.\-\(\)]/g, "");
+  if (s.startsWith("+226")) s = s.slice(4);
+  else if (s.startsWith("00226")) s = s.slice(5);
+  else if (s.startsWith("226") && s.length > 8) s = s.slice(3);
+  s = s.replace(/\D/g, "");
+  return "+226" + s;
+}
+
+function renderOrderModal() {
+  const root = document.getElementById("orderModalRoot");
+  if (!root) return;
+  if (!orderModalState.open) { root.innerHTML = ""; return; }
+  document.body.style.overflow = "hidden";
+
+  const isProm = orderModalState.type === "promesse";
+  const prods = existingProducts();
+  const defaultProd = prods[0] ? prods[0].nom : "";
+  const defaultPrix = prods[0] ? prods[0].prix || "" : "";
+  const sources = ["WhatsApp direct", "Appel", "Tunnel", "Bouche-à-oreille", "Autre"];
+
+  root.innerHTML = `
+    <div class="wscrim anim" id="moScrim"></div>
+    <div class="wsheet anim" role="dialog" aria-modal="true" style="max-width:560px">
+      <div class="grab"></div>
+      <div class="sh-top" style="align-items:center;margin-bottom:12px">
+        <span class="pic" style="background:var(--hero);color:var(--gold)">${SV(AIC.check)}</span>
+        <div style="min-width:0;flex:1">
+          <h3 style="font-size:20px">${isProm ? "Nouvelle promesse d'achat" : "Nouvelle commande manuelle"}</h3>
+          <p style="font-size:13px;color:var(--mut)">Enregistrement rapide par ${esc(myName || (role === "sales" ? "Yasmine" : "Direction"))}</p>
+        </div>
+        <button class="shx" id="moClose" aria-label="Fermer">${SV(AIC.x)}</button>
+      </div>
+
+      <div class="m-type-seg">
+        <button type="button" class="m-type-btn" data-mtype="commande" aria-pressed="${!isProm}">
+          🛒 Commande confirmée
+        </button>
+        <button type="button" class="m-type-btn" data-mtype="promesse" aria-pressed="${isProm}">
+          🤝 Promesse d'achat
+        </button>
+      </div>
+
+      <form id="manualOrderForm" style="display:grid;gap:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label class="flab" for="moNom">Nom du client <b>*</b></label>
+            <input class="field" id="moNom" name="nom" required placeholder="Ex : Moussa Traoré" autocomplete="name">
+          </div>
+          <div>
+            <label class="flab" for="moTel">WhatsApp / Tél <b>*</b></label>
+            <div class="tel-wrap">
+              <span class="tel-pfx">+226</span>
+              <input class="field" id="moTel" name="tel" type="tel" inputmode="numeric" required placeholder="70 00 00 00" autocomplete="tel">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:10px">
+          <div>
+            <label class="flab" for="moProduit">Produit <b>*</b></label>
+            <select class="field" id="moProduit" name="produit" required>
+              ${prods.map(p => `<option value="${esc(p.nom)}" data-prix="${p.prix}">${esc(p.nom)}${p.prix ? " (" + F(p.prix) + ")" : ""}</option>`).join("")}
+              <option value="__autre__">+ Autre produit…</option>
+            </select>
+            <input class="field" id="moAutreProd" name="autre_produit" placeholder="Nom du produit" style="display:none;margin-top:6px">
+          </div>
+          <div>
+            <label class="flab" for="moQte">Quantité <b>*</b></label>
+            <input class="field" id="moQte" name="qte" type="number" inputmode="numeric" min="1" value="1" required>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label class="flab" for="moPrix">Prix total (F CFA) <b>*</b></label>
+            <input class="field" id="moPrix" name="prix" type="number" inputmode="numeric" min="0" value="${defaultPrix}" required>
+          </div>
+          <div>
+            <label class="flab" for="moVille">Ville <b>*</b></label>
+            <select class="field" id="moVille" name="ville">
+              <option value="Ouagadougou" selected>Ouagadougou</option>
+              <option value="Bobo-Dioulasso">Bobo-Dioulasso</option>
+              <option value="Koudougou">Koudougou</option>
+              <option value="Autre">Autre ville</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="flab" for="moLieu">Quartier / Adresse de livraison</label>
+          <input class="field" id="moLieu" name="lieu" placeholder="Ex : Patte d'Oie, vers la pharmacie">
+        </div>
+
+        <div>
+          <label class="flab">Source de la vente</label>
+          <div class="src-chips">
+            ${sources.map(s => `
+              <button type="button" class="src-chip" data-msrc="${esc(s)}" aria-pressed="${orderModalState.source === s}">
+                ${s === "WhatsApp direct" ? "💬 " : s === "Appel" ? "📞 " : s === "Tunnel" ? "🌐 " : s === "Bouche-à-oreille" ? "👥 " : "✨ "}${esc(s)}
+              </button>
+            `).join("")}
+          </div>
+        </div>
+
+        ${isProm ? `
+          <div class="prom-box">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span class="eyebrow" style="color:var(--bx)">Relance de la promesse</span>
+              <span style="font-size:12px;color:var(--mut)">Apparaîtra dans tes rappels du jour</span>
+            </div>
+            <div>
+              <label class="flab" for="moDateRelance" style="margin-top:2px">Date de relance <b>*</b></label>
+              <input class="field" id="moDateRelance" name="dateRelance" type="date" value="${esc(orderModalState.dateRelance || getTomorrowDateStr())}" required style="background:var(--surface)">
+              <div class="quick-days">
+                <button type="button" class="quick-day" data-qday="1">Demain</button>
+                <button type="button" class="quick-day" data-qday="2">Dans 2 jours</button>
+                <button type="button" class="quick-day" data-qday="3">Dans 3 jours</button>
+                <button type="button" class="quick-day" data-qday="7">Dans 1 semaine</button>
+              </div>
+            </div>
+            <div>
+              <label class="flab" for="moPromNote">Contexte / Motif (ex : achète après sa paie)</label>
+              <input class="field" id="moPromNote" name="promNote" placeholder="Ex : Attend son salaire le 28, rappeler l'après-midi" style="background:var(--surface)">
+            </div>
+          </div>
+        ` : ""}
+
+        <div>
+          <label class="flab" for="moNote">Note de commande (optionnelle)</label>
+          <input class="field" id="moNote" name="note" placeholder="Instructions particulières, précisions…">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:10px;margin-top:8px">
+          <button type="button" class="btn ghost" id="moCancel">Annuler</button>
+          <button type="submit" class="btn pri" id="moSubmit" style="background:var(--bx-fill);color:var(--on-bx)">
+            ${isProm ? "🤝 Enregistrer promesse" : "✓ Enregistrer commande"}
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.getElementById("moScrim").onclick = closeOrderModal;
+  document.getElementById("moClose").onclick = closeOrderModal;
+  document.getElementById("moCancel").onclick = closeOrderModal;
+
+  root.querySelectorAll("[data-mtype]").forEach(b => {
+    b.onclick = () => setOrderType(b.dataset.mtype);
+  });
+
+  root.querySelectorAll("[data-msrc]").forEach(b => {
+    b.onclick = () => setOrderSource(b.dataset.msrc);
+  });
+
+  root.querySelectorAll("[data-qday]").forEach(b => {
+    b.onclick = () => setQuickRelance(+b.dataset.qday);
+  });
+
+  const pSel = document.getElementById("moProduit");
+  const pAutre = document.getElementById("moAutreProd");
+  if (pSel) {
+    pSel.onchange = () => {
+      if (pSel.value === "__autre__") {
+        if (pAutre) { pAutre.style.display = "block"; pAutre.required = true; pAutre.focus(); }
+      } else {
+        if (pAutre) { pAutre.style.display = "none"; pAutre.required = false; }
+        onModalProductChange();
+      }
+    };
+  }
+
+  const qIn = document.getElementById("moQte");
+  if (qIn) qIn.oninput = onModalQteChange;
+
+  const f = document.getElementById("manualOrderForm");
+  if (f) f.onsubmit = handleOrderModalSubmit;
+
+  setTimeout(() => {
+    const nomInput = document.getElementById("moNom");
+    if (nomInput) nomInput.focus();
+  }, 100);
+}
+
+async function handleOrderModalSubmit(e) {
+  e.preventDefault();
+  const f = e.target;
+  const nom = (f.nom.value || "").trim();
+  let tel = cleanTel226(f.tel.value);
+  let produit = f.produit.value;
+  if (produit === "__autre__") {
+    produit = (f.autre_produit ? f.autre_produit.value : "").trim();
+  }
+  const qte = Math.max(1, Math.round(+f.qte.value || 1));
+  const prix = Math.max(0, Math.round(+f.prix.value || 0));
+  const lieu = (f.lieu.value || "").trim();
+  const source = orderModalState.source || "WhatsApp direct";
+  const isProm = orderModalState.type === "promesse";
+  const type = isProm ? "promesse" : "commande";
+  const dateRelance = isProm ? (f.dateRelance ? f.dateRelance.value : "") : "";
+  const promNote = isProm && f.promNote ? f.promNote.value.trim() : "";
+  const extraNote = f.note ? f.note.value.trim() : "";
+  const noteParts = [];
+  if (promNote) noteParts.push(promNote);
+  if (extraNote) noteParts.push(extraNote);
+  const note = noteParts.join(" · ");
+
+  if (!nom) { alert("Le nom du client est obligatoire."); return; }
+  if (!tel || tel === "+226") { alert("Le numéro de téléphone est obligatoire."); return; }
+  if (!produit) { alert("Veuillez choisir un produit."); return; }
+
+  const btn = document.getElementById("moSubmit");
+  if (btn) { btn.disabled = true; btn.textContent = "Enregistrement…"; }
+
+  const zone = (f.ville ? f.ville.value : "Ouagadougou").trim();
+
+  await createManualOrder({
+    nom,
+    tel,
+    produit,
+    qte,
+    prix,
+    zone,
+    lieu,
+    source,
+    type,
+    dateRelance,
+    note
+  });
+}
+
+async function createManualOrder(data) {
+  const isProm = data.type === "promesse";
+  const now = new Date();
+  const nowStr = now.toLocaleDateString("fr-FR") + " " + now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  const creator = myName || cred.nom || (role === "sales" ? "Yasmine" : "Direction");
+  const tempRow = 100000 + Math.floor(Math.random() * 800000);
+
+  let fullNote = data.note ? data.note.trim() : "";
+  if (data.nom) fullNote = (`[Client: ${data.nom}] ` + fullNote).trim();
+
+  const optimisticOrder = {
+    row: tempRow,
+    date: now,
+    produit: data.produit,
+    qte: data.qte,
+    prix: data.prix,
+    zone: data.zone || "Ouagadougou",
+    lieu: data.lieu || "",
+    tel: data.tel,
+    jour: isProm ? "À convenir" : "Aujourd'hui",
+    statut: isProm ? "Promesse" : "Confirmée",
+    note: fullNote,
+    relances: [],
+    toks: [],
+    derniereRelance: null,
+    session: "MANUEL-" + Date.now(),
+    etape: isProm ? "Promesse d'achat" : "Commande manuelle",
+    livreur: "",
+    paiement: "",
+    livreeLe: null,
+    modifiePar: creator + " · " + nowStr,
+    payeLe: null,
+    payePar: "",
+    remisLe: null,
+    source: data.source,
+    type: data.type,
+    dateRelance: isProm && data.dateRelance ? new Date(data.dateRelance + "T12:00:00") : null,
+    dateRelanceRaw: data.dateRelance || "",
+    creePar: creator,
+    nom: data.nom
+  };
+
+  orders.unshift(optimisticOrder);
+  if (role === "ceo") {
+    journal.unshift([fmtTime(now), creator, "Nouvelle " + (isProm ? "promesse" : "commande") + " (" + data.source + ")", tempRow, data.tel, data.produit + " · " + (data.nom || data.lieu)]);
+  }
+
+  closeOrderModal();
+  render();
+  toast(isProm ? "Promesse enregistrée ✓" : "Commande confirmée enregistrée ✓");
+
+  try {
+    const res = await api("addOrder", {
+      nom: data.nom,
+      tel: data.tel,
+      produit: data.produit,
+      qte: data.qte,
+      prix: data.prix,
+      zone: data.zone,
+      lieu: data.lieu,
+      source: data.source,
+      type: data.type,
+      dateRelance: data.dateRelance,
+      jour: optimisticOrder.jour,
+      note: data.note
+    });
+    if (res && res.row) {
+      optimisticOrder.row = res.row;
+    }
+  } catch (err) {
+    banner("Erreur lors de l'enregistrement Google Sheet : " + esc(err.message));
+  }
+}
+
+async function convertPromesse(row) {
+  const o = orders.find(x => x.row === row);
+  if (!o) return;
+  const now = new Date();
+  const nowStr = now.toLocaleDateString("fr-FR");
+  const base = noteText(o);
+  const newNote = ((o.nom ? "[Client: " + o.nom + "] " : "") + "[Convertie en commande le " + nowStr + "] " + base).trim();
+
+  o.type = "commande";
+  o.statut = "Confirmée";
+  o.jour = "Aujourd'hui";
+  o.note = newNote;
+  if (sh && sh.row === row) sh = null;
+  render();
+  toast("Promesse convertie en commande confirmée !");
+
+  try {
+    await api("update", {
+      row: o.row,
+      patch: {
+        type: "commande",
+        statut: "Confirmée",
+        jour: "Aujourd'hui",
+        note: newNote
+      }
+    });
+  } catch (err) {
+    banner("Erreur de mise à jour : " + esc(err.message));
+  }
+}
+
+function openPostponeModal(row) {
+  const o = orders.find(x => x.row === row);
+  if (!o) return;
+  const root = document.getElementById("orderModalRoot");
+  if (!root) return;
+  document.body.style.overflow = "hidden";
+
+  const t0 = today();
+  const opts = [
+    { label: "Demain", days: 1 },
+    { label: "Dans 2 jours", days: 2 },
+    { label: "Dans 3 jours", days: 3 },
+    { label: "Dans 5 jours", days: 5 },
+    { label: "Dans 1 semaine", days: 7 }
+  ];
+
+  root.innerHTML = `
+    <div class="wscrim anim" id="popScrim"></div>
+    <div class="wsheet anim" role="dialog" aria-modal="true" style="max-width:440px">
+      <div class="grab"></div>
+      <div class="sh-top">
+        <span class="pic" style="background:var(--warn-soft);color:var(--warn)">📅</span>
+        <div style="min-width:0;flex:1">
+          <h3 style="font-size:19px">Reporter la relance</h3>
+          <p style="font-size:13px;color:var(--mut)">${esc(o.nom || o.tel)} · ${esc(o.produit)}</p>
+        </div>
+        <button class="shx" id="popClose" aria-label="Fermer">${SV(AIC.x)}</button>
+      </div>
+      <p class="ghint" style="margin:10px 0 6px">Choisis la nouvelle date de rappel :</p>
+      <div class="choices" style="margin-bottom:12px">
+        ${opts.map(opt => {
+          const d = new Date(t0.getTime() + opt.days * DAY);
+          const dStr = d.toISOString().slice(0, 10);
+          return `<button class="choice" data-postday="${dStr}"><b>${opt.label}</b> (${d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })})</button>`;
+        }).join("")}
+      </div>
+      <form id="customPostForm" style="display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px">
+        <label class="flab" for="customPostDate">Ou choisir une date précise :</label>
+        <div style="display:flex;gap:8px">
+          <input class="field" id="customPostDate" type="date" required value="${getTomorrowDateStr()}" style="flex:1">
+          <button type="submit" class="btn pri">Reporter</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.getElementById("popScrim").onclick = closeOrderModal;
+  document.getElementById("popClose").onclick = closeOrderModal;
+  root.querySelectorAll("[data-postday]").forEach(b => {
+    b.onclick = () => savePostpone(o, b.dataset.postday);
+  });
+  const cf = document.getElementById("customPostForm");
+  if (cf) {
+    cf.onsubmit = e => {
+      e.preventDefault();
+      savePostpone(o, document.getElementById("customPostDate").value);
+    };
+  }
+}
+
+async function savePostpone(o, newDateStr) {
+  closeOrderModal();
+  if (!newDateStr) return;
+  const d = new Date(newDateStr + "T12:00:00");
+  o.dateRelance = d;
+  o.dateRelanceRaw = newDateStr;
+  const disp = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+  const base = noteText(o);
+  const newNote = ((o.nom ? "[Client: " + o.nom + "] " : "") + "[Relance reportée au " + disp + "] " + base).trim();
+  o.note = newNote;
+  render();
+  toast("Relance reportée au " + disp);
+
+  try {
+    await api("update", {
+      row: o.row,
+      patch: {
+        dateRelance: newDateStr,
+        note: newNote
+      }
+    });
+  } catch (err) {
+    banner("Erreur lors du report : " + esc(err.message));
+  }
+}
+
+function openCancelModal(row) {
+  const o = orders.find(x => x.row === row);
+  if (!o) return;
+  const root = document.getElementById("orderModalRoot");
+  if (!root) return;
+  document.body.style.overflow = "hidden";
+
+  const reasons = [
+    "Plus intéressé(e)",
+    "Prix trop élevé",
+    "Injoignable après plusieurs relances",
+    "Acheté ailleurs",
+    "Autre raison"
+  ];
+
+  root.innerHTML = `
+    <div class="wscrim anim" id="cancScrim"></div>
+    <div class="wsheet anim" role="dialog" aria-modal="true" style="max-width:440px">
+      <div class="grab"></div>
+      <div class="sh-top">
+        <span class="pic" style="background:var(--bad-soft);color:var(--bad)">✕</span>
+        <div style="min-width:0;flex:1">
+          <h3 style="font-size:19px">Annuler la promesse</h3>
+          <p style="font-size:13px;color:var(--mut)">${esc(o.nom || o.tel)} · ${esc(o.produit)}</p>
+        </div>
+        <button class="shx" id="cancClose" aria-label="Fermer">${SV(AIC.x)}</button>
+      </div>
+      <p class="ghint" style="margin:10px 0 6px">Sélectionne le motif d'annulation :</p>
+      <div class="choices" style="margin-bottom:12px">
+        ${reasons.map(r => `<button class="choice" data-canc-reason="${esc(r)}">${esc(r)}</button>`).join("")}
+      </div>
+      <form id="customCancForm" style="display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px">
+        <label class="flab" for="customCancNote">Ou préciser un motif :</label>
+        <div style="display:flex;gap:8px">
+          <input class="field" id="customCancNote" placeholder="Motif précis" style="flex:1">
+          <button type="submit" class="btn ghost" style="color:var(--bad)">Annuler la promesse</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.getElementById("cancScrim").onclick = closeOrderModal;
+  document.getElementById("cancClose").onclick = closeOrderModal;
+  root.querySelectorAll("[data-canc-reason]").forEach(b => {
+    b.onclick = () => saveCancelProm(o, b.dataset.cancReason);
+  });
+  const ccf = document.getElementById("customCancForm");
+  if (ccf) {
+    ccf.onsubmit = e => {
+      e.preventDefault();
+      const val = (document.getElementById("customCancNote").value || "").trim() || "Annulée";
+      saveCancelProm(o, val);
+    };
+  }
+}
+
+async function saveCancelProm(o, reason) {
+  closeOrderModal();
+  o.statut = "Annulée";
+  const base = noteText(o);
+  const newNote = ((o.nom ? "[Client: " + o.nom + "] " : "") + "[Annulée: " + reason + "] " + base).trim();
+  o.note = newNote;
+  if (sh && sh.row === o.row) sh = null;
+  render();
+  toast("Promesse annulée (" + reason + ")");
+
+  try {
+    await api("update", {
+      row: o.row,
+      patch: {
+        statut: "Annulée",
+        note: newNote
+      }
+    });
+  } catch (err) {
+    banner("Erreur lors de l'annulation : " + esc(err.message));
+  }
+}
+
+/* ---------- CRM : Fiche Client Complète & Pré-remplissage ---------- */
+function openClientModal(cleanTel) {
+  const cs = clients();
+  const c = cs.find(x => x.cleanTel === cleanTel || x.tel === cleanTel);
+  if (!c) return;
+  const root = document.getElementById("orderModalRoot");
+  if (!root) return;
+  document.body.style.overflow = "hidden";
+
+  const isVip = c.spent >= 50000;
+  const name = c.nom || "Client " + c.tel;
+  const ini = esc(iniOf({ nom: c.nom, tel: c.tel, lieu: c.lieu }));
+  const srcBadges = [...c.sources].map(sourceBadge).join(" ");
+  const avgBasket = c.livrees > 0 ? Math.round(c.spent / c.livrees) : 0;
+
+  root.innerHTML = `
+    <div class="wscrim anim" id="crmScrim"></div>
+    <div class="wsheet anim" role="dialog" aria-modal="true" style="max-width:560px">
+      <div class="grab"></div>
+      <div class="sh-top" style="align-items:flex-start">
+        <div class="crm-avatar" style="width:52px;height:52px;font-size:20px">${ini}</div>
+        <div style="min-width:0;flex:1">
+          <h3 style="font-size:21px;margin:0">${esc(name)}</h3>
+          <p style="margin:2px 0 0;font-size:14px;color:var(--mut)">
+            <span style="user-select:all">${esc(c.tel)}</span> · ${esc(c.lieu || "Ouagadougou")}
+          </p>
+          <div class="oc-tags" style="margin-top:6px">
+            ${srcBadges}
+            ${c.livrees >= 2 ? `<span class="pill s-conf">Fidèle (${c.livrees} livrées)</span>` : c.livrees === 1 ? `<span class="pill s-ok">Acheté (1)</span>` : `<span class="pill s-mut">Prospect</span>`}
+            ${isVip ? `<span class="pill" style="background:var(--gold-soft);color:var(--gold)">👑 VIP</span>` : ""}
+            ${c.promesses.length ? `<span class="kb kb-prom">🤝 ${c.promesses.length} promesse(s)</span>` : ""}
+          </div>
+        </div>
+        <button class="shx" id="crmClose" aria-label="Fermer">${SV(AIC.x)}</button>
+      </div>
+
+      <div class="kpis" style="margin:14px 0 10px">
+        <div class="kpi">
+          <span class="l">Total dépensé</span>
+          <b style="font-size:19px">${F(c.spent)}</b>
+        </div>
+        <div class="kpi">
+          <span class="l">Commandes</span>
+          <b style="font-size:19px">${c.orders.length} <small style="font-size:12px;color:var(--mut)">(${c.livrees} livrée${c.livrees > 1 ? "s" : ""})</small></b>
+        </div>
+        <div class="kpi">
+          <span class="l">Panier moyen</span>
+          <b style="font-size:19px">${F(avgBasket)}</b>
+        </div>
+        <div class="kpi">
+          <span class="l">Dernière activité</span>
+          <b style="font-size:14px">${c.last ? c.last.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "—"}</b>
+        </div>
+      </div>
+
+      ${c.fid ? `
+        <div class="crm-fid-banner" style="margin:10px 0">
+          <div>
+            <b>✨ Relance fidélisation F+${c.fid.step}</b>
+            <div style="font-size:12px;color:var(--mut);margin-top:2px">${esc(c.fid.msg)}</div>
+          </div>
+          <a class="btn small pri" href="${esc(waLink(c.tel, c.fid.msg))}" target="_blank" rel="noopener">${I_WA} Envoyer</a>
+        </div>
+      ` : ""}
+
+      <h4 style="margin:16px 0 8px;font:700 16px var(--serif)">Historique d'achats (${c.orders.length})</h4>
+      <div style="display:flex;flex-direction:column;gap:8px;max-height:40vh;overflow-y:auto;padding-right:4px">
+        ${c.orders.map(o => {
+          const isProm = isPromise(o);
+          const stCls = isProm ? "kb-prom" : is(o, /^livr/i) ? "s-ok" : is(o, /^confirm/i) ? "s-conf" : is(o, /^annul/i) ? "s-mut" : "";
+          return `
+            <div style="background:var(--sunk);border:1px solid var(--line);border-radius:14px;padding:10px 12px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div style="font-weight:700;font-size:14.5px">${esc(o.produit)}${o.qte > 1 ? " × " + o.qte : ""}</div>
+                  <div class="meta" style="font-size:12px">${fmtDate(o.date)}${o.lieu ? " · " + esc(o.lieu) : ""}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="amt" style="font-size:15px">${F(o.prix)}</div>
+                  <span class="pill ${stCls}" style="font-size:11px">${esc(isProm ? "Promesse" : o.statut)}</span>
+                </div>
+              </div>
+              <div class="oc-tags" style="margin-top:6px">
+                ${sourceBadge(o.source)}
+                ${o.livreur ? `<span class="tg" style="font-size:11px">🛵 ${esc(o.livreur)}</span>` : ""}
+                ${o.paiement ? `<span class="tg t-fid" style="font-size:11px">💳 ${esc(o.paiement)}</span>` : ""}
+                ${o.creePar && o.creePar !== "Tunnel" ? `<span class="tg" style="font-size:11px">👤 ${esc(o.creePar)}</span>` : ""}
+              </div>
+              ${o.note ? `<div style="font-size:12.5px;color:var(--mut);font-style:italic;margin-top:6px;border-top:1px dashed var(--line);padding-top:4px">💬 ${esc(noteText(o))}</div>` : ""}
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">
+        <button class="btn pri" id="crmNewOrderBtn" style="background:var(--bx-fill);color:var(--on-bx)">+ Nouvelle commande</button>
+        <a class="btn" href="${esc(waLink(c.tel, ""))}" target="_blank" rel="noopener">${I_WA} WhatsApp</a>
+        <a class="btn" href="${esc(telLink(c.tel))}">${I_PHONE} Appeler</a>
+        <button class="btn ghost" id="crmCancelBtn">Fermer</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("crmScrim").onclick = closeOrderModal;
+  document.getElementById("crmClose").onclick = closeOrderModal;
+  document.getElementById("crmCancelBtn").onclick = closeOrderModal;
+  document.getElementById("crmNewOrderBtn").onclick = () => prefillOrderForClient(cleanTel);
+}
+
+function prefillOrderForClient(cleanTel) {
+  const cs = clients();
+  const c = cs.find(x => x.cleanTel === cleanTel || x.tel === cleanTel);
+  if (!c) return;
+  closeOrderModal();
+  openOrderModal();
+  setTimeout(() => {
+    const nomIn = document.getElementById("moNom");
+    const telIn = document.getElementById("moTel");
+    const lieuIn = document.getElementById("moLieu");
+    if (nomIn && c.nom) nomIn.value = c.nom;
+    if (telIn) {
+      let t = c.tel || "";
+      if (t.startsWith("+226")) t = t.slice(4).trim();
+      else if (t.startsWith("226") && t.length > 8) t = t.slice(3).trim();
+      telIn.value = t;
+    }
+    if (lieuIn && c.lieu) lieuIn.value = c.lieu;
+  }, 120);
+}
+
 /* ---------- Rendu principal ---------- */
 function renderTabs() {
   const due = loaded ? salesBuckets() : null;
@@ -1478,6 +2645,11 @@ function renderTabs() {
 }
 function render() {
   renderTabs();
+  const fab = document.getElementById("fabAdd");
+  if (fab) {
+    fab.hidden = !cred || role === "driver";
+    fab.onclick = openOrderModal;
+  }
   if (!cred) return renderLogin("");
   if (false) { view.innerHTML = `<h1>Connexion</h1>${empty("Cette app lit tes commandes dans Google Sheets. Ouvre-la dans Claude pour la connecter.")}`; return; }
   if (!loaded && tab !== "ai") { view.innerHTML = `<h1>Chargement</h1>${empty("Lecture de tes commandes dans Google Sheets…")}`; return; }
@@ -1490,6 +2662,13 @@ function render() {
 const findO = el => orders.find(x => x.row === +el.closest("[data-row]").dataset.row);
 function bind() {
   bindSheet();
+  view.querySelectorAll("[data-dir-src]").forEach(b => b.onclick = () => { dirSourceFilter = b.dataset.dirSrc; render(); });
+  view.querySelectorAll("[data-client-filter]").forEach(b => b.onclick = () => { clientFilter = b.dataset.clientFilter; render(); });
+  view.querySelectorAll("[data-client-view]").forEach(b => b.onclick = () => openClientModal(b.dataset.clientView));
+  view.querySelectorAll("[data-client-new-order]").forEach(b => b.onclick = () => prefillOrderForClient(b.dataset.clientNewOrder));
+  view.querySelectorAll("[data-convert]").forEach(b => b.onclick = e => { e.stopPropagation(); convertPromesse(+b.dataset.convert); });
+  view.querySelectorAll("[data-postpone]").forEach(b => b.onclick = e => { e.stopPropagation(); openPostponeModal(+b.dataset.postpone); });
+  view.querySelectorAll("[data-cancel-prom]").forEach(b => b.onclick = e => { e.stopPropagation(); openCancelModal(+b.dataset.cancelProm); });
   view.querySelectorAll("[data-tg]").forEach(b => b.onclick = () => { todoGroup = b.dataset.tg; store("ws_tgroup", todoGroup); render(); if (innerWidth < 960) { const el = view.querySelector(".flow section"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); } });
   view.querySelectorAll('[data-act="status"]').forEach(s => s.onchange = () => { const o = findO(s); if (o) setStatut(o, s.value); });
   view.querySelectorAll('[data-act="driver"]').forEach(s => s.onchange = () => { const o = findO(s); if (o) setLivreur(o, s.value); });
