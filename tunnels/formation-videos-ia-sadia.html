@@ -1,0 +1,318 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700;800&display=swap">
+<style>
+#drb{--bg:#F6F4EE;--ink:#13221A;--mut:#56655B;--line:#E3E0D7;--yel:#FCD116;--yel2:#E0B800;--yel3:#C9A400;--red:#CE1126;--green:#0f5a32}
+#drb *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body.drb-on{margin:0;overflow:hidden}
+#drb{position:fixed;inset:0;z-index:2147483000;background:#E8E5DC;display:flex;justify-content:center;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);text-align:left}
+#drb .app{width:100%;max-width:440px;height:100vh;height:100dvh;background:var(--bg);display:flex;flex-direction:column;overflow-y:auto}
+@media (min-width:600px){#drb{align-items:center}#drb .app{height:min(880px,94vh);width:420px;border-radius:30px;box-shadow:0 30px 80px rgba(19,34,26,.18);overflow-x:hidden}}
+
+/* Appel vidéo */
+#drb header.vc{position:relative;flex:1 1 0;min-height:130px;max-height:60vh;max-height:60dvh;background:linear-gradient(160deg,#2a1a3d,#0f5a32);overflow:hidden;transition:max-height .35s ease}
+#drb.compact header.vc{max-height:30vh;max-height:30dvh}
+#drb header.vc video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;z-index:1}
+#drb header.vc::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 25%,transparent 78%,rgba(0,0,0,.35));z-index:2}
+#drb header.vc::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,#EF2B2D 0 50%,#009E49 50%);z-index:4}
+#drb .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;z-index:1;text-align:center;padding:20px}
+#drb .ph .face{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#8a5a3c 0 34%,transparent 35%),radial-gradient(ellipse at 50% 100%,#EF2B2D 0 48%,transparent 49%),#FCD116;border:3px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.3);animation:bob 3s ease-in-out infinite}
+#drb .ph small{font-size:12px;opacity:.75}
+#drb .live{position:absolute;top:12px;left:12px;z-index:3;display:flex;align-items:center;gap:6px;background:#EF2B2D;color:#fff;font:800 11px 'DM Sans',sans-serif;letter-spacing:.06em;border-radius:7px;padding:4px 8px}
+#drb .live i{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.2s infinite}
+#drb .nm{position:absolute;left:14px;top:40px;z-index:3;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);font-size:13px}
+#drb .nm b{display:block;font:800 22px 'Bricolage Grotesque',sans-serif}
+#drb .badge{position:absolute;top:12px;right:12px;z-index:3;background:rgba(255,255,255,.94);color:var(--ink);font:700 11.5px 'DM Sans',sans-serif;border-radius:99px;padding:5px 10px}
+#drb .badge b{color:var(--red)}
+#drb .prog{position:absolute;left:0;bottom:5px;height:3px;background:var(--yel);z-index:4;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+#drb .ptag{position:absolute;right:10px;bottom:14%;z-index:3;width:92px;height:92px;border-radius:50%;background:var(--yel);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.25);transform:rotate(-8deg);animation:tagIn .6s 1.5s cubic-bezier(.34,1.56,.64,1) both}
+#drb .ptag span{font-size:10.5px;font-weight:700}
+#drb .ptag b{font:800 19px 'Bricolage Grotesque',sans-serif;line-height:1.05}
+#drb.compact .ptag{display:none}
+
+/* Sous-titres de Sadia */
+#drb .subt{flex:none;margin:10px 14px 0;background:var(--green);color:#fff;border-radius:16px;border-top-left-radius:4px;padding:11px 14px;font-size:16px;line-height:1.4;min-height:46px}
+#drb .subt::before{content:"Sadia · IA";display:block;font:800 11px 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--yel);margin-bottom:2px}
+#drb .subt b{color:var(--yel)}
+#drb .typing{display:flex;gap:4px;padding:6px 2px}
+#drb .typing i{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1s infinite}
+#drb .typing i:nth-child(2){animation-delay:.15s}#drb .typing i:nth-child(3){animation-delay:.3s}
+
+/* Cartes */
+#drb #stage{flex:none;padding:8px 14px 0;display:flex;flex-direction:column;gap:8px}
+#drb #stage:empty{display:none}
+#drb .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:14.5px;line-height:1.45;animation:rise .35s both}
+#drb .card h4{margin:0 0 6px;font:800 17px 'Bricolage Grotesque',sans-serif}
+#drb .card ul{margin:0;padding:0;list-style:none}
+#drb .card li{padding:3px 0 3px 24px;position:relative}
+#drb .card li::before{content:"✓";position:absolute;left:2px;color:#009E49;font-weight:800}
+#drb .card li.bn::before{content:"🎁";left:0}
+#drb .price{font:800 24px 'Bricolage Grotesque',sans-serif;color:var(--red)}
+#drb .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+#drb .gal .ex{aspect-ratio:9/16;border-radius:10px;background:linear-gradient(160deg,#3b2a52,#0f5a32);color:#fff;font-size:11px;display:flex;align-items:flex-end;justify-content:center;padding:6px;text-align:center;overflow:hidden;position:relative}
+#drb .gal .ex video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#drb .gal .ex span{position:relative;z-index:1;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 5px}
+#drb .recu{background:#FFF8DC;border:1.5px dashed var(--yel2);border-radius:12px;padding:10px 12px;font-size:14px}
+#drb .recu div{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+#drb .recu .tot{border-top:1px solid var(--yel2);margin-top:4px;padding-top:7px;font-weight:800;font-size:17px}
+#drb .recu .off{color:#009E49;font-weight:700}
+
+/* Réponses */
+#drb #dock{flex:none;padding:12px 14px calc(16px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start}
+#drb .yourturn{flex-basis:100%;text-align:center;font:800 13px 'DM Sans',sans-serif;letter-spacing:.04em;text-transform:uppercase;margin:2px 0 4px;animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both}
+#drb .yourturn span{display:inline-block;animation:finger 1s ease-in-out infinite}
+#drb .opt{position:relative;flex:1 1 40%;min-height:54px;border-radius:14px;font:700 16px 'DM Sans',sans-serif;cursor:pointer;padding:8px 12px;background:var(--yel);border:2px solid var(--yel2);color:#1d1d1b;box-shadow:0 3px 0 var(--yel3);animation:popIn .55s cubic-bezier(.34,1.56,.64,1) both,nudge 2.4s ease-in-out infinite}
+#drb .opt:active{transform:scale(.94)}
+#drb .opt.main::after{content:"👆";position:absolute;right:14px;bottom:-12px;font-size:26px;animation:tap 1.2s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+#drb .opt.ask{flex-basis:100%;background:#fff;border:1.5px dashed #B9C3BB;color:#55605a;box-shadow:none;min-height:46px;font-size:15px;animation:popIn .55s both}
+#drb .form{width:100%;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:rise .4s both}
+#drb .fld{width:100%;height:52px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font:500 16px 'DM Sans',sans-serif;background:#FBFAF7;color:var(--ink);outline:none}
+#drb .fld:focus{border-color:var(--yel2);background:#fff}
+#drb .tel{display:flex;gap:8px}
+#drb .tel select{flex:none;width:112px;padding:0 8px}
+#drb .cta{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;border-radius:14px;font:800 17px 'DM Sans',sans-serif;cursor:pointer;text-decoration:none;background:var(--yel);color:#1d1d1b;border:2px solid var(--yel2);box-shadow:0 3px 0 var(--yel3)}
+#drb .cta#go{background:var(--red);color:#fff;border:0;box-shadow:none;animation:pulseR 2.4s infinite}
+#drb .note{font-size:13px;line-height:1.5;color:var(--mut);text-align:center;margin:0}
+#drb .qlink{background:none;border:0;color:var(--green);font:700 14px 'DM Sans',sans-serif;text-decoration:underline;cursor:pointer;padding:6px}
+
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.4) translateY(18px)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes nudge{0%,62%,100%{transform:scale(1)}72%{transform:scale(1.06)}84%{transform:scale(.98)}}
+@keyframes finger{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@keyframes tap{0%,100%{transform:translate(0,0) scale(1)}45%{transform:translate(-6px,-8px) scale(1.1)}60%{transform:translate(-6px,-6px) scale(.92)}}
+@keyframes tagIn{from{opacity:0;transform:scale(.5) rotate(-25deg)}to{opacity:1;transform:scale(1) rotate(-8deg)}}
+@keyframes pulseR{0%{box-shadow:0 0 0 0 rgba(206,17,38,.45)}70%{box-shadow:0 0 0 12px rgba(206,17,38,0)}100%{box-shadow:0 0 0 0 rgba(206,17,38,0)}}
+@media (max-width:360px){#drb .subt{font-size:15px}#drb .opt{font-size:15px;min-height:50px}#drb .tel select{width:96px}}
+@media (max-height:640px){#drb .ptag{display:none}#drb .card{padding:9px 12px;font-size:13.5px}}
+@media (prefers-reduced-motion:reduce){#drb .opt,#drb .ptag{animation:none}#drb .opt.main::after,#drb .yourturn span{animation:none}}
+</style>
+
+<div id="drb"><div class="app">
+<header class="vc">
+  <div class="ph" id="ph"><div class="face"></div><small>Vidéo de Sadia</small></div>
+  <video id="vid" muted loop playsinline preload="none"></video>
+  <span class="live"><i></i>EN LIGNE</span>
+  <div class="nm"><b>Sadia</b>Créée 100 % par l'IA</div>
+  <div class="badge">Prix de lancement · <b>7 500 F</b></div>
+  <div class="ptag"><span>Formation</span><b>7 500 F</b><span>+ bonus</span></div>
+  <div class="prog" id="prog" style="width:0"></div>
+</header>
+<div class="subt" id="subt" aria-live="polite"></div>
+<div id="stage"></div>
+<div id="dock"></div>
+</div></div>
+
+<script>
+/* ===================== À REMPLIR ===================== */
+var CFG = {
+  video: "",        // lien .mp4 de la vidéo de Sadia
+  exemples: ["", "", ""], // liens .mp4 de 3 vidéos exemples
+  paiement: "",     // lien de paiement Chariow
+  wa: "22672019524", // numéro WhatsApp pour les questions
+  prix: 7500
+};
+/* ===================================================== */
+
+var PROD = "Formation Vidéos IA";
+var SHEET = "https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec";
+var SID = "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+var S = {};
+var dock = document.getElementById("dock"), stage = document.getElementById("stage"), subt = document.getElementById("subt");
+
+(function () {
+  if (!CFG.video) return;
+  var v = document.getElementById("vid"), c = navigator.connection || {};
+  if (c.saveData || /(^|-)2g$/.test(c.effectiveType || "")) return;
+  setTimeout(function () { v.src = CFG.video; v.play().then(function () { document.getElementById("ph").style.display = "none"; }).catch(function () {}); }, 500);
+})();
+try { new MutationObserver(function () { document.getElementById("drb").classList.toggle("compact", !!dock.querySelector(".form") || !!stage.querySelector(".card")); }).observe(dock, { childList: true, subtree: true }); } catch (e) {}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " F"; }
+function prog(p) { document.getElementById("prog").style.width = p + "%"; }
+function px(ev, data, custom) { try { var f = window.fbq || (window.parent && window.parent.fbq); if (f) f(custom ? "trackCustom" : "track", ev, data || {}); } catch (e) {} }
+function send(obj) {
+  try {
+    obj.sid = SID; obj.produit = PROD;
+    var d = JSON.stringify(obj);
+    if (!(navigator.sendBeacon && navigator.sendBeacon(SHEET, d))) fetch(SHEET, { method: "POST", mode: "no-cors", body: d, keepalive: true });
+  } catch (e) {}
+}
+function track(step) { send({ type: "visit", step: step, veut: S.but || "", zone: S.pays || "" }); }
+function goTop(url) { try { window.top.location.href = url; } catch (e) { window.location.href = url; } }
+
+/* Sadia parle (sous-titres), une phrase après l'autre */
+function bot(list, done) {
+  list = [].concat(list);
+  (function next() {
+    if (!list.length) return done && done();
+    var m = list.shift();
+    subt.innerHTML = '<div class="typing"><i></i><i></i><i></i></div>';
+    setTimeout(function () { subt.innerHTML = m; setTimeout(next, list.length ? 1400 : 200); }, 600);
+  })();
+}
+function card(html) { stage.innerHTML = '<div class="card">' + html + '</div>'; }
+function ask(opts, cb) {
+  dock.innerHTML = '<div class="yourturn"><span>👇</span> À toi de choisir</div>';
+  opts.forEach(function (o, i) {
+    var b = document.createElement("button");
+    b.className = "opt" + (/question|vraiment/i.test(o) ? " ask" : (i === 0 ? " main" : ""));
+    b.style.animationDelay = (0.15 + i * 0.12) + "s, " + (1.2 + i * 0.6) + "s";
+    b.textContent = o;
+    b.onclick = function () { dock.innerHTML = ""; stage.innerHTML = ""; setTimeout(function () { cb(o); }, 200); };
+    dock.appendChild(b);
+  });
+}
+
+/* 1. Accroche */
+function start() {
+  S = {}; prog(8); track("Arrivée");
+  px("ViewContent", { content_name: PROD, value: CFG.prix, currency: "XOF" });
+  bot(["Coucou 👋 Moi c'est <b>Sadia</b>.", "Je ne suis pas une vraie personne : je suis une <b>IA</b>. Wilfried m'a créée avec son téléphone.", "Tu veux apprendre à créer des vidéos comme moi ?"], function () {
+    ask(["Oui, je veux apprendre", "C'est vraiment une IA ? 😳"], function (a) {
+      if (/vraiment/.test(a)) return vraiment();
+      px("TunnelDemarre", {}, true); track("Intéressé"); but();
+    });
+  });
+}
+function vraiment() {
+  bot(["Oui, à 100 % ! Mon visage, ma voix, mes décors : tout est fait avec l'IA.", "Et ce que Wilfried a fait, il te l'apprend étape par étape."], function () {
+    ask(["Je veux apprendre"], function () { px("TunnelDemarre", {}, true); track("Intéressé"); but(); });
+  });
+}
+
+/* 2. Objectif */
+function but() {
+  prog(22);
+  bot(["Tu veux faire quoi avec ces vidéos ?"], function () {
+    ask(["Gagner de l'argent avec ça", "Faire les pubs de mes produits"], function (a) {
+      S.but = /argent/.test(a) ? "Revenu" : "Mes pubs"; track("Objectif"); reponse();
+    });
+  });
+}
+
+/* 3. Réponse adaptée + exemples */
+function reponse() {
+  prog(38);
+  var msg = S.but === "Revenu"
+    ? ["Bon choix 💰 Les commerçants ont besoin de vidéos pub <b>tous les jours</b>.", "Avec cette compétence, tu peux leur créer des vidéos IA et te faire payer pour chaque vidéo."]
+    : ["Parfait 👌 Plus besoin de payer un vidéaste ni de te filmer.", "Tu crées tes pubs toi-même, quand tu veux, avec juste ton téléphone."];
+  bot(msg.concat(["Regarde ce qu'on peut faire 👇"]), function () {
+    var g = CFG.exemples.map(function (u, i) {
+      return '<div class="ex">' + (u ? '<video src="' + u + '" muted loop autoplay playsinline></video>' : '') + '<span>Exemple ' + (i + 1) + '</span></div>';
+    }).join("");
+    card('<h4>Vidéos 100 % IA</h4><div class="gal">' + g + '</div>');
+    ask(["Je veux savoir faire ça", "J'ai une question avant"], function (a) {
+      if (/question/.test(a)) return faq();
+      offre();
+    });
+  });
+}
+
+/* 4. Objections */
+function faq() {
+  prog(50);
+  bot(["Vas-y, c'est quoi ta question ?"], function () {
+    ask(["J'ai juste un téléphone", "Je suis débutant(e)", "Autre question"], function (a) {
+      if (/Autre/.test(a)) return autre();
+      var r = /téléphone/.test(a)
+        ? "Pas de souci 📱 Tout se fait <b>sur téléphone</b>, pas besoin d'ordinateur."
+        : "C'est fait pour toi 🙌 On part de zéro, étape par étape, en vidéo.";
+      bot([r], function () { ask(["Ok, je continue", "Une autre question"], function (b) { if (/autre/i.test(b)) return faq(); offre(); }); });
+    });
+  });
+}
+
+/* 5. Offre */
+function offre() {
+  prog(62); track("Offre vue"); px("OffreVue", {}, true);
+  bot(["Voici tout ce que tu reçois 👇"], function () {
+    card('<h4>Formation Vidéos IA</h4><ul>' +
+      '<li>8 vidéos de formation, pas à pas</li>' +
+      '<li>Créer ton personnage réaliste</li>' +
+      '<li>Écrire des scripts qui vendent</li>' +
+      '<li>Générer et monter tes vidéos</li>' +
+      '<li>Trouver des clients</li>' +
+      '<li class="bn"><b>Bonus :</b> accès Google AI Pro offert</li>' +
+      '<li class="bn"><b>Bonus :</b> groupe d\'entraide WhatsApp</li>' +
+      '</ul><div style="margin-top:6px">Prix de lancement : <span class="price">' + fmt(CFG.prix) + '</span></div>');
+    ask(["Oui, je prends ma place", "J'ai une question"], function (a) {
+      if (/question/.test(a)) return faq();
+      contact();
+    });
+  });
+}
+
+/* 6. Prénom + WhatsApp (juste avant le récap) */
+var PAYS = [
+  { n: "🇧🇫 +226", p: "Burkina", c: "226", l: [8] },
+  { n: "🇨🇮 +225", p: "Côte d'Ivoire", c: "225", l: [10] },
+  { n: "🇸🇳 +221", p: "Sénégal", c: "221", l: [9] },
+  { n: "🇧🇯 +229", p: "Bénin", c: "229", l: [8, 10] },
+  { n: "🇹🇬 +228", p: "Togo", c: "228", l: [8] }
+];
+function contact() {
+  prog(78);
+  bot(["Super ! 🎉 C'est quoi ton prénom et ton numéro WhatsApp ?", "C'est là que je t'envoie ton accès et le lien du groupe."], function () {
+    dock.innerHTML = '<div class="form">' +
+      '<input class="fld" id="fnom" autocomplete="given-name" placeholder="Ton prénom" aria-label="Ton prénom">' +
+      '<div class="tel"><select class="fld" id="fpays" aria-label="Ton pays">' + PAYS.map(function (p, i) { return '<option value="' + i + '">' + p.n + '</option>'; }).join("") + '</select>' +
+      '<input class="fld" id="ftel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Numéro WhatsApp" aria-label="Ton numéro WhatsApp"></div>' +
+      '<button class="cta" id="okc">Continuer</button></div>';
+    var t = document.getElementById("ftel");
+    document.getElementById("okc").onclick = contactOk;
+    t.addEventListener("keydown", function (e) { if (e.key === "Enter") contactOk(); });
+  });
+}
+function contactOk() {
+  var f = document.getElementById("fnom"), t = document.getElementById("ftel"), p = PAYS[+document.getElementById("fpays").value];
+  var nom = f.value.trim(), d = t.value.replace(/\D/g, "");
+  if (d.indexOf(p.c) === 0 && p.l.indexOf(d.length) < 0) d = d.slice(p.c.length);
+  var okNom = /[a-zA-ZÀ-ÿ]{2,}/.test(nom);
+  var okTel = p.l.indexOf(d.length) >= 0 && !/^(\d)\1+$/.test(d);
+  if (!okNom) { f.style.borderColor = "#B42335"; f.placeholder = "Écris ton prénom"; f.focus(); return; }
+  if (!okTel) { t.style.borderColor = "#B42335"; t.value = ""; t.placeholder = "Vérifie ton numéro (" + p.l.join(" ou ") + " chiffres)"; t.focus(); return; }
+  S.nom = nom; S.pays = p.p; S.tel = "+" + p.c + " " + d.replace(/(\d{2})(?=\d)/g, "$1 ");
+  send({ type: "lead", step: "Numéro donné", nom: S.nom, tel: S.tel, prix: CFG.prix, zone: S.pays, lieu: S.but });
+  px("Lead", { content_name: PROD });
+  dock.innerHTML = "";
+  recap();
+}
+
+/* 7. Récap + paiement */
+function recap() {
+  prog(92);
+  bot(["Merci " + esc(S.nom) + " ! Voici ton récap 👇"], function () {
+    card('<div class="recu">' +
+      '<div><span>Formation Vidéos IA (8 vidéos)</span><span>' + fmt(CFG.prix) + '</span></div>' +
+      '<div><span>Accès Google AI Pro</span><span class="off">Offert</span></div>' +
+      '<div><span>Groupe d\'entraide WhatsApp</span><span class="off">Offert</span></div>' +
+      '<div class="tot"><span>Total à payer</span><span>' + fmt(CFG.prix) + '</span></div></div>');
+    dock.innerHTML = '<div class="form">' +
+      '<button class="cta" id="go">Payer ' + fmt(CFG.prix) + '</button>' +
+      '<p class="note">Orange Money, Moov, Wave, MTN…<br>Ton accès est envoyé <b>tout de suite</b> après le paiement.</p>' +
+      '<button class="qlink" id="q">J\'ai une question</button></div>';
+    document.getElementById("go").onclick = payer;
+    document.getElementById("q").onclick = autre;
+  });
+}
+function payer() {
+  send({ type: "order", nom: S.nom, tel: S.tel, prix: CFG.prix, zone: S.pays, lieu: S.but });
+  px("InitiateCheckout", { value: CFG.prix, currency: "XOF", num_items: 1 });
+  prog(100);
+  if (!CFG.paiement) { subt.innerHTML = "⚠️ Lien de paiement pas encore configuré."; return; }
+  subt.innerHTML = "Je t'ouvre la page de paiement… 💳";
+  setTimeout(function () { goTop(CFG.paiement); }, 300);
+}
+function autre() {
+  track("Question");
+  var url = "https://api.whatsapp.com/send?phone=" + CFG.wa + "&text=" + encodeURIComponent("Bonjour, j'ai une question sur la formation vidéos IA : ");
+  bot(["Écris-moi ta question sur WhatsApp, je te réponds vite."], function () {
+    dock.innerHTML = '<div class="form"><a class="cta" href="' + url + '" target="_top" rel="noopener">Poser ma question sur WhatsApp</a><button class="qlink" onclick="start()">Revenir au début</button></div>';
+  });
+}
+
+document.body.classList.add("drb-on");
+start();
+</script>
