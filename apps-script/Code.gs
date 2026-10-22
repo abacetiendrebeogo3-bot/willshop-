@@ -17,6 +17,12 @@ function doGet() {
 
 // API JSON pour l'app WillShop
 function doPost(e) {
+  // Webhook Evolution API (WhatsApp de la commerciale) : ?k=<clé secrète>
+  if (e && e.parameter && e.parameter.k) {
+    var res;
+    try { res = waWebhook_(e); } catch (err) { res = { ok: false, error: String(err && err.message || err) }; }
+    return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+  }
   var out;
   try {
     var body = JSON.parse(e.postData.contents);
@@ -120,6 +126,80 @@ function tasks_(days) {
   return sh.getRange(2, 1, n - 1, 7).getDisplayValues().map(function (r, i) {
     return { id: i + 2, date: r[0], qui: r[1], type: r[2], cle: r[3], faite: r[4], note: r[5], par: r[6] };
   }).filter(function (t) { return keep[t.date] || (t.type === "libre" && !t.faite); });
+}
+
+// ---------- WhatsApp (Superviseur) ----------
+// Onglet « Messages » : Date (ISO) · Tél · Nom · Sens (IN/OUT) · Texte · Type · ID
+// Onglet « Suivi WA » : Tél · État (perso / pause) · Jusqu'à (ISO) · Par · Le
+function waKey_() {
+  var pr = PropertiesService.getScriptProperties(), k = pr.getProperty("WA_KEY");
+  if (!k) { k = Utilities.getUuid().replace(/-/g, ""); pr.setProperty("WA_KEY", k); }
+  return k;
+}
+function msgSheet_() {
+  var ss = ss_(), sh = ss.getSheetByName("Messages");
+  if (!sh) { sh = ss.insertSheet("Messages"); sh.appendRow(["Date", "Tél", "Nom", "Sens", "Texte", "Type", "ID"]); sh.setFrozenRows(1); sh.getRange("A:B").setNumberFormat("@"); }
+  return sh;
+}
+function suiviSheet_() {
+  var ss = ss_(), sh = ss.getSheetByName("Suivi WA");
+  if (!sh) { sh = ss.insertSheet("Suivi WA"); sh.appendRow(["Tél", "État", "Jusqu'à", "Par", "Le"]); sh.setFrozenRows(1); sh.getRange("A:A").setNumberFormat("@"); }
+  return sh;
+}
+function waText_(m) {
+  if (!m) return null;
+  if (m.ephemeralMessage) m = m.ephemeralMessage.message || m;
+  if (m.viewOnceMessage) m = m.viewOnceMessage.message || m;
+  if (m.conversation) return { t: m.conversation, k: "texte" };
+  if (m.extendedTextMessage) return { t: m.extendedTextMessage.text || "", k: "texte" };
+  if (m.imageMessage) return { t: "[Photo] " + (m.imageMessage.caption || ""), k: "image" };
+  if (m.videoMessage) return { t: "[Vidéo] " + (m.videoMessage.caption || ""), k: "video" };
+  if (m.audioMessage) return { t: "[Vocal]", k: "audio" };
+  if (m.documentMessage) return { t: "[Document] " + (m.documentMessage.fileName || ""), k: "document" };
+  if (m.stickerMessage) return { t: "[Sticker]", k: "sticker" };
+  if (m.contactMessage) return { t: "[Contact]", k: "contact" };
+  if (m.locationMessage) return { t: "[Position]", k: "position" };
+  if (m.buttonsResponseMessage) return { t: m.buttonsResponseMessage.selectedDisplayText || "", k: "texte" };
+  if (m.listResponseMessage) return { t: m.listResponseMessage.title || "", k: "texte" };
+  return null; // réactions, messages supprimés, protocole… : ignorés
+}
+function waWebhook_(e) {
+  if (String(e.parameter.k) !== waKey_()) return { ok: false, error: "clé" };
+  var body = JSON.parse((e.postData && e.postData.contents) || "{}");
+  var ev = String(body.event || "").toLowerCase().replace(/_/g, ".");
+  if (ev && ev !== "messages.upsert" && ev !== "send.message") return { ok: true, ignored: ev };
+  var list = body.data && body.data.messages ? body.data.messages : (Array.isArray(body.data) ? body.data : [body.data]);
+  var rows = [], cache = CacheService.getScriptCache();
+  list.forEach(function (d) {
+    if (!d || !d.key) return;
+    var jid = String(d.key.remoteJid || "");
+    if (/@lid$/.test(jid)) jid = String(d.key.remoteJidAlt || d.key.senderPn || d.senderPn || "");
+    if (!/@s\.whatsapp\.net$/.test(jid)) return; // groupes, statuts, chaînes : ignorés
+    var tel = jid.split("@")[0].split(":")[0].replace(/\D/g, "");
+    if (tel.length < 8) return;
+    var x = waText_(d.message); if (!x) return;
+    var id = String(d.key.id || "");
+    if (id && cache.get("wa_" + id)) return;
+    if (id) cache.put("wa_" + id, "1", 21600);
+    var ts = Number(d.messageTimestamp) ? new Date(Number(d.messageTimestamp) * 1000) : new Date();
+    var out = !!d.key.fromMe;
+    rows.push([ts.toISOString(), tel, out ? "" : String(d.pushName || "").slice(0, 60), out ? "OUT" : "IN", String(x.t).slice(0, 1000), x.k, id]);
+  });
+  if (!rows.length) return { ok: true, saved: 0 };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try { var sh = msgSheet_(); sh.getRange(sh.getLastRow() + 1, 1, rows.length, 7).setValues(rows); }
+  finally { lock.releaseLock(); }
+  return { ok: true, saved: rows.length };
+}
+function waData_(days) {
+  var sh = msgSheet_(), n = sh.getLastRow(), since = new Date(Date.now() - days * 86400000).toISOString();
+  var from = Math.max(2, n - 8000);
+  var msgs = n < 2 ? [] : sh.getRange(from, 1, n - from + 1, 6).getDisplayValues().filter(function (r) { return r[0] >= since; })
+    .map(function (r) { return [r[0], r[1], r[2], r[3], r[4]]; });
+  var su = suiviSheet_(), sn = su.getLastRow();
+  var suivi = sn < 2 ? [] : su.getRange(2, 1, sn - 1, 3).getDisplayValues();
+  var last = msgs.length ? msgs[msgs.length - 1][0] : "";
+  return { msgs: msgs, suivi: suivi, last: last, total: Math.max(0, n - 1) };
 }
 
 function api(action, cred, p) {
@@ -367,6 +447,28 @@ function api(action, cred, p) {
       return { ok: true };
     } finally { lk4.releaseLock(); }
   }
+  if (action === "waData") {
+    if (role === "driver") throw new Error("Réservé à la direction et aux commerciaux");
+    return waData_(Math.min(Number(p.days) || 14, 30));
+  }
+  if (action === "waMark") {
+    if (role === "driver") throw new Error("Réservé à la direction et aux commerciaux");
+    var wt = String(p.tel || "").replace(/\D/g, ""), etat = String(p.etat || "");
+    if (wt.length < 8 || ["perso", "pause", "reactiver"].indexOf(etat) < 0) throw new Error("Paramètres invalides");
+    var until = etat === "pause" ? new Date(Date.now() + (Number(p.heures) || 3) * 3600000).toISOString() : "";
+    var su = suiviSheet_(), sn = su.getLastRow();
+    var tels = sn < 2 ? [] : su.getRange(2, 1, sn - 1, 1).getDisplayValues().map(function (r) { return r[0]; });
+    var at = tels.indexOf(wt);
+    var line = [wt, etat === "reactiver" ? "" : etat, until, me.nom, stamp_()];
+    if (at >= 0) su.getRange(at + 2, 1, 1, 5).setValues([line]); else su.appendRow(line);
+    if (etat === "perso") journal_(me.nom, "WhatsApp : contact marqué perso", "", wt, "");
+    return { ok: true, until: until };
+  }
+  if (action === "waKey") {
+    if (role !== "ceo") throw new Error("Réservé à la direction");
+    return { key: waKey_(), url: ScriptApp.getService().getUrl() };
+  }
+
   if (action === "taskAdd") {
     if (role !== "ceo") throw new Error("Réservé à la direction");
     var texte = String(p.texte || "").trim().slice(0, 200), qui = String(p.qui || "").trim();

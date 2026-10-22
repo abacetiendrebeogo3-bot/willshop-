@@ -65,6 +65,13 @@
 - **Fidélisation** : clients livrés relancés à J+3, J+10, J+25 et J+45 après la livraison (`FID_STEPS`, `T_FID`, `fidStep()`), jetons `F+3`… dans la colonne K. Bulle « Fidélisation ». Le tag « Ne pas relancer » les bloque.
 - **Tags clients** : enregistrés au début de la colonne J (Note) sous la forme `[Tags: VIP, Fidèle]` ; `tagsOf()` les lit, `noteText()` donne la note sans les tags.
 
+## 8. Superviseur WhatsApp (22/10)
+- **But** : lire le WhatsApp de la commerciale (connecté par QR code via Evolution API, serveur Railway) et lui dire qui répondre ou relancer. **Lecture seule** : rien n'est jamais envoyé depuis ce numéro (risque de bannissement), la commerciale envoie elle-même avec le bouton « Écrire ».
+- **Flux** : Evolution → webhook `MESSAGES_UPSERT` → pont Apps Script `doPost` avec `?k=<clé>` (`waWebhook_`) → onglet **Messages** (Date ISO · Tél · Nom · Sens IN/OUT · Texte · Type · ID). Onglet **Suivi WA** (Tél · État perso/pause · Jusqu'à · Par · Le).
+- **Pont** : actions `waData` (messages 14 j + suivi), `waMark` (perso / pause / reactiver), `waKey` (Direction : clé secrète du webhook, créée toute seule dans les propriétés du script).
+- **Vercel** : `api/whatsapp.js` (Direction : statut, QR code, déconnexion ; variables `EVOLUTION_API_URL`, `EVOLUTION_API_KEY`, `WA_INSTANCE` facultatif) et `api/relance.js` (bouton « Rédiger avec l'IA », variables `OPENAI_API_KEY`, `OPENAI_SUPERVISOR_MODEL` facultatif).
+- **App** : onglet `wa` « WhatsApp » (Direction et commerciale). Moteur entre `/* SV-ENGINE-START */` et `/* SV-ENGINE-END */` (`svEvaluate`, `svBuild`) : jamais répondu, attend une réponse, promesse dite sur WhatsApp, intéressé sans commande, ne répond plus. Les relances liées à une commande restent dans « Ma journée ».
+
 ## 7. Chantiers à faire (par ordre de priorité)
 
 ### A. Checklist et suivi de la commerciale — ✅ FAIT le 19/10 (pont v5)

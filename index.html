@@ -492,6 +492,16 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 .crm-fid-banner{background:var(--bx-soft);border:1px solid var(--bx);border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px}
 .crm-hist-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
 .crm-hist-item:last-child{border-bottom:none}
+/* Superviseur WhatsApp */
+.banner.warn{background:var(--warn-soft);color:var(--ink)}
+.sv-card{--c:var(--mut);--s:var(--sunk);border-left:4px solid var(--c)}
+.sv-card.k-red{--c:var(--bad);--s:var(--bad-soft)} .sv-card.k-orange{--c:var(--warn);--s:var(--warn-soft)} .sv-card.k-gold{--c:var(--gold-fill);--s:var(--gold-soft)}
+.sv-pill{background:var(--s);color:var(--c);margin-top:0}
+.sv-msg{background:var(--gold-soft);box-shadow:inset 0 0 0 1px var(--gold-fill)}
+.sv-ai-res{display:flex;gap:6px;align-items:flex-start;color:var(--bx)} .sv-ai-res svg{width:15px;height:15px;flex:none;margin-top:2px}
+.sv-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bad);margin-right:7px;vertical-align:1px} .sv-dot.on{background:var(--ok)} .sv-dot.wait{background:var(--gold-fill)}
+.sv-qr{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.sv-qr img{width:240px;max-width:100%;aspect-ratio:1;background:#fff;border-radius:12px;padding:8px;border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -560,11 +570,12 @@ const ICONS = {
   day: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   runs: '<path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
   history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
-  stock: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>'
+  stock: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  wa: '<path d="M21 11.5a8.4 8.4 0 0 1-12.5 7.4L3 20.5l1.6-5.3A8.5 8.5 0 1 1 21 11.5z"/><path d="M9 10h.01M12.5 10h.01M16 10h.01"/>'
 };
 const ROLES = {
-  ceo:    [["home", "Accueil"], ["orders", "Commandes"], ["stock", "Stock"], ["team", "Équipe"], ["ai", "Assistant"]],
-  sales:  [["day", "Ma journée"], ["home", "Accueil"], ["orders", "Commandes"], ["clients", "Clients"], ["ai", "Assistant"]],
+  ceo:    [["home", "Accueil"], ["wa", "WhatsApp"], ["orders", "Commandes"], ["stock", "Stock"], ["team", "Équipe"], ["ai", "Assistant"]],
+  sales:  [["day", "Ma journée"], ["wa", "WhatsApp"], ["home", "Accueil"], ["orders", "Commandes"], ["clients", "Clients"], ["ai", "Assistant"]],
   driver: [["runs", "Livraisons"], ["history", "Historique"]]
 };
 const I_WA = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3c-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>';
@@ -743,6 +754,7 @@ async function load(quiet) {
     lastSync = new Date();
     document.getElementById("sync").textContent = myName + " · " + lastSync.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
     banner(""); render();
+    if ((realRole || role) !== "driver") loadSv(true);
   } catch (e) {
     if (!e.net && /PIN|essais/i.test(e.message)) { logout("Ton code a changé. Reconnecte-toi."); }
     else { banner("Pas de connexion pour le moment. Les dernières données restent affichées."); document.getElementById("sync").textContent = "Hors ligne"; }
@@ -2703,10 +2715,218 @@ function prefillOrderForClient(cleanTel) {
   }, 120);
 }
 
+/* ---------- Superviseur WhatsApp ----------
+   Lit le WhatsApp de la commerciale (Evolution API → onglet « Messages » du Sheet) et dit qui répondre / relancer.
+   Lecture seule : rien n'est envoyé automatiquement, la commerciale envoie elle-même depuis son téléphone.
+   Les relances liées aux commandes (J+1, veille, fidélisation…) restent gérées par « Ma journée ». */
+/* SV-ENGINE-START */
+const SV_MIN = 60000, SV_H = 3600000, SV_D = 86400000;
+const SV_PROMISE = [/\bdemain\b/i, /apr[eè]s[- ]demain/i, /plus tard/i, /je (vais|vai) (voir|r[ée]fl[ée]chir|vous (rappeler|[ée]crire|revenir))/i, /je (vous |te )?reviens/i, /je (vous |te )?rappelle/i, /fin du mois/i, /quand j'?aurai/i, /la semaine prochaine/i, /ce (soir|week[- ]?end)/i, /\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b/i];
+const SV_INTEREST = [/\bprix\b/i, /combien/i, /[cç]a co[uû]te/i, /\btarif/i, /livraison/i, /disponible/i, /je (veux|voudrais|prends|commande)/i, /command/i, /comment (on|je) (fait|fais|utilise)/i, /\bint[ée]ress/i, /\bc'?est quoi\b/i];
+const SV_ACK = /^(ok+|okay|d'?accord|dac+|merci( beaucoup| bien)?|bien re[cç]u|👍|🙏|👌|ok merci|super|cool|ça marche|ca marche)[\s!.🙏👍]*$/i;
+const SV_ACTIVE = /^(nouv|confirm|en livr|reprog|injoig|échec|echec|promesse)/i;
+const svKey = t => String(t || "").replace(/\D/g, "").slice(-8);
+function svFirst(n) { n = String(n || "").trim(); return !n || /^[+\d]/.test(n) || /^client/i.test(n) ? "" : n.split(/\s+/)[0]; }
+function svHello(n) { const f = svFirst(n); return f ? "Bonjour " + f : "Bonjour"; }
+function svSince(ms) { const m = ms / SV_MIN; if (m < 60) return Math.max(1, Math.round(m)) + " min"; const h = m / 60; if (h < 24) return Math.round(h) + " h"; const d = Math.round(h / 24); return d + " jour" + (d > 1 ? "s" : ""); }
+function svPromiseDue(text, at) {
+  const t = String(text || "").toLowerCase(), b = at.getTime();
+  if (/apr[eè]s[- ]demain/.test(t)) return new Date(b + 2 * SV_D);
+  if (/\bdemain\b/.test(t)) return new Date(b + SV_D);
+  if (/ce soir/.test(t)) return new Date(b + 6 * SV_H);
+  if (/semaine prochaine/.test(t)) return new Date(b + 7 * SV_D);
+  if (/fin du mois/.test(t)) return new Date(b + 5 * SV_D);
+  return new Date(b + SV_D);
+}
+// c = { tel, nom, msgs:[{at:Date, out:bool, text}], etat, until:Date|null } ; ords = lignes du Sheet pour ce numéro
+function svEvaluate(c, ords, now) {
+  now = now || new Date();
+  if (c.etat === "perso") return null;
+  if (c.until && c.until > now) return null;
+  const msgs = c.msgs; if (!msgs.length) return null;
+  const last = msgs[msgs.length - 1];
+  const lastIn = [...msgs].reverse().find(m => !m.out);
+  const hasOut = msgs.some(m => m.out);
+  const live = (ords || []).filter(o => !/^annul/i.test(o.statut || ""));
+  const active = live.some(o => SV_ACTIVE.test(o.statut || "") || o.type === "promesse");
+  const nom = c.nom || "";
+  const mk = (type, prio, titre, raison, ms, texte) => ({ tel: c.tel, nom, type, prio, titre, raison, ms, texte, lastIn: lastIn ? lastIn.text : "", inSheet: live.length > 0 });
+
+  // 1. Le client attend une réponse
+  if (!last.out) {
+    const w = now - last.at;
+    if (!SV_ACK.test(String(last.text || "").trim()) && w >= 15 * SV_MIN && w <= 7 * SV_D) {
+      if (!hasOut) return mk("jamais", "urgent", "Jamais répondu", `A écrit il y a ${svSince(w)}, n'a reçu aucune réponse.`, w, `${svHello(nom)} 😊 merci pour votre message ! Je suis là pour vous aider. Qu'est-ce qui vous intéresse ?`);
+      return mk("attente", w >= 2 * SV_H ? "urgent" : "haute", "Attend une réponse", `Attend une réponse depuis ${svSince(w)}.`, w, `${svHello(nom)}, désolée pour l'attente 🙏 Je reviens vers vous tout de suite.`);
+    }
+  }
+  if (active) return null; // une commande ou une promesse existe : « Ma journée » s'en occupe
+
+  // 2. Promesse dite sur WhatsApp, pas notée dans l'app
+  const lastOrderAt = live.reduce((t, o) => Math.max(t, o.date ? o.date.getTime() : 0), 0);
+  const prom = [...msgs].reverse().find(m => !m.out && SV_PROMISE.some(p => p.test(m.text || "")));
+  if (prom && prom.at.getTime() > lastOrderAt) {
+    const due = svPromiseDue(prom.text, prom.at), age = now - prom.at;
+    const relancee = msgs.some(m => m.out && m.at >= due);
+    if (now >= due && !relancee && age <= 10 * SV_D) return mk("promesse", "haute", "Promesse à relancer", `Avait dit : « ${String(prom.text).slice(0, 70)} » il y a ${svSince(age)}.`, age, `${svHello(nom)} 😊 comme convenu je reviens vers vous. On programme votre livraison pour aujourd'hui ?`);
+  }
+
+  // 3. Intéressé, pas de commande, ne répond plus
+  if (last.out) {
+    const s = now - last.at;
+    const interest = msgs.find(m => !m.out && SV_INTEREST.some(p => p.test(m.text || "")));
+    const orderedAfter = interest && live.some(o => o.date && o.date >= interest.at);
+    if (interest && !orderedAfter && s >= 6 * SV_H && s <= 7 * SV_D) return mk("interesse", "haute", "Intéressé, pas commandé", `A demandé le prix ou la livraison, puis ne répond plus depuis ${svSince(s)}.`, s, `${svHello(nom)} 😊 je reviens vers vous pour le produit. Il en reste encore quelques-uns, je vous en réserve un ? La livraison est à 1 000 F partout à Ouaga.`);
+    const recentDelivery = live.some(o => /^livr/i.test(o.statut || "") && o.livreeLe && now - o.livreeLe < 3 * SV_D);
+    if (lastIn && !recentDelivery && s >= SV_D && s <= 7 * SV_D) return mk("silence", "normale", "Ne répond plus", `Dernier message envoyé il y a ${svSince(s)}, sans réponse.`, s, `${svHello(nom)}, j'espère que vous allez bien 😊 Avez-vous eu le temps de réfléchir ? Je reste disponible pour vos questions.`);
+  }
+  return null;
+}
+// data = réponse de waData ; allOrders = commandes de l'app
+function svBuild(data, allOrders, now) {
+  now = now || new Date();
+  const byTel = {};
+  (data.msgs || []).forEach(r => {
+    const tel = String(r[1] || ""), at = new Date(r[0]); if (!tel || isNaN(at)) return;
+    const c = byTel[tel] || (byTel[tel] = { tel, nom: "", msgs: [], etat: "", until: null });
+    if (r[2] && r[3] === "IN") c.nom = r[2];
+    c.msgs.push({ at, out: r[3] === "OUT", text: r[4] || "" });
+  });
+  const suivi = {}; (data.suivi || []).forEach(s => { suivi[svKey(s[0])] = { etat: s[1], until: s[2] ? new Date(s[2]) : null }; });
+  const ordsBy = {}; (allOrders || []).forEach(o => { const k = svKey(o.tel); if (k.length === 8) (ordsBy[k] = ordsBy[k] || []).push(o); });
+  const rank = { urgent: 0, haute: 1, normale: 2 };
+  return Object.values(byTel).map(c => {
+    c.msgs.sort((a, b) => a.at - b.at);
+    const k = svKey(c.tel), s = suivi[k]; if (s) { c.etat = s.etat; c.until = s.until && !isNaN(s.until) ? s.until : null; }
+    const ords = ordsBy[k] || [];
+    if (!c.nom) { const o = ords.find(x => x.nom); if (o) c.nom = o.nom; }
+    const a = svEvaluate(c, ords, now);
+    if (a) { a.msgs = c.msgs; a.orders = ords; }
+    return a;
+  }).filter(Boolean).sort((a, b) => rank[a.prio] - rank[b.prio] || b.ms - a.ms);
+}
+/* SV-ENGINE-END */
+
+let svData = null, svAt = 0, svLoading = false, svErr = "", svFilter = "all", svHidden = {}, svAi = {}, svAiBusy = "", svWa = null, svWaBusy = false, svQr = null, svPoll = 0, svAiReady = false;
+fetch("api/relance").then(r => r.json()).then(j => { svAiReady = !!(j && j.ready); }).catch(() => {});
+async function loadSv(quiet) {
+  if (!cred || svLoading || (realRole || role) === "driver") return;
+  svLoading = true; if (!quiet && tab === "wa") render();
+  try { svData = await api("waData", { days: 14 }); svAt = Date.now(); svErr = ""; }
+  catch (e) { svErr = e.message || "Erreur"; }
+  finally { svLoading = false; if (tab === "wa" || !quiet) render(); else renderTabs(); }
+}
+function svAlerts() { return svData ? svBuild(svData, orders).filter(a => !(svHidden[a.tel] && svHidden[a.tel] > Date.now())) : []; }
+function svBadge() { return svAlerts().filter(a => a.prio === "urgent").length; }
+async function svMark(tel, etat, heures) {
+  svHidden[tel] = Date.now() + (etat === "perso" ? 365 * SV_D : (heures || 3) * SV_H); render();
+  try { await api("waMark", { tel, etat, heures }); toast(etat === "perso" ? "Contact perso : il ne sera plus signalé" : "Remis à plus tard"); if (svData && svData.suivi) svData.suivi.push([tel, etat, etat === "pause" ? new Date(Date.now() + (heures || 3) * SV_H).toISOString() : ""]); }
+  catch (e) { delete svHidden[tel]; render(); banner("Pas enregistré : " + esc(e.message)); }
+}
+async function svAskAi(a, btn) {
+  svAiBusy = a.tel; render();
+  try {
+    const r = await fetch("api/relance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cred, situation: a.titre + " — " + a.raison, nom: a.nom, messages: a.msgs.slice(-25).map(m => ({ at: m.at.toISOString(), out: m.out, text: m.text })), orders: a.orders.map(o => ({ produit: o.produit, statut: o.statut, prix: o.prix })) }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || "Erreur IA");
+    if (j.message) svAi[a.tel] = { texte: j.message, resume: j.resume || "" };
+  } catch (e) { banner("IA : " + esc(e.message)); }
+  finally { svAiBusy = ""; render(); }
+}
+async function svWaCall(action) {
+  const r = await fetch("api/whatsapp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cred, action }) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || "Erreur");
+  return j;
+}
+async function svWaStatus() { try { svWa = await svWaCall("status"); } catch (e) { svWa = { state: "erreur", error: e.message }; } render(); }
+async function svWaConnect() {
+  svWaBusy = true; render();
+  try {
+    const j = await svWaCall("connect"); svWa = j;
+    if (j.state === "attente") { svQr = { qr: j.qr, pairing: j.pairing }; clearInterval(svPoll); let n = 0;
+      svPoll = setInterval(async () => { n++; try { const s = await svWaCall("status"); if (s.state === "connecte" || n > 40) { clearInterval(svPoll); svQr = null; svWa = s; if (s.state === "connecte") { toast("WhatsApp connecté ✓"); setTimeout(() => loadSv(true), 4000); } render(); } } catch (e) {} }, 3000); }
+  } catch (e) { banner(esc(e.message)); }
+  finally { svWaBusy = false; render(); }
+}
+async function svWaDisconnect() {
+  if (!confirm("Déconnecter le WhatsApp de la commerciale de l'app ? Son WhatsApp continue de marcher normalement sur son téléphone.")) return;
+  svWaBusy = true; render();
+  try { svWa = await svWaCall("disconnect"); toast("WhatsApp déconnecté"); } catch (e) { banner(esc(e.message)); }
+  finally { svWaBusy = false; render(); }
+}
+function svConnCard() {
+  if (realRole !== "ceo") return "";
+  if (!svWa) { setTimeout(svWaStatus, 0); svWa = { state: "…" }; }
+  const st = svWa.state;
+  const label = st === "connecte" ? `Connecté${svWa.phone ? " · " + esc(svWa.phone) : ""}${svWa.name ? " (" + esc(svWa.name) + ")" : ""}` : st === "attente" ? "En attente du scan" : st === "absent" || st === "deconnecte" ? "Pas connecté" : st === "erreur" ? esc(svWa.error || "Erreur") : "Vérification…";
+  const qr = svQr ? `<div class="sv-qr">${svQr.qr ? `<img alt="QR code WhatsApp" src="${svQr.qr.startsWith("data:") ? svQr.qr : "data:image/png;base64," + svQr.qr}">` : ""}
+      ${svQr.pairing ? `<p class="meta">Ou code d'association : <b>${esc(svQr.pairing)}</b></p>` : ""}
+      <p class="meta">Sur le téléphone de la commerciale : WhatsApp → ⋮ → <b>Appareils connectés</b> → <b>Connecter un appareil</b> → scanner ce code.</p></div>` : "";
+  return `<article class="card sv-conn"><div class="c-top"><div><div class="eyebrow">WhatsApp de la commerciale</div><div class="who" style="font-size:15px;margin-top:6px"><span class="sv-dot ${st === "connecte" ? "on" : st === "attente" ? "wait" : ""}"></span>${label}</div>
+      <div class="meta">Lecture seule : l'app lit les discussions, elle n'envoie jamais rien depuis ce numéro.</div></div></div>
+    ${qr}
+    <div class="actions">${st === "connecte" ? `<button class="btn small ghost" id="svDisc" ${svWaBusy ? "disabled" : ""}>Déconnecter</button>` : `<button class="btn small pri" id="svConn" ${svWaBusy ? "disabled" : ""}>${svWaBusy ? "Préparation…" : svQr ? "Nouveau QR code" : "Connecter par QR code"}</button>`}<button class="btn small ghost" id="svStat">Vérifier</button></div></article>`;
+}
+function renderSv() {
+  if (!svData && !svLoading && !svErr) setTimeout(() => loadSv(true), 0);
+  else if (svData && Date.now() - svAt > 90000 && !svLoading) setTimeout(() => loadSv(true), 0);
+  const all = svAlerts();
+  const n = { urgent: 0, haute: 0, normale: 0 }; all.forEach(a => n[a.prio]++);
+  const list = all.filter(a => svFilter === "all" || a.prio === svFilter);
+  const lastMsg = svData && svData.last ? new Date(svData.last) : null;
+  const health = !svData ? "" : !lastMsg ? `<div class="banner warn">Aucun message WhatsApp reçu pour l'instant.${realRole === "ceo" ? " Connecte le WhatsApp de la commerciale ci-dessus." : " Demande à Wilfried de connecter ton WhatsApp."}</div>`
+    : (Date.now() - lastMsg > 4 * SV_H && new Date().getHours() >= 9 && new Date().getHours() < 21) ? `<div class="banner warn">Aucun nouveau message depuis ${svSince(Date.now() - lastMsg)}. Vérifie que le WhatsApp est toujours connecté.</div>` : "";
+  const P = { urgent: ["Urgent", "k-red"], haute: ["Important", "k-orange"], normale: ["À faire", "k-gold"] };
+  const card = a => {
+    const ai = svAi[a.tel], txt = ai ? ai.texte : a.texte, [plabel, pk] = P[a.prio];
+    return `<article class="card sv-card ${pk}" data-sv="${esc(a.tel)}">
+      <div class="c-top"><div><div class="who">${esc(a.nom || "+" + a.tel)}</div><div class="meta">+${esc(a.tel)}${a.inSheet ? "" : " · pas encore dans les commandes"}</div></div>
+        <span class="pill sv-pill">${esc(a.titre)}</span></div>
+      <div class="meta" style="color:var(--ink)">${esc(a.raison)}</div>
+      ${a.lastIn ? `<div class="msg-box"><span class="eyebrow">Dernier message du client</span>${esc(String(a.lastIn).slice(0, 220))}</div>` : ""}
+      ${ai && ai.resume ? `<div class="meta sv-ai-res">${I_SPARK} ${esc(ai.resume)}</div>` : ""}
+      <div class="msg-box sv-msg"><span class="eyebrow">Message proposé</span>${esc(txt)}</div>
+      <div class="actions">
+        <a class="btn small pri" href="${esc(waLink(a.tel, txt))}" target="_blank" rel="noopener" data-sv-write="${esc(a.tel)}">${I_WA} Écrire</a>
+        <button class="btn small" data-copy="${esc(txt)}">Copier</button>
+        ${svAiReady ? `<button class="btn small ghost" data-sv-ai="${esc(a.tel)}" ${svAiBusy === a.tel ? "disabled" : ""}>${I_SPARK} ${svAiBusy === a.tel ? "L'IA écrit…" : "Rédiger avec l'IA"}</button>` : ""}
+        ${!a.inSheet ? `<button class="btn small ghost" data-sv-order="${esc(a.tel)}">+ Commande</button>` : ""}
+        <button class="btn small ghost" data-sv-pause="${esc(a.tel)}">Plus tard</button>
+        <button class="btn small ghost" data-sv-perso="${esc(a.tel)}">Perso</button>
+      </div></article>`;
+  };
+  const chips = [["all", "Tous", all.length], ["urgent", "Urgent", n.urgent], ["haute", "Important", n.haute], ["normale", "À faire", n.normale]]
+    .map(([k, l, c]) => `<button class="btn small ${svFilter === k ? "pri" : "ghost"}" data-sv-f="${k}">${l} <b>${c}</b></button>`).join("");
+  return `<h1>Superviseur</h1><p class="sub">Qui répondre et qui relancer sur WhatsApp, maintenant.${lastMsg ? ` Dernier message : ${lastMsg.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}.` : ""}</p>
+    ${svConnCard()}
+    ${health}
+    ${svErr ? `<div class="banner err">${esc(svErr)}</div>` : ""}
+    <div class="actions" style="margin:14px 0 10px">${chips}<button class="btn small ghost" id="svRefresh">${svLoading ? "Lecture…" : "Actualiser"}</button></div>
+    <div class="list">${!svData ? empty(svLoading ? "Lecture des discussions WhatsApp…" : "Chargement…") : list.length ? list.map(card).join("") : empty(all.length ? "Rien dans ce filtre." : "Tout est à jour 👏 Personne n'attend de réponse.")}</div>`;
+}
+function bindSv() {
+  const g = id => document.getElementById(id);
+  if (g("svRefresh")) g("svRefresh").onclick = () => loadSv();
+  if (g("svConn")) g("svConn").onclick = svWaConnect;
+  if (g("svDisc")) g("svDisc").onclick = svWaDisconnect;
+  if (g("svStat")) g("svStat").onclick = () => { svWa = { state: "…" }; render(); svWaStatus(); };
+  view.querySelectorAll("[data-sv-f]").forEach(b => b.onclick = () => { svFilter = b.dataset.svF; render(); });
+  view.querySelectorAll("[data-sv-write]").forEach(b => b.addEventListener("click", () => { const t = b.dataset.svWrite; setTimeout(() => { svHidden[t] = Date.now() + 10 * SV_MIN; render(); }, 600); }));
+  view.querySelectorAll("[data-sv-pause]").forEach(b => b.onclick = () => svMark(b.dataset.svPause, "pause", 3));
+  view.querySelectorAll("[data-sv-perso]").forEach(b => b.onclick = () => { if (confirm("Ce contact n'est pas un client (famille, ami…) ? Il ne sera plus jamais signalé.")) svMark(b.dataset.svPerso, "perso"); });
+  view.querySelectorAll("[data-sv-ai]").forEach(b => b.onclick = () => { const a = svAlerts().find(x => x.tel === b.dataset.svAi); if (a) svAskAi(a, b); });
+  view.querySelectorAll("[data-sv-order]").forEach(b => b.onclick = () => {
+    const a = svAlerts().find(x => x.tel === b.dataset.svOrder); if (!a) return;
+    closeOrderModal(); openOrderModal("commande", "WhatsApp direct");
+    setTimeout(() => { const t = document.getElementById("moTel"), nm = document.getElementById("moNom"); if (t) t.value = String(a.tel).replace(/^226(?=\d{8}$)/, ""); if (nm && a.nom) nm.value = a.nom; }, 120);
+  });
+}
+
 /* ---------- Rendu principal ---------- */
 function renderTabs() {
   const due = loaded ? salesBuckets() : null;
-  const badge = { day: due ? Object.values(due).reduce((n, l) => n + l.length, 0) : 0, runs: loaded ? driverOrders().filter(o => isToDeliver(o) && (deliveryDate(o) || 0) < today().getTime() + DAY).length : 0 };
+  const badge = { wa: svData ? svBadge() : 0, day: due ? Object.values(due).reduce((n, l) => n + l.length, 0) : 0, runs: loaded ? driverOrders().filter(o => isToDeliver(o) && (deliveryDate(o) || 0) < today().getTime() + DAY).length : 0 };
   document.getElementById("tabs").innerHTML = ROLES[role].map(([k, l]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>${l}${badge[k] ? `<span class="badge">${badge[k]}</span>` : ""}</button>`).join("");
   document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => { tab = b.dataset.tab; store("ws_tab", tab + "|" + dayKey()); query = ""; panel = null; sh = null; window.scrollTo(0, 0); render(); });
   document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.role === role)));
@@ -2722,7 +2942,7 @@ function render() {
   if (false) { view.innerHTML = `<h1>Connexion</h1>${empty("Cette app lit tes commandes dans Google Sheets. Ouvre-la dans Claude pour la connecter.")}`; return; }
   if (!loaded && tab !== "ai") { view.innerHTML = `<h1>Chargement</h1>${empty("Lecture de tes commandes dans Google Sheets…")}`; return; }
   const y = window.scrollY;
-  const R = { stock: renderStock, home: renderHome, orders: renderOrders, clients: renderClients, team: renderTeam, ai: renderAI, day: renderDay, runs: renderRuns, history: renderHistory };
+  const R = { wa: renderSv, stock: renderStock, home: renderHome, orders: renderOrders, clients: renderClients, team: renderTeam, ai: renderAI, day: renderDay, runs: renderRuns, history: renderHistory };
   view.innerHTML = (R[tab] || R[ROLES[role][0][0]])() + `<p class="sub" style="text-align:center;margin-top:30px"><button class="btn small ghost" id="out">Se déconnecter</button></p>` + (sh ? sheetHtml() : "");
   bind();
   window.scrollTo(0, y);
@@ -2730,6 +2950,7 @@ function render() {
 const findO = el => orders.find(x => x.row === +el.closest("[data-row]").dataset.row);
 function bind() {
   bindSheet();
+  if (tab === "wa") bindSv();
   view.querySelectorAll("[data-dir-src]").forEach(b => b.onclick = () => { dirSourceFilter = b.dataset.dirSrc; render(); });
   view.querySelectorAll("[data-client-filter]").forEach(b => b.onclick = () => { clientFilter = b.dataset.clientFilter; render(); });
   view.querySelectorAll("[data-client-view]").forEach(b => b.onclick = () => openClientModal(b.dataset.clientView));
