@@ -592,9 +592,14 @@ const F = n => (Number(n) || 0).toLocaleString("fr-FR").replace(/[  ]/g, " ")
 const DAY = 86400000;
 const JOURS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 function parseDate(s) {
-  const m = String(s || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if (!m) { const d = new Date(s); return isNaN(d) ? null : d; }
-  return new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+  if (!s) return null;
+  const str = String(s).trim();
+  const mFr = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (mFr) return new Date(+mFr[3], +mFr[2] - 1, +mFr[1], +(mFr[4] || 0), +(mFr[5] || 0), +(mFr[6] || 0));
+  const mIso = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (mIso) return new Date(+mIso[1], +mIso[2] - 1, +mIso[3], +(mIso[4] || 12), +(mIso[5] || 0), +(mIso[6] || 0));
+  const d = new Date(str);
+  return isNaN(d) ? null : d;
 }
 const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const today = () => startOfDay(new Date());
@@ -744,7 +749,11 @@ async function load(quiet) {
   } finally { loading = false; }
 }
 function applyData(d) {
-    orders = d.rows.map(x => rowFrom(x.v, x.row - 2)).filter(o => o.produit || o.tel);
+    const fetched = d.rows.map(x => rowFrom(x.v, x.row - 2)).filter(o => o.produit || o.tel);
+    const nowTime = Date.now();
+    const pending = orders.filter(o => o.row >= 100000 && (nowTime - (o.date ? o.date.getTime() : 0)) < 1800000);
+    const stillPending = pending.filter(po => !fetched.some(fo => fo.tel === po.tel && fo.produit === po.produit && Math.abs((fo.date || 0) - (po.date || 0)) < 120000));
+    orders = [...stillPending, ...fetched];
     drivers = d.drivers || [];
     if (d.visits) { visits = d.visits.map(v => ({ date: parseDate(v[0]), produit: v[1] || "", step: v[3] || "Arrivée" })); visitsLoaded = true; }
     if (d.team) { team = d.team; teamLoaded = true; }
@@ -1488,6 +1497,7 @@ function renderHome() {
       <div class="actions">
         <button class="btn small pri" data-todo="promesse">Voir les promesses à relancer →</button>
         <button class="btn small" data-tabgo="orders" data-filter="promesses">Toutes les promesses (${ps.total})</button>
+        <button class="btn small" data-add-promesse="1" style="background:var(--hero);color:var(--gold);font-weight:700">🤝 + Ajouter une promesse</button>
       </div>
     </div>
 
@@ -1548,12 +1558,14 @@ function ordersSwitch() {
 let todoGroup = store("ws_tgroup") || "";
 function renderTodo() {
   const b = salesBuckets(), total = TODO_GROUPS.reduce((n, g) => n + b[g.k].length, 0);
+  const totalProm = orders.filter(isPromise).length;
   if (jumpGroup) { todoGroup = jumpGroup; jumpGroup = null; }
   const g = TODO_GROUPS.find(x => x.k === todoGroup && b[x.k].length) || TODO_GROUPS.find(x => b[x.k].length);
   return `<h1>Commandes</h1><p class="sub">${total ? total + " client" + (total > 1 ? "s" : "") + " à traiter. Touche une bulle, puis un client." : "Rien à faire pour le moment 👍"}</p>${ordersSwitch()}
     ${total ? `<div class="flow">${todoBubbles(b, g.k, "data-tg")}
       <section><div class="ghead"><h2>${g.t} <span class="count">${b[g.k].length}</span></h2></div><p class="ghint">${g.d}</p>
-      <div class="list grid">${b[g.k].map((x, i) => orderCard(x.o, { task: x.t })).join("")}</div></section></div>` : empty("Toutes les commandes sont à jour. Les nouvelles apparaîtront ici automatiquement.")}`;
+      <div class="list grid">${b[g.k].map((x, i) => orderCard(x.o, { task: x.t })).join("")}</div></section></div>` : empty("Toutes les commandes sont à jour. Les nouvelles apparaîtront ici automatiquement.")}
+    ${totalProm > 0 ? `<div style="margin-top:16px;text-align:center"><button class="btn small" data-tabgo="orders" data-filter="promesses">🤝 Voir toutes les promesses enregistrées (${totalProm})</button></div>` : ""}`;
 }
 function renderOrders() {
   if (ordersMode !== "all") return renderTodo();
@@ -1946,10 +1958,10 @@ function existingProducts() {
   return Array.from(map.values());
 }
 
-function openOrderModal() {
+function openOrderModal(initialType, initialSource) {
   orderModalState.open = true;
-  orderModalState.type = "commande";
-  orderModalState.source = "WhatsApp direct";
+  orderModalState.type = initialType || (filter === "promesses" ? "promesse" : "commande");
+  orderModalState.source = initialSource || "WhatsApp direct";
   orderModalState.dateRelance = getTomorrowDateStr();
   renderOrderModal();
 }
@@ -1963,12 +1975,34 @@ function closeOrderModal() {
 
 function setOrderType(t) {
   orderModalState.type = t;
-  renderOrderModal();
+  const isProm = t === "promesse";
+  const root = document.getElementById("orderModalRoot");
+  if (!root) return;
+  root.querySelectorAll("[data-mtype]").forEach(b => {
+    b.setAttribute("aria-pressed", String(b.dataset.mtype === t));
+  });
+  const pBox = document.getElementById("moPromBox");
+  if (pBox) pBox.style.display = isProm ? "block" : "none";
+  const dIn = document.getElementById("moDateRelance");
+  if (dIn) {
+    dIn.required = isProm;
+    if (isProm && !dIn.value) dIn.value = orderModalState.dateRelance || getTomorrowDateStr();
+  }
+  const title = document.getElementById("moTitle");
+  if (title) title.textContent = isProm ? "Nouvelle promesse d'achat" : "Nouvelle commande manuelle";
+  const submitBtn = document.getElementById("moSubmit");
+  if (submitBtn) {
+    submitBtn.textContent = isProm ? "🤝 Enregistrer promesse" : "✓ Enregistrer commande";
+  }
 }
 
 function setOrderSource(s) {
   orderModalState.source = s;
-  renderOrderModal();
+  const root = document.getElementById("orderModalRoot");
+  if (!root) return;
+  root.querySelectorAll("[data-msrc]").forEach(b => {
+    b.setAttribute("aria-pressed", String(b.dataset.msrc === s));
+  });
 }
 
 function setQuickRelance(days) {
@@ -2032,8 +2066,8 @@ function renderOrderModal() {
       <div class="sh-top" style="align-items:center;margin-bottom:12px">
         <span class="pic" style="background:var(--hero);color:var(--gold)">${SV(AIC.check)}</span>
         <div style="min-width:0;flex:1">
-          <h3 style="font-size:20px">${isProm ? "Nouvelle promesse d'achat" : "Nouvelle commande manuelle"}</h3>
-          <p style="font-size:13px;color:var(--mut)">Enregistrement rapide par ${esc(myName || (role === "sales" ? "Yasmine" : "Direction"))}</p>
+          <h3 id="moTitle" style="font-size:20px">${isProm ? "Nouvelle promesse d'achat" : "Nouvelle commande manuelle"}</h3>
+          <p style="font-size:13px;color:var(--mut)">Enregistrement rapide par ${esc(myName || (cred && cred.nom) || (role === "sales" ? "Yasmine" : "Direction"))}</p>
         </div>
         <button class="shx" id="moClose" aria-label="Fermer">${SV(AIC.x)}</button>
       </div>
@@ -2109,28 +2143,26 @@ function renderOrderModal() {
           </div>
         </div>
 
-        ${isProm ? `
-          <div class="prom-box">
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span class="eyebrow" style="color:var(--bx)">Relance de la promesse</span>
-              <span style="font-size:12px;color:var(--mut)">Apparaîtra dans tes rappels du jour</span>
-            </div>
-            <div>
-              <label class="flab" for="moDateRelance" style="margin-top:2px">Date de relance <b>*</b></label>
-              <input class="field" id="moDateRelance" name="dateRelance" type="date" value="${esc(orderModalState.dateRelance || getTomorrowDateStr())}" required style="background:var(--surface)">
-              <div class="quick-days">
-                <button type="button" class="quick-day" data-qday="1">Demain</button>
-                <button type="button" class="quick-day" data-qday="2">Dans 2 jours</button>
-                <button type="button" class="quick-day" data-qday="3">Dans 3 jours</button>
-                <button type="button" class="quick-day" data-qday="7">Dans 1 semaine</button>
-              </div>
-            </div>
-            <div>
-              <label class="flab" for="moPromNote">Contexte / Motif (ex : achète après sa paie)</label>
-              <input class="field" id="moPromNote" name="promNote" placeholder="Ex : Attend son salaire le 28, rappeler l'après-midi" style="background:var(--surface)">
+        <div class="prom-box" id="moPromBox" style="display:${isProm ? "block" : "none"}">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span class="eyebrow" style="color:var(--bx)">Relance de la promesse</span>
+            <span style="font-size:12px;color:var(--mut)">Apparaîtra dans tes rappels du jour</span>
+          </div>
+          <div>
+            <label class="flab" for="moDateRelance" style="margin-top:2px">Date de relance <b>*</b></label>
+            <input class="field" id="moDateRelance" name="dateRelance" type="date" value="${esc(orderModalState.dateRelance || getTomorrowDateStr())}" ${isProm ? "required" : ""} style="background:var(--surface)">
+            <div class="quick-days">
+              <button type="button" class="quick-day" data-qday="1">Demain</button>
+              <button type="button" class="quick-day" data-qday="2">Dans 2 jours</button>
+              <button type="button" class="quick-day" data-qday="3">Dans 3 jours</button>
+              <button type="button" class="quick-day" data-qday="7">Dans 1 semaine</button>
             </div>
           </div>
-        ` : ""}
+          <div>
+            <label class="flab" for="moPromNote">Contexte / Motif (ex : achète après sa paie)</label>
+            <input class="field" id="moPromNote" name="promNote" placeholder="Ex : Attend son salaire le 28, rappeler l'après-midi" style="background:var(--surface)">
+          </div>
+        </div>
 
         <div>
           <label class="flab" for="moNote">Note de commande (optionnelle)</label>
@@ -2203,7 +2235,7 @@ async function handleOrderModalSubmit(e) {
   const source = orderModalState.source || "WhatsApp direct";
   const isProm = orderModalState.type === "promesse";
   const type = isProm ? "promesse" : "commande";
-  const dateRelance = isProm ? (f.dateRelance ? f.dateRelance.value : "") : "";
+  const dateRelance = isProm ? ((f.dateRelance && f.dateRelance.value) ? f.dateRelance.value : getTomorrowDateStr()) : "";
   const promNote = isProm && f.promNote ? f.promNote.value.trim() : "";
   const extraNote = f.note ? f.note.value.trim() : "";
   const noteParts = [];
@@ -2211,39 +2243,64 @@ async function handleOrderModalSubmit(e) {
   if (extraNote) noteParts.push(extraNote);
   const note = noteParts.join(" · ");
 
-  if (!nom) { alert("Le nom du client est obligatoire."); return; }
-  if (!tel || tel === "+226") { alert("Le numéro de téléphone est obligatoire."); return; }
-  if (!produit) { alert("Veuillez choisir un produit."); return; }
-
   const btn = document.getElementById("moSubmit");
+
+  if (!nom) {
+    alert("Le nom du client est obligatoire.");
+    if (f.nom) f.nom.focus();
+    return;
+  }
+  if (!tel || tel === "+226" || tel.replace(/\D/g, "").length < 8) {
+    alert("Le numéro de téléphone est obligatoire (8 chiffres minimum).");
+    if (f.tel) f.tel.focus();
+    return;
+  }
+  if (!produit) {
+    alert("Veuillez choisir un produit.");
+    if (f.produit) f.produit.focus();
+    return;
+  }
+
   if (btn) { btn.disabled = true; btn.textContent = "Enregistrement…"; }
 
   const zone = (f.ville ? f.ville.value : "Ouagadougou").trim();
 
-  await createManualOrder({
-    nom,
-    tel,
-    produit,
-    qte,
-    prix,
-    zone,
-    lieu,
-    source,
-    type,
-    dateRelance,
-    note
-  });
+  try {
+    await createManualOrder({
+      nom,
+      tel,
+      produit,
+      qte,
+      prix,
+      zone,
+      lieu,
+      source,
+      type,
+      dateRelance,
+      note
+    });
+  } catch (err) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = isProm ? "🤝 Enregistrer promesse" : "✓ Enregistrer commande";
+    }
+  }
 }
 
 async function createManualOrder(data) {
   const isProm = data.type === "promesse";
   const now = new Date();
   const nowStr = now.toLocaleDateString("fr-FR") + " " + now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-  const creator = myName || cred.nom || (role === "sales" ? "Yasmine" : "Direction");
+  const creator = myName || (cred && cred.nom) || (role === "sales" ? "Yasmine" : "Direction");
   const tempRow = 100000 + Math.floor(Math.random() * 800000);
 
   let fullNote = data.note ? data.note.trim() : "";
   if (data.nom) fullNote = (`[Client: ${data.nom}] ` + fullNote).trim();
+
+  let parsedDateRelance = null;
+  if (isProm && data.dateRelance) {
+    parsedDateRelance = parseDate(data.dateRelance) || new Date(data.dateRelance + "T12:00:00");
+  }
 
   const optimisticOrder = {
     row: tempRow,
@@ -2271,7 +2328,7 @@ async function createManualOrder(data) {
     remisLe: null,
     source: data.source,
     type: data.type,
-    dateRelance: isProm && data.dateRelance ? new Date(data.dateRelance + "T12:00:00") : null,
+    dateRelance: parsedDateRelance,
     dateRelanceRaw: data.dateRelance || "",
     creePar: creator,
     nom: data.nom
@@ -2280,6 +2337,14 @@ async function createManualOrder(data) {
   orders.unshift(optimisticOrder);
   if (role === "ceo") {
     journal.unshift([fmtTime(now), creator, "Nouvelle " + (isProm ? "promesse" : "commande") + " (" + data.source + ")", tempRow, data.tel, data.produit + " · " + (data.nom || data.lieu)]);
+  }
+
+  if (isProm) {
+    if (tab === "orders") {
+      ordersMode = "all";
+      store("ws_omode", "all");
+      filter = "promesses";
+    }
   }
 
   closeOrderModal();
@@ -2303,9 +2368,12 @@ async function createManualOrder(data) {
     });
     if (res && res.row) {
       optimisticOrder.row = res.row;
+    } else {
+      throw new Error("Le script Google n'a pas confirmé la ligne (pense à déployer Code.gs dans Apps Script)");
     }
   } catch (err) {
-    banner("Erreur lors de l'enregistrement Google Sheet : " + esc(err.message));
+    console.error("Erreur addOrder:", err);
+    banner("⚠️ La " + (isProm ? "promesse" : "commande") + " a été ajoutée dans l'app, mais n'a pas pu être enregistrée dans Google Sheets : " + esc(err.message));
   }
 }
 
@@ -2648,7 +2716,7 @@ function render() {
   const fab = document.getElementById("fabAdd");
   if (fab) {
     fab.hidden = !cred || role === "driver";
-    fab.onclick = openOrderModal;
+    fab.onclick = () => openOrderModal(filter === "promesses" ? "promesse" : "commande");
   }
   if (!cred) return renderLogin("");
   if (false) { view.innerHTML = `<h1>Connexion</h1>${empty("Cette app lit tes commandes dans Google Sheets. Ouvre-la dans Claude pour la connecter.")}`; return; }
@@ -2666,6 +2734,7 @@ function bind() {
   view.querySelectorAll("[data-client-filter]").forEach(b => b.onclick = () => { clientFilter = b.dataset.clientFilter; render(); });
   view.querySelectorAll("[data-client-view]").forEach(b => b.onclick = () => openClientModal(b.dataset.clientView));
   view.querySelectorAll("[data-client-new-order]").forEach(b => b.onclick = () => prefillOrderForClient(b.dataset.clientNewOrder));
+  view.querySelectorAll("[data-add-promesse]").forEach(b => b.onclick = () => openOrderModal("promesse"));
   view.querySelectorAll("[data-convert]").forEach(b => b.onclick = e => { e.stopPropagation(); convertPromesse(+b.dataset.convert); });
   view.querySelectorAll("[data-postpone]").forEach(b => b.onclick = e => { e.stopPropagation(); openPostponeModal(+b.dataset.postpone); });
   view.querySelectorAll("[data-cancel-prom]").forEach(b => b.onclick = e => { e.stopPropagation(); openCancelModal(+b.dataset.cancelProm); });
@@ -2701,11 +2770,38 @@ function bind() {
   view.querySelectorAll("[data-contact]").forEach(b => b.onclick = () => taskDone("contact", b.dataset.contact, "", "Contact noté ✓"));
   view.querySelectorAll("[data-libre]").forEach(b => b.onclick = () => taskDone("libre", b.dataset.libre, "", "Tâche faite ✓"));
   view.querySelectorAll("[data-cr]").forEach(b => b.onclick = () => { const h = b.dataset.cr; window.open("https://wa.me/?text=" + encodeURIComponent(crText(h)), "_blank"); setTimeout(() => taskDone("cr", h, "", "Compte-rendu de " + h + " h noté ✓"), 600); });
-  view.querySelectorAll("[data-todo]").forEach(b => b.onclick = () => { ordersMode = "todo"; jumpGroup = b.dataset.todo; tab = "orders"; store("ws_tab", tab + "|" + dayKey()); render(); const el = document.getElementById("grp-" + jumpGroup); if (el) el.scrollIntoView({ behavior: "smooth" }); else window.scrollTo(0, 0); });
+  view.querySelectorAll("[data-todo]").forEach(b => b.onclick = () => {
+    const k = b.dataset.todo;
+    const bk = salesBuckets();
+    if (k === "promesse" && (!bk.promesse || !bk.promesse.length)) {
+      ordersMode = "all";
+      filter = "promesses";
+      store("ws_omode", "all");
+    } else {
+      ordersMode = "todo";
+      jumpGroup = k;
+    }
+    tab = "orders";
+    store("ws_tab", tab + "|" + dayKey());
+    render();
+    const el = document.getElementById("grp-" + jumpGroup);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+    else window.scrollTo(0, 0);
+  });
   view.querySelectorAll("[data-addtask]").forEach(fm => fm.onsubmit = e => { e.preventDefault(); const i = fm.querySelector("input"), v = i.value.trim(); if (!v) return; i.value = ""; taskAdd(fm.dataset.addtask, v); });
   view.querySelectorAll("[data-feed]").forEach(b => b.onclick = () => { showFeed = !showFeed; render(); });
   view.querySelectorAll("[data-scroll]").forEach(b => b.onclick = () => { const el = document.getElementById(b.dataset.scroll); if (el) el.scrollIntoView({ behavior: "smooth" }); });
-  view.querySelectorAll("[data-tabgo]").forEach(b => b.onclick = () => { tab = b.dataset.tabgo; store("ws_tab", tab + "|" + dayKey()); window.scrollTo(0, 0); render(); });
+  view.querySelectorAll("[data-tabgo]").forEach(b => b.onclick = () => {
+    tab = b.dataset.tabgo;
+    if (b.dataset.filter) {
+      filter = b.dataset.filter;
+      ordersMode = "all";
+      store("ws_omode", "all");
+    }
+    store("ws_tab", tab + "|" + dayKey());
+    window.scrollTo(0, 0);
+    render();
+  });
   view.querySelectorAll("[data-omode]").forEach(b => b.onclick = () => { ordersMode = b.dataset.omode; store("ws_omode", ordersMode); window.scrollTo(0, 0); render(); });
   view.querySelectorAll("[data-alert]").forEach(b => b.onclick = () => {
     const a = alerts()[+b.dataset.alert]; if (!a) return;

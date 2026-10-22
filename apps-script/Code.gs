@@ -184,6 +184,11 @@ function api(action, cred, p) {
     try {
       var shCmd = ss_().getSheetByName("Commandes");
       if (shCmd.getMaxColumns() < 26) shCmd.insertColumnsAfter(shCmd.getMaxColumns(), 26 - shCmd.getMaxColumns());
+      var hCmd = shCmd.getRange(1, 1, 1, 26).getValues()[0];
+      var headersCmd = ["Date", "Produit", "Qté", "Prix", "Zone", "Lieu", "Tél", "Jour", "Statut", "Note", "Relances", "Dernière relance", "Session", "Étape", "Livreur", "Paiement", "Livrée le", "Modifié par", "Payé le", "Encaissé par", "Remis à la caisse le", "Source", "Type", "Date relance", "Créé par", "Nom client"];
+      for (var colIdx = 21; colIdx < 26; colIdx++) {
+        if (!hCmd[colIdx]) shCmd.getRange(1, colIdx + 1).setValue(headersCmd[colIdx]);
+      }
       var nowStr = stamp_();
       var newRow = [
         nowStr,
@@ -227,6 +232,7 @@ function api(action, cred, p) {
     lock.waitLock(10000);
     try {
       var sh2 = ss_().getSheetByName("Commandes");
+      if (sh2.getMaxColumns() < 26) sh2.insertColumnsAfter(sh2.getMaxColumns(), 26 - sh2.getMaxColumns());
       var row = Number(p && p.row);
       if (!(row >= 2 && row <= sh2.getLastRow())) throw new Error("Commande introuvable");
       if (role === "driver" && sh2.getRange(row, 15).getDisplayValue() !== me.nom) throw new Error("Cette livraison n'est pas à toi");
