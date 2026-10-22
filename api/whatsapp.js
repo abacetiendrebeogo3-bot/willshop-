@@ -12,7 +12,8 @@ async function bridge(action, cred, p) {
 }
 
 function evo() {
-  const url = String(process.env.EVOLUTION_API_URL || "").trim().replace(/\/+$/, "");
+  let url = String(process.env.EVOLUTION_API_URL || "").trim().replace(/\/+$/, "");
+  if (url && !/^https?:\/\//i.test(url)) url = "https://" + url;
   const key = String(process.env.EVOLUTION_API_KEY || process.env.AUTHENTICATION_API_KEY || "").trim();
   const instance = String(process.env.WA_INSTANCE || "willshop_commerciale").trim();
   if (!url || !key) throw Object.assign(new Error("Ajoute EVOLUTION_API_URL et EVOLUTION_API_KEY dans les variables Vercel du projet willshop-app."), { code: 503 });
