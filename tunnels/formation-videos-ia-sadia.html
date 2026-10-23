@@ -51,6 +51,9 @@ body.drb-on{margin:0;overflow:hidden}
 #drb .gal .ex{aspect-ratio:9/16;border-radius:10px;background:linear-gradient(160deg,#3b2a52,#0f5a32);color:#fff;font-size:11px;display:flex;align-items:flex-end;justify-content:center;padding:6px;text-align:center;overflow:hidden;position:relative}
 #drb .gal .ex video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #drb .gal .ex span{position:relative;z-index:1;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 5px}
+#drb .xv{display:block;width:100%;aspect-ratio:16/9;max-height:34vh;border-radius:12px;background:#111;object-fit:contain}
+#drb .xph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;font-size:34px;background:linear-gradient(160deg,#3b2a52,#0f5a32)}
+#drb .xph span{font-size:12px;opacity:.8}
 #drb .recu{background:#FFF8DC;border:1.5px dashed var(--yel2);border-radius:12px;padding:10px 12px;font-size:14px}
 #drb .recu div{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
 #drb .recu .tot{border-top:1px solid var(--yel2);margin-top:4px;padding-top:7px;font-weight:800;font-size:17px}
@@ -108,6 +111,7 @@ body.drb-on{margin:0;overflow:hidden}
 var CFG = {
   video: "",        // lien .mp4 de la vidéo de Sadia
   exemples: ["", "", ""], // liens .mp4 de 3 vidéos exemples
+  extrait: "",      // lien .mp4 de l'extrait gratuit de la formation (1 à 2 min)
   paiement: "",     // lien Chariow : laisser vide = la commande part sur WhatsApp
   wa: "22672019524", // numéro WhatsApp pour les questions
   prix: 7500
@@ -205,6 +209,24 @@ function reponse() {
     }).join("");
     card('<h4>Vidéos 100 % IA</h4><div class="gal">' + g + '</div>');
     ask(["Je veux savoir faire ça", "J'ai une question avant"], function (a) {
+      if (/question/.test(a)) return faq();
+      extrait();
+    });
+  });
+}
+
+/* 3 bis. Extrait gratuit de la formation */
+function extrait() {
+  prog(46); track("Extrait vu"); px("ExtraitGratuit", {}, true);
+  bot(["Je t'offre un <b>extrait gratuit</b> de la formation 🎁", "Mets le son 🔊 et regarde 👇"], function () {
+    card('<h4>🎁 Extrait gratuit</h4>' +
+      (CFG.extrait
+        ? '<video class="xv" id="xv" src="' + CFG.extrait + '" controls playsinline preload="metadata"></video>'
+        : '<div class="xv xph">▶<span>Extrait bientôt disponible</span></div>') +
+      '<p class="note" style="text-align:left;margin-top:6px">Leçon 2 : créer ton personnage réaliste avec l\'IA</p>');
+    var x = document.getElementById("xv");
+    if (x) x.addEventListener("play", function () { var v = document.getElementById("vid"); if (v) v.pause(); track("Extrait lancé"); }, { once: true });
+    ask(["Je veux la suite", "J'ai une question"], function (a) {
       if (/question/.test(a)) return faq();
       offre();
     });
