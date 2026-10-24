@@ -67,11 +67,43 @@ function upsertCommande(ss, d) {
   sh.getRange(r, 1, 1, 14).setValues([row]);
 }
 
+// ===================== ACADÉMIE (formations) =====================
+// Les formations vont dans un Sheet séparé « WillShop Académie », pas dans les commandes de la boutique.
+var ACADEMIE_ID = "1Zdj2DA8Zh_iHEfdvYg6GdFTNMSsjth0v8W2-TXOxIhU";
+var ACA_STEPS = ["Arrivée", "Intéressé", "Objectif", "Extrait lancé", "Extrait vu", "Offre vue", "Question", "Numéro donné", "Commande"];
+var ACA_RANK = { "Visiteur": 0, "Prospect": 1, "Veut payer": 2, "Acompte": 3, "Payé": 4, "Perdu": 4 };
+
+// Onglet Prospects : A Date | B Formation | C Session | D Nom | E WhatsApp | F Pays | G Objectif | H Dernière étape | I Statut
+//                    J Montant payé | K Date paiement | L Accès donné | M Relances | N Dernière relance | O Note | P Mise à jour
+function upsertAcademie(d) {
+  var sh = SpreadsheetApp.openById(ACADEMIE_ID).getSheetByName("Prospects");
+  var now = new Date();
+  var step = d.type === "order" ? "Commande" : txt(d.step || "Arrivée", 40);
+  var statut = d.type === "order" ? "Veut payer" : (d.tel ? "Prospect" : "Visiteur");
+  var r = findRow(sh, 3, d.sid);
+  if (!r) {
+    sh.appendRow([now, txt(d.produit), txt(d.sid, 40), txt(d.nom, 60), d.tel ? "'" + txt(d.tel, 25) : "", txt(d.zone, 30),
+      txt(d.lieu || d.veut, 40), step, statut, "", "", "", 0, "", "", now]);
+    return;
+  }
+  var row = sh.getRange(r, 1, 1, 16).getValues()[0];
+  if (d.nom) row[3] = txt(d.nom, 60);
+  if (d.tel) row[4] = "'" + txt(d.tel, 25);
+  else if (row[4]) row[4] = "'" + String(row[4]).replace(/^'/, "");
+  if (d.zone) row[5] = txt(d.zone, 30);
+  if (d.lieu || d.veut) row[6] = txt(d.lieu || d.veut, 40);
+  if (ACA_STEPS.indexOf(step) > ACA_STEPS.indexOf(String(row[7]))) row[7] = step;
+  if ((ACA_RANK[statut] || 0) > (ACA_RANK[String(row[8])] || 0)) row[8] = statut; // ne rétrograde jamais un statut
+  row[15] = now;
+  sh.getRange(r, 1, 1, 16).setValues([row]);
+}
+
 function doPost(e) {
   var lock = LockService.getScriptLock();
   lock.tryLock(15000);
   try {
     var d = JSON.parse(e.postData.contents);
+    if (/^Formation/i.test(String(d.produit || ""))) { upsertAcademie(d); return ContentService.createTextOutput("ok"); }
     var ss = SpreadsheetApp.openById(SHEET_ID);
     if (d.type === "order" || !d.type) d.step = "Commande";
     if (d.sid) upsertVisit(ss, d);
