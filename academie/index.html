@@ -187,6 +187,7 @@ nav.tabs .badge{position:absolute;top:0;left:calc(50% + 6px);background:var(--ba
   <form id="lf"><input id="pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="12" aria-label="Code PIN">
   <button class="btn pri" type="submit" id="lbtn">Ouvrir</button></form>
   <p class="err" id="lerr"></p>
+  <button class="btn install" id="install2" type="button" hidden style="width:100%">Installer l'app sur cet appareil</button>
 </div>
 
 <div class="wrap" id="app" hidden>
@@ -506,13 +507,14 @@ $("lf").onsubmit = async function (e) {
 /* Installation de l'app (Android / ordinateur : bouton ; iPhone : explication) */
 var deferredInstall = null;
 var standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
-window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferredInstall = e; if (!standalone) $("install").hidden = false; });
-window.addEventListener("appinstalled", function () { $("install").hidden = true; toast("App installée ✓"); });
-if (!standalone && /iPhone|iPad/.test(navigator.userAgent)) $("install").hidden = false;
+window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferredInstall = e; if (!standalone) { $("install").hidden = false; $("install2").hidden = false; } });
+window.addEventListener("appinstalled", function () { $("install").hidden = true; $("install2").hidden = true; toast("App installée ✓"); });
+if (!standalone && /iPhone|iPad/.test(navigator.userAgent)) { $("install").hidden = false; $("install2").hidden = false; }
 $("install").onclick = async function () {
-  if (deferredInstall) { deferredInstall.prompt(); var c = await deferredInstall.userChoice; deferredInstall = null; if (c.outcome === "accepted") $("install").hidden = true; return; }
+  if (deferredInstall) { deferredInstall.prompt(); var c = await deferredInstall.userChoice; deferredInstall = null; if (c.outcome === "accepted") { $("install").hidden = true; $("install2").hidden = true; } return; }
   openSheet('<div style="font:700 20px var(--serif)">Installer Will Academy</div><p class="sub" style="margin-top:8px">Sur iPhone : touche le bouton <b>Partager</b> de Safari, puis <b>Sur l\'écran d\'accueil</b>.<br><br>Sur Android : menu <b>⋮</b> de Chrome, puis <b>Installer l\'application</b>.</p><div class="row" style="margin-top:14px"><button class="btn ghost" onclick="closeSheet()">Fermer</button></div>');
 };
+$("install2").onclick = function () { $("install").onclick(); };
 if ("serviceWorker" in navigator) window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(function () {}); });
 </script>
 </body>
