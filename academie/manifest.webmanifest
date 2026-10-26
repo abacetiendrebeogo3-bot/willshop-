@@ -1,0 +1,18 @@
+{
+  "name": "Will Academy",
+  "short_name": "Will Academy",
+  "description": "Prospects, relances WhatsApp, élèves et chiffres de la formation vidéos IA.",
+  "lang": "fr",
+  "id": "/academie/",
+  "start_url": "/academie/",
+  "scope": "/academie/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2F2F0",
+  "theme_color": "#0B4A36",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

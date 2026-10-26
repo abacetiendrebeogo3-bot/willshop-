@@ -98,11 +98,98 @@ function upsertAcademie(d) {
   sh.getRange(r, 1, 1, 16).setValues([row]);
 }
 
+// ===================== API de l'app « WillShop Académie » =====================
+// L'app envoie {app:1, action, pin, p}. Le PIN est dans l'onglet Config (B1) du Sheet Académie.
+var ACA_COLS = ["date", "formation", "sid", "nom", "tel", "pays", "objectif", "etape", "statut", "montant", "datePaiement",
+  "acces", "relances", "derniereRelance", "note", "maj", "progression"];
+
+function acaJson(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+function acaIso(v) { return v instanceof Date ? v.toISOString() : v; }
+
+function acaCheckPin(ss, pin) {
+  var cache = CacheService.getScriptCache(), fails = Number(cache.get("aca_fails") || 0);
+  if (fails >= 8) throw new Error("Trop d'essais. Réessaie dans 10 minutes.");
+  var good = String(ss.getSheetByName("Config").getRange("B1").getValue()).replace(/^'/, "").trim();
+  if (!good || String(pin || "").trim() !== good) { cache.put("aca_fails", String(fails + 1), 600); throw new Error("Code PIN incorrect"); }
+  cache.remove("aca_fails");
+}
+
+function acaData(ss) {
+  var sh = ss.getSheetByName("Prospects"), last = sh.getLastRow(), rows = [];
+  if (last >= 2) sh.getRange(2, 1, last - 1, 17).getValues().forEach(function (r, i) {
+    var o = { row: i + 2 };
+    ACA_COLS.forEach(function (k, j) { o[k] = acaIso(r[j]); });
+    o.tel = String(o.tel || "").replace(/^'/, "");
+    rows.push(o);
+  });
+  var rl = ss.getSheetByName("Relances"), seq = [];
+  if (rl.getLastRow() >= 2) rl.getRange(2, 1, rl.getLastRow() - 1, 4).getValues().forEach(function (r) {
+    if (r[0] && r[3]) seq.push({ pour: String(r[0]), jour: Number(r[1]) || 0, titre: String(r[2]), message: String(r[3]) });
+  });
+  var cfg = {}, cf = ss.getSheetByName("Config").getRange("A2:B10").getValues();
+  cf.forEach(function (r) { if (r[0]) cfg[String(r[0])] = String(r[1]); });
+  var tb = ss.getSheetByName("Tableau de bord").getRange("B4:B9").getValues().map(function (r) { return Number(r[0]) || 0; });
+  var bp = ss.getSheetByName("Budget pub"), pub = 0, blocs = [];
+  if (bp.getLastRow() >= 2) bp.getRange(2, 1, bp.getLastRow() - 1, 10).getValues().forEach(function (r) {
+    pub += Number(r[3]) || 0;
+    if (r[0]) blocs.push({ bloc: r[0], du: acaIso(r[1]), au: acaIso(r[2]), pub: Number(r[3]) || 0, ventes: Number(r[4]) || 0, encaisse: Number(r[5]) || 0,
+      reinjecter: Number(r[7]) || 0, epargner: Number(r[8]) || 0, parJour: Number(r[9]) || 0 });
+  });
+  return { prospects: rows, sequence: seq, config: cfg,
+    params: { budget: tb[0], prix: tb[1], bonus: tb[2], reinjection: tb[3], coutMax: tb[4], objectif: tb[5] }, pub: pub, blocs: blocs,
+    now: new Date().toISOString() };
+}
+
+// Met à jour une ligne retrouvée par sa session (jamais par numéro de ligne seul : le Sheet peut bouger)
+function acaUpdate(ss, p) {
+  var sh = ss.getSheetByName("Prospects"), r = findRow(sh, 3, p.sid);
+  if (!r) throw new Error("Prospect introuvable");
+  var row = sh.getRange(r, 1, 1, 17).getValues()[0], f = p.fields || {}, now = new Date();
+  if (f.statut !== undefined) {
+    if (f.statut === "Payé" && String(row[8]) !== "Payé") { row[12] = 0; row[13] = ""; if (!row[10]) row[10] = now; }
+    if (f.statut === "Acompte" && !row[10]) row[10] = now;
+    row[8] = String(f.statut);
+  }
+  if (f.montant !== undefined) row[9] = Number(f.montant) || "";
+  if (f.acces !== undefined) row[11] = f.acces ? "Oui" : "";
+  if (f.note !== undefined) row[14] = String(f.note).slice(0, 500);
+  if (f.nom !== undefined) row[3] = String(f.nom).slice(0, 60);
+  if (f.progression !== undefined) row[16] = Math.max(0, Math.min(8, Number(f.progression) || 0));
+  if (p.relance) { row[12] = (Number(row[12]) || 0) + 1; row[13] = now; }
+  if (row[4]) row[4] = "'" + String(row[4]).replace(/^'/, "");
+  row[15] = now;
+  sh.getRange(r, 1, 1, 17).setValues([row]);
+  return true;
+}
+
+// Ajoute un contact venu directement sur WhatsApp (hors tunnel)
+function acaAdd(ss, p) {
+  var sh = ss.getSheetByName("Prospects"), now = new Date();
+  var sid = "m" + now.getTime().toString(36);
+  sh.appendRow([now, "Formation Vidéos IA", sid, String(p.nom || "").slice(0, 60), "'" + String(p.tel || "").slice(0, 25), String(p.pays || "Burkina"),
+    "WhatsApp direct", "Numéro donné", "Prospect", "", "", "", 0, "", String(p.note || "").slice(0, 500), now, 0]);
+  return sid;
+}
+
+function acaApi(d) {
+  var ss = SpreadsheetApp.openById(ACADEMIE_ID);
+  try {
+    acaCheckPin(ss, d.pin);
+    if (d.action === "data") return acaJson({ ok: true, data: acaData(ss) });
+    if (d.action === "update") return acaJson({ ok: true, data: acaUpdate(ss, d.p || {}) });
+    if (d.action === "add") return acaJson({ ok: true, data: acaAdd(ss, d.p || {}) });
+    return acaJson({ ok: false, error: "Action inconnue" });
+  } catch (err) {
+    return acaJson({ ok: false, error: String(err.message || err) });
+  }
+}
+
 function doPost(e) {
   var lock = LockService.getScriptLock();
   lock.tryLock(15000);
   try {
     var d = JSON.parse(e.postData.contents);
+    if (d.app) return acaApi(d);
     if (/^Formation/i.test(String(d.produit || ""))) { upsertAcademie(d); return ContentService.createTextOutput("ok"); }
     var ss = SpreadsheetApp.openById(SHEET_ID);
     if (d.type === "order" || !d.type) d.step = "Commande";
