@@ -1,0 +1,64 @@
+<!-- Suivi Académie : tunnel Sadia (videos-ia) → Google Sheet « WillShop Académie » + Pixel Facebook.
+     À coller dans Systeme.io : page videos-ia → Paramètres → Code de suivi (pied de page / body).
+     Ne modifie pas le chat de Sadia : il écoute seulement les clics. -->
+<script>
+(function () {
+  var SHEET = "https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec";
+  var PROD = "Formation Vidéos IA", PRIX = 7500;
+  if (!document.getElementById("sadia")) return;
+  var SID, S = {};
+  try {
+    SID = localStorage.getItem("aca_sid");
+    if (!SID) { SID = "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); localStorage.setItem("aca_sid", SID); }
+    S = JSON.parse(localStorage.getItem("aca_s") || "{}");
+  } catch (e) { SID = SID || "s" + Date.now().toString(36); }
+  function save() { try { localStorage.setItem("aca_s", JSON.stringify(S)); } catch (e) {} }
+  function px(ev, data, custom) { try { if (window.fbq) window.fbq(custom ? "trackCustom" : "track", ev, data || {}); } catch (e) {} }
+  function send(o) {
+    try {
+      o.sid = SID; o.produit = PROD; o.lieu = o.lieu || S.mode || ""; o.zone = o.zone || S.pays || "";
+      var d = JSON.stringify(o);
+      if (!(navigator.sendBeacon && navigator.sendBeacon(SHEET, d))) fetch(SHEET, { method: "POST", mode: "no-cors", body: d, keepalive: true });
+    } catch (e) {}
+  }
+  function step(s) { send({ type: "visit", step: s }); }
+  function pays(tel) {
+    var d = String(tel).replace(/\D/g, "");
+    var P = { "226": "Burkina", "225": "Côte d'Ivoire", "221": "Sénégal", "229": "Bénin", "228": "Togo", "223": "Mali", "227": "Niger" };
+    for (var k in P) if (d.indexOf(k) === 0 && d.length > 9) return P[k];
+    return d.length === 8 ? "Burkina" : "";
+  }
+
+  if (!/[?&]inscrit=1/.test(location.search)) step("Arrivée");
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("#sadia button, #sadia a");
+    if (!b) return;
+    var t = (b.textContent || "").trim();
+    if (/je veux apprendre|je veux m'inscrire/i.test(t)) { step("Intéressé"); px("TunnelDemarre", {}, true); }
+    else if (/en ligne/i.test(t)) { S.mode = "En ligne"; save(); step("Objectif"); }
+    else if (/présentiel/i.test(t)) { S.mode = "Présentiel"; save(); step("Objectif"); }
+    else if (/^(Débutant|J'ai déjà testé)$/.test(t)) { step("Offre vue"); px("OffreVue", {}, true); }
+    else if (/question|WhatsApp/i.test(t) && b.tagName === "BUTTON") step("Question");
+    else if (/^Payer/i.test(t)) {
+      var acompte = /acompte/i.test(t), v = acompte ? PRIX / 2 : PRIX;
+      send({ type: "order", nom: S.nom || "", tel: S.tel || "", prix: v });
+      px("InitiateCheckout", { value: v, currency: "XOF", num_items: 1, content_name: PROD });
+    }
+  }, true);
+
+  // Formulaire du chat (prénom + WhatsApp) : même contrôle que le tunnel, avant sa validation
+  document.addEventListener("submit", function (e) {
+    var f = e.target;
+    if (!f || f.id !== "f" || !f.closest("#sadia")) return;
+    var nom = (f.querySelector("[name=nom]") || {}).value || "", tel = (f.querySelector("[name=tel]") || {}).value || "";
+    var mail = (f.querySelector("[name=mail]") || {}).value || "";
+    var ok = nom.trim() && tel.replace(/\D/g, "").length >= 8 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail.trim());
+    var q = f.querySelector("[name=quart]"); if (q && !q.value.trim()) ok = false;
+    if (!ok) return;
+    S.nom = nom.trim(); S.tel = tel.trim(); S.pays = pays(tel); save();
+    send({ type: "lead", step: "Numéro donné", nom: S.nom, tel: S.tel, prix: PRIX });
+    px("Lead", { content_name: PROD, value: PRIX, currency: "XOF" });
+  }, true);
+})();
+</script>
