@@ -96,3 +96,10 @@ Même modèle que le Kit, livraison à 1 000 F. En attente de la vidéo d'Awa av
 ### D. Plus tard
 - Assistant IA : Wilfried ajoute `ANTHROPIC_API_KEY` dans Vercel.
 - Branchement respond.io (forfait Growth requis pour l'API) ou API WhatsApp Cloud de Meta (projet « Mon Closeur »).
+
+## Will Academy (app séparée)
+
+- Code : dossier `academie/` → projet Vercel `willshop--academie`, adresse **https://will-academy.vercel.app** (dossier racine = `academie`).
+- Ne jamais la remettre sous willshop-app.vercel.app : l'app WillShop (scope `/`) l'avalerait. L'ancienne adresse `/academie/` renvoie vers la nouvelle.
+- Données : Sheet « WillShop Académie » (ID 1Zdj2DA8Zh_iHEfdvYg6GdFTNMSsjth0v8W2-TXOxIhU), onglets Prospects, Relances, Config (PIN en B1), Budget pub, Tableau de bord.
+- API : `apps-script/tunnel-logger.gs` (projet « WillShop Commandes Tunnels »), requêtes `{app:1, action, pin, p}`.
