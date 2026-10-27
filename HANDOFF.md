@@ -103,3 +103,12 @@ Même modèle que le Kit, livraison à 1 000 F. En attente de la vidéo d'Awa av
 - Ne jamais la remettre sous willshop-app.vercel.app : l'app WillShop (scope `/`) l'avalerait. L'ancienne adresse `/academie/` renvoie vers la nouvelle.
 - Données : Sheet « WillShop Académie » (ID 1Zdj2DA8Zh_iHEfdvYg6GdFTNMSsjth0v8W2-TXOxIhU), onglets Prospects, Relances, Config (PIN en B1), Budget pub, Tableau de bord.
 - API : `apps-script/tunnel-logger.gs` (projet « WillShop Commandes Tunnels »), requêtes `{app:1, action, pin, p}`.
+
+## Tunnel Will Academy (formation vidéos IA) — état au 27/10/2026
+
+- **Format retenu** : « appel vidéo » comme le Kit Minceur. Vidéo de Sadia en haut (une par étape), ses paroles s'écrivent mot à mot dessous pendant qu'elle parle, puis les boutons. Fichier : `tunnels/will-academy-appel.src.html` (build : `cd tunnels && python3 build-will-academy.py`).
+- Versions abandonnées (gardées pour mémoire) : `will-academy-chat`, `will-academy-jeu`, `will-academy-parcours`, `will-academy-video`.
+- **Vidéos** : `academie/media/*.mp4` servies sur https://will-academy.vercel.app/media/ (montage : `python3 academie/media/build_videos.py <dossier>` → recadrage 4:5, logo, son, `captions.json` = minutage des paroles). Les 8 vidéos actuelles sont à refaire (erreurs de prononciation, phrases manquantes, ordre du parcours à revoir).
+- **Pas encore en ligne** : la page Systeme.io /videos-ia garde l'ancien tunnel Sadia + le script de suivi `tunnels/formation-videos-ia-tracking.html` dans son code de pied de page. À la mise en ligne : remplacer le bloc de code et retirer ce script (sinon double comptage).
+- Suivi : le tunnel envoie au Sheet « WillShop Académie » et au Pixel 2354404514688190 seulement sur systeme.io.
+- Présentiel du 23/10 retiré du nouveau tunnel (date passée).
