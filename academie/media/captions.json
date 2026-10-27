@@ -1,0 +1,163 @@
+{
+ "02-objectif": [
+  [
+   1.75,
+   3.96,
+   "Super ! Dis-moi, c'est pour *gagner de l'argent*…"
+  ],
+  [
+   4.4,
+   5.5,
+   "*faire la pub* de tes produits…"
+  ],
+  [
+   5.9,
+   7.3,
+   "ou *créer du contenu* ?"
+  ]
+ ],
+ "03a-simple": [
+  [
+   2.05,
+   2.75,
+   "C'est *simple* :"
+  ],
+  [
+   3.3,
+   4.35,
+   "ton *téléphone* suffit."
+  ],
+  [
+   5.3,
+   6.6,
+   "Même une *grand-mère* peut le faire…"
+  ],
+  [
+   7.05,
+   7.7,
+   "*regarde* !"
+  ]
+ ],
+ "03b-grand-mere": [
+  [
+   0.3,
+   1.05,
+   "Hé !"
+  ],
+  [
+   1.35,
+   3.45,
+   "Si moi *j'y arrive*,"
+  ],
+  [
+   3.7,
+   4.5,
+   "*toi aussi* tu peux !"
+  ],
+  [
+   4.95,
+   6.6,
+   "Tu veux voir la *première vidéo* ?"
+  ]
+ ],
+ "04a-plateforme": [
+  [
+   0.05,
+   2.1,
+   "Ta formation est sur ton *téléphone* :"
+  ],
+  [
+   2.7,
+   3.85,
+   "*8 vidéos* courtes,"
+  ],
+  [
+   4.4,
+   4.9,
+   "*pas à pas*,"
+  ],
+  [
+   5.25,
+   7.5,
+   "avec un *exercice* après chaque vidéo."
+  ]
+ ],
+ "04b-accompagnement": [
+  [
+   0.65,
+   2.0,
+   "Tu y as accès *à vie*,"
+  ],
+  [
+   2.55,
+   4.5,
+   "et on t'accompagne dans le *groupe WhatsApp*."
+  ],
+  [
+   5.9,
+   7.5,
+   "On regarde ta *première leçon* ?"
+  ]
+ ],
+ "04c-lecon": [
+  [
+   1.95,
+   4.1,
+   "Voilà ta *première leçon* !"
+  ],
+  [
+   4.3,
+   5.5,
+   "Regarde-la *jusqu'au bout*,"
+  ],
+  [
+   5.9,
+   7.05,
+   "d'accord ?"
+  ]
+ ],
+ "05-offre": [
+  [
+   2.6,
+   3.6,
+   "Alors, *ça t'a plu* ?"
+  ],
+  [
+   4.1,
+   6.1,
+   "La suite t'attend dans la *formation complète*."
+  ],
+  [
+   6.4,
+   7.4,
+   "Tu *prends ta place* ?"
+  ]
+ ],
+ "06-whatsapp": [
+  [
+   0.0,
+   0.75,
+   "Top !"
+  ],
+  [
+   1.2,
+   2.5,
+   "Appuie sur le bouton *WhatsApp* :"
+  ],
+  [
+   3.05,
+   3.55,
+   "tu *paies*,"
+  ],
+  [
+   3.75,
+   5.85,
+   "et Wilfried t'ajoute à la *formation* et au *groupe*."
+  ],
+  [
+   6.3,
+   7.1,
+   "*À tout de suite* !"
+  ]
+ ]
+}

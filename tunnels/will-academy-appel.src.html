@@ -1,0 +1,393 @@
+<!-- ============================================================
+  Tunnel « Will Academy » — appel vidéo avec Sadia (format Kit Minceur), formation vidéos IA
+  À chaque étape : la vidéo de Sadia en haut, ses paroles s'écrivent dessous pendant qu'elle parle, puis les boutons.
+  À coller dans UN bloc « Code HTML » de la page Systeme.io videos-ia.
+  Suivi Sheet « WillShop Académie » + Pixel : seulement sur systeme.io (jamais en aperçu ni avec ?test).
+  Source : tunnels/will-academy-appel.src.html → build : python3 build-will-academy.py
+  Vidéos : academie/media (montage : python3 academie/media/build_videos.py <dossier>)
+============================================================= -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700;800&display=swap">
+<style>
+#drb{--bg:#F4F6F3;--ink:#13221A;--mut:#56655B;--line:#DDE4DE;--yel:#22C32A;--yel2:#18A920;--yel3:#118A18;--red:#1F8F4E;--green:#0B4A36;--lite:#7BE883}
+#drb *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body.drb-on{margin:0;overflow:hidden}
+#drb{position:fixed;inset:0;z-index:2147483000;background:#E8E5DC;display:flex;justify-content:center;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);text-align:left}
+#drb .app{width:100%;max-width:440px;height:100vh;height:100dvh;background:var(--bg);display:flex;flex-direction:column;overflow-y:auto}
+@media (min-width:600px){#drb{align-items:center}#drb .app{height:min(880px,94vh);width:420px;border-radius:30px;box-shadow:0 30px 80px rgba(19,34,26,.18);overflow-x:hidden}}
+
+/* Appel vidéo */
+#drb header.vc{position:relative;flex:1 1 0;min-height:130px;max-height:60vh;max-height:60dvh;background:linear-gradient(160deg,#11674B,#062A1F);overflow:hidden;transition:max-height .35s ease}
+#drb.compact header.vc{max-height:30vh;max-height:30dvh}
+#drb header.vc video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;z-index:1}
+#drb header.vc::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 25%,transparent 78%,rgba(0,0,0,.35));z-index:2}
+#drb header.vc::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,#0B4A36,#22C32A);z-index:4}
+#drb .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;z-index:1;text-align:center;padding:20px}
+#drb .ph .face{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#8a5a3c 0 34%,transparent 35%),radial-gradient(ellipse at 50% 100%,#EF2B2D 0 48%,transparent 49%),#FCD116;border:3px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.3);animation:bob 3s ease-in-out infinite}
+#drb .ph small{font-size:12px;opacity:.75}
+#drb .live{position:absolute;top:12px;left:12px;z-index:3;display:flex;align-items:center;gap:6px;background:#22C32A;color:#06301F!important;color:#fff;font:800 11px 'DM Sans',sans-serif;letter-spacing:.06em;border-radius:7px;padding:4px 8px}
+#drb .live i{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.2s infinite}
+#drb .nm{position:absolute;left:14px;top:40px;z-index:3;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);font-size:13px}
+#drb .nm b{display:block;font:800 22px 'Bricolage Grotesque',sans-serif}
+#drb .badge{position:absolute;top:12px;right:12px;z-index:3;background:rgba(255,255,255,.94);color:var(--ink);font:700 11.5px 'DM Sans',sans-serif;border-radius:99px;padding:5px 10px}
+#drb .badge b{color:var(--red)}
+#drb .prog{position:absolute;left:0;bottom:5px;height:3px;background:var(--yel);z-index:4;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+#drb .ptag{position:absolute;right:10px;bottom:14%;z-index:3;width:92px;height:92px;border-radius:50%;background:var(--yel);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.25);transform:rotate(-8deg);animation:tagIn .6s 1.5s cubic-bezier(.34,1.56,.64,1) both}
+#drb .ptag span{font-size:10.5px;font-weight:700}
+#drb .ptag b{font:800 19px 'Bricolage Grotesque',sans-serif;line-height:1.05}
+#drb.compact .ptag{display:none}
+
+/* Sous-titres de Sadia */
+#drb .subt{flex:none;margin:10px 14px 0;background:var(--green);color:#fff;border-radius:16px;border-top-left-radius:4px;padding:11px 14px;font-size:16px;line-height:1.4;min-height:46px}
+#drb .subt::before{content:"Sadia · Will Academy";display:block;font:800 11px 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--lite);margin-bottom:2px}
+#drb .subt b{color:var(--lite)}
+#drb .typing{display:flex;gap:4px;padding:6px 2px}
+#drb .typing i{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1s infinite}
+#drb .typing i:nth-child(2){animation-delay:.15s}#drb .typing i:nth-child(3){animation-delay:.3s}
+
+/* Cartes */
+#drb #stage{flex:none;padding:8px 14px 0;display:flex;flex-direction:column;gap:8px}
+#drb #stage:empty{display:none}
+#drb .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:14.5px;line-height:1.45;animation:rise .35s both}
+#drb .card h4{margin:0 0 6px;font:800 17px 'Bricolage Grotesque',sans-serif}
+#drb .card ul{margin:0;padding:0;list-style:none}
+#drb .card li{padding:3px 0 3px 24px;position:relative}
+#drb .card li::before{content:"✓";position:absolute;left:2px;color:#18A920;font-weight:800}
+#drb .card li.bn::before{content:"🎁";left:0}
+#drb .price{font:800 26px 'Bricolage Grotesque',sans-serif;color:var(--green)}
+#drb .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+#drb .gal .ex{aspect-ratio:9/16;border-radius:10px;background:linear-gradient(160deg,#3b2a52,#0f5a32);color:#fff;font-size:11px;display:flex;align-items:flex-end;justify-content:center;padding:6px;text-align:center;overflow:hidden;position:relative}
+#drb .gal .ex video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#drb .gal .ex span{position:relative;z-index:1;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 5px}
+#drb .xv{display:block;width:100%;aspect-ratio:16/9;max-height:34vh;border-radius:12px;background:#111;object-fit:contain}
+#drb .xph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;font-size:34px;background:linear-gradient(160deg,#3b2a52,#0f5a32)}
+#drb .xph span{font-size:12px;opacity:.8}
+#drb .recu{background:#EEF9EE;border:1.5px dashed var(--yel2);border-radius:12px;padding:10px 12px;font-size:14px}
+#drb .recu div{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+#drb .recu .tot{border-top:1px solid var(--yel2);margin-top:4px;padding-top:7px;font-weight:800;font-size:17px}
+#drb .recu .off{color:#009E49;font-weight:700}
+
+/* Réponses */
+#drb #dock{flex:none;padding:12px 14px calc(16px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start}
+#drb .yourturn{flex-basis:100%;text-align:center;font:800 13px 'DM Sans',sans-serif;letter-spacing:.04em;text-transform:uppercase;margin:2px 0 4px;animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both}
+#drb .yourturn span{display:inline-block;animation:finger 1s ease-in-out infinite}
+#drb .opt{position:relative;flex:1 1 40%;min-height:54px;border-radius:14px;font:700 16px 'DM Sans',sans-serif;cursor:pointer;padding:8px 12px;background:var(--yel);border:2px solid var(--yel2);color:#06301F;box-shadow:0 3px 0 var(--yel3);animation:popIn .55s cubic-bezier(.34,1.56,.64,1) both,nudge 2.4s ease-in-out infinite}
+#drb .opt:active{transform:scale(.94)}
+#drb .opt.main::after{content:"👆";position:absolute;right:14px;bottom:-12px;font-size:26px;animation:tap 1.2s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+#drb .opt.ask{flex-basis:100%;background:#fff;border:1.5px dashed #B9C3BB;color:#55605a;box-shadow:none;min-height:46px;font-size:15px;animation:popIn .55s both}
+#drb .form{width:100%;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:rise .4s both}
+#drb .fld{width:100%;height:52px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font:500 16px 'DM Sans',sans-serif;background:#FBFAF7;color:var(--ink);outline:none}
+#drb .fld:focus{border-color:var(--yel2);background:#fff}
+#drb .tel{display:flex;gap:8px}
+#drb .tel select{flex:none;width:112px;padding:0 8px}
+#drb .cta{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;border-radius:14px;font:800 17px 'DM Sans',sans-serif;cursor:pointer;text-decoration:none;background:var(--yel);color:#06301F;border:2px solid var(--yel2);box-shadow:0 3px 0 var(--yel3)}
+#drb .cta#go{background:var(--red);color:#fff;border:0;box-shadow:none;animation:pulseR 2.4s infinite}
+#drb .note{font-size:13px;line-height:1.5;color:var(--mut);text-align:center;margin:0}
+#drb .qlink{background:none;border:0;color:var(--green);font:700 14px 'DM Sans',sans-serif;text-decoration:underline;cursor:pointer;padding:6px}
+
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.4) translateY(18px)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes nudge{0%,62%,100%{transform:scale(1)}72%{transform:scale(1.06)}84%{transform:scale(.98)}}
+@keyframes finger{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@keyframes tap{0%,100%{transform:translate(0,0) scale(1)}45%{transform:translate(-6px,-8px) scale(1.1)}60%{transform:translate(-6px,-6px) scale(.92)}}
+@keyframes tagIn{from{opacity:0;transform:scale(.5) rotate(-25deg)}to{opacity:1;transform:scale(1) rotate(-8deg)}}
+@keyframes pulseR{0%{box-shadow:0 0 0 0 rgba(31,143,78,.45)}70%{box-shadow:0 0 0 12px rgba(31,143,78,0)}100%{box-shadow:0 0 0 0 rgba(31,143,78,0)}}
+@media (max-width:360px){#drb .subt{font-size:15px}#drb .opt{font-size:15px;min-height:50px}#drb .tel select{width:96px}}
+@media (max-height:640px){#drb .ptag{display:none}#drb .card{padding:9px 12px;font-size:13.5px}}
+@media (prefers-reduced-motion:reduce){#drb .opt,#drb .ptag{animation:none}#drb .opt.main::after,#drb .yourturn span{animation:none}}
+
+/* Will Academy : vidéo qui change à chaque étape + bouton son */
+#drb header.vc video{object-position:center 20%;transition:opacity .25s}
+#drb header.vc video.swap{opacity:.2}
+#drb .snd{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:5;border:0;border-radius:99px;background:rgba(0,0,0,.7);color:#fff;font:700 14px 'DM Sans',sans-serif;padding:10px 16px;cursor:pointer;white-space:nowrap;animation:pulseR 2s infinite}
+#drb .playbig{position:absolute;inset:0;z-index:5;border:0;background:rgba(0,0,0,.25);display:grid;place-items:center;cursor:pointer}
+#drb .playbig span{width:74px;height:74px;border-radius:50%;background:var(--yel);display:grid;place-items:center;box-shadow:0 0 0 10px rgba(34,195,42,.25)}
+#drb .playbig svg{width:30px;height:30px;margin-left:5px}
+#drb .subt .w{opacity:0;transition:opacity .12s}
+#drb .subt .w.on{opacity:1}
+#drb .logo{position:absolute;top:10px;right:12px;z-index:3;width:38px;height:38px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#drb .card .steps{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13.5px}
+#drb .card .steps div{background:#F1F7F2;border-radius:10px;padding:7px 9px}
+</style>
+
+<div id="drb"><div class="app">
+<header class="vc">
+  <video id="vid" playsinline preload="auto"></video>
+  <span class="live"><i></i>EN LIGNE</span>
+  <div class="nm"><b>Sadia</b>Will Academy · créée par l'IA</div>
+  <img class="logo" src="__LOGO__" alt="Will Academy">
+  <div class="prog" id="prog" style="width:0"></div>
+</header>
+<div class="subt" id="subt" aria-live="polite"></div>
+<div id="stage"></div>
+<div id="dock"></div>
+</div></div>
+
+<script>
+(function () {
+  /* ===================== RÉGLAGES ===================== */
+  var M = "https://will-academy.vercel.app/media/", V = "?v=2";
+  var CFG = { prix: 7500, prixBarre: 15000, wa: "22672019524",
+    sheet: "https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec" };
+  /* Une vidéo par étape. cap = ce que Sadia dit, minuté (début, fin en secondes) : les mots s'écrivent pendant qu'elle parle. *mot* = en vert. */
+  var CAPS = __CAPTIONS__;
+  function clip(name) { return { src: M + name + ".mp4" + V, poster: M + name + ".jpg" + V, cap: CAPS[name] || [] }; }
+  var C = {
+    /* En attendant la vidéo du toit, on garde le teaser actuel de Sadia */
+    hook: { src: "https://d1yei2z3i6k35z.cloudfront.net/1170093/6ad1fe571e78b8.72595249_sadia_teaser.mp4", poster: "__P_TEASER__",
+      cap: [[0.3, 2.2, "Salut 👋 Moi c'est *Sadia*…"], [2.4, 4.6, "et je n'existe pas : je suis une *IA* 😉"], [4.8, 8.0, "Tu veux apprendre à créer des *vidéos comme moi* ?"]] },
+    objectif: clip("02-objectif"), simple: clip("03a-simple"), grandMere: clip("03b-grand-mere"),
+    plateforme: clip("04a-plateforme"), accompagnement: clip("04b-accompagnement"), voilaLecon: clip("04c-lecon"),
+    offre: clip("05-offre"), whatsapp: clip("06-whatsapp"),
+    lecon1: { src: "https://d1yei2z3i6k35z.cloudfront.net/1170093/6ad02dce51de09.43882998_Video1_Bienvenue.mp4", poster: "__P_L1__", lesson: true,
+      cap: [[0, 1, "Voici ta *leçon 1 offerte* 👆 Appuie sur lecture."]] }
+  };
+  var PROD = "Formation Vidéos IA";
+  var LIVE = /systeme\.io$/.test(location.hostname) && !/[?&]test/.test(location.search);
+  /* ==================================================== */
+
+  var drb = document.getElementById("drb"); if (!drb) return;
+  document.body.classList.add("drb-on");
+  var vid = document.getElementById("vid"), subt = document.getElementById("subt"), stage = document.getElementById("stage"), dock = document.getElementById("dock"), head = drb.querySelector("header.vc");
+  var S = {}, SID, unlocked = false;
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  SID = store("waa_sid"); if (!SID) { SID = "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); store("waa_sid", SID); }
+  try { S = JSON.parse(store("waa_s") || "{}") || {}; } catch (e) { S = {}; }
+  function save() { store("waa_s", JSON.stringify(S)); }
+
+  /* ---------- Suivi : Sheet + Pixel ---------- */
+  function send(o) {
+    if (!LIVE) return;
+    try {
+      o.sid = SID; o.produit = PROD; o.zone = o.zone || S.pays || ""; o.lieu = o.lieu || S.but || "";
+      if (S.nom && !o.nom) o.nom = S.nom; if (S.tel && !o.tel) o.tel = S.tel;
+      var d = JSON.stringify(o);
+      if (!(navigator.sendBeacon && navigator.sendBeacon(CFG.sheet, d))) fetch(CFG.sheet, { method: "POST", mode: "no-cors", body: d, keepalive: true });
+    } catch (e) {}
+  }
+  function step(s) { send({ type: "visit", step: s }); }
+  function px(ev, data, custom) { if (!LIVE) return; try { if (window.fbq) window.fbq(custom ? "trackCustom" : "track", ev, data || {}); } catch (e) {} }
+
+  /* ---------- Outils ---------- */
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " F"; }
+  function prog(p) { document.getElementById("prog").style.width = p + "%"; }
+  function compact(on) { drb.classList.toggle("compact", !!on); }
+  var PLAY = '<svg viewBox="0 0 24 24" fill="#06301F"><path d="M8 5v14l11-7z"/></svg>';
+  var WAI = '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2c0 1.3.9 2.5 1.1 2.7.1.2 1.9 2.9 4.6 4 1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.5-.2z"/></svg>';
+
+  /* ---------- Sous-titres : les mots s'écrivent pendant que Sadia parle ---------- */
+  var words = [];
+  function setCaption(cap) {
+    var h = "", n = 0; words = [];
+    cap.forEach(function (seg) {
+      var parts = seg[2].split("*"), list = [];
+      parts.forEach(function (p, k) { p.split(/(\s+)/).forEach(function (w) { if (!w) return; if (/^\s+$/.test(w)) list.push({ sp: w }); else list.push({ w: w, g: k % 2 === 1 }); }); });
+      var count = list.filter(function (x) { return x.w; }).length, i = 0;
+      list.forEach(function (x) {
+        if (x.sp) { h += " "; return; }
+        var at = seg[0] + (seg[1] - seg[0]) * (i / Math.max(1, count)); i++;
+        words.push(at);
+        var t = esc(x.w); h += '<span class="w" data-i="' + (n++) + '">' + (x.g ? "<b>" + t + "</b>" : t) + "</span>";
+      });
+      h += " ";
+    });
+    subt.innerHTML = h;
+  }
+  function showWords(t) { var el = subt.querySelectorAll(".w"); for (var i = 0; i < el.length; i++) el[i].classList.toggle("on", words[i] <= t + 0.05); }
+  function showAll() { subt.querySelectorAll(".w").forEach(function (e) { e.classList.add("on"); }); }
+  /* sans vidéo (lecture bloquée) : on écrit le texte à la main, au même rythme */
+  function typeAlong(done) {
+    var t0 = performance.now(), last = words.length ? words[words.length - 1] + 0.6 : 0.5;
+    (function tick() { var t = (performance.now() - t0) / 1000; showWords(t); if (t < last) requestAnimationFrame(tick); else done(); })();
+  }
+
+  /* ---------- Sadia parle : vidéo en haut + texte qui s'écrit ---------- */
+  var cache = {};
+  function preload(c) { if (!c || cache[c.src] || c.lesson) return; var v = document.createElement("video"); v.preload = "auto"; v.muted = true; v.src = c.src; cache[c.src] = v; }
+  function say(c, done, next) {
+    stage.innerHTML = ""; dock.innerHTML = ""; compact(false);
+    head.querySelectorAll(".snd,.playbig").forEach(function (e) { e.remove(); });
+    setCaption(c.cap); preload(next);
+    var finished = false, timer;
+    function end() { if (finished) return; finished = true; clearTimeout(timer); vid.ontimeupdate = null; showAll(); done && done(); }
+    vid.classList.add("swap"); vid.loop = false; vid.controls = false; vid.poster = c.poster || ""; vid.src = c.src;
+    setTimeout(function () { vid.classList.remove("swap"); }, 200);
+    if (c.lesson) {
+      showAll();
+      var b = document.createElement("button"); b.type = "button"; b.className = "playbig"; b.setAttribute("aria-label", "Lire la leçon"); b.innerHTML = "<span>" + PLAY + "</span>";
+      b.onclick = function () { b.remove(); unlocked = true; vid.muted = false; vid.controls = true; vid.play().catch(function () {}); c.onStart && c.onStart(); };
+      head.appendChild(b);
+      var half = false; vid.ontimeupdate = function () { if (!half && vid.duration && vid.currentTime / vid.duration > .5) { half = true; c.onHalf && c.onHalf(); } };
+      return done && done();
+    }
+    vid.ontimeupdate = function () { showWords(vid.currentTime); };
+    vid.onended = end; vid.onerror = function () { typeAlong(end); };
+    var cn = navigator.connection || {};
+    if (cn.saveData || /2g/.test(cn.effectiveType || "")) return typeAlong(end);
+    vid.muted = !unlocked;
+    var p = vid.play();
+    (p || Promise.resolve()).then(function () { if (vid.muted) soundBtn(); }).catch(function () {
+      if (!vid.muted) { vid.muted = true; return vid.play().then(soundBtn).catch(blocked); }
+      blocked();
+    });
+    function blocked() { playBtn(); typeAlong(end); }
+    /* au cas où la vidéo charge mal : les boutons arrivent quand même */
+    timer = setTimeout(end, 13000);
+  }
+  function soundBtn() {
+    var b = document.createElement("button"); b.type = "button"; b.className = "snd"; b.textContent = "🔊 Touche pour entendre Sadia";
+    b.onclick = function () { unlocked = true; b.remove(); vid.muted = false; vid.currentTime = 0; vid.play().catch(function () {}); };
+    head.appendChild(b);
+  }
+  function playBtn() {
+    var b = document.createElement("button"); b.type = "button"; b.className = "playbig"; b.setAttribute("aria-label", "Lire la vidéo"); b.innerHTML = "<span>" + PLAY + "</span>";
+    b.onclick = function () { b.remove(); unlocked = true; vid.muted = false; vid.currentTime = 0; vid.play().catch(function () {}); };
+    head.appendChild(b);
+  }
+  /* Texte seul de Sadia (sans vidéo), écrit mot à mot */
+  function text(msg, done) {
+    setCaption([[0, Math.min(2.2, 0.5 + msg.length * 0.03), msg]]); typeAlong(function () { done && done(); });
+  }
+
+  function ask(opts, cb) {
+    var h = '<div class="yourturn"><span>👇</span> À toi de choisir</div>';
+    dock.innerHTML = h;
+    opts.forEach(function (o, i) {
+      var b = document.createElement("button"); b.type = "button";
+      var t = o.t || o; b.className = "opt" + (o.c ? " " + o.c : (i === 0 ? " main" : ""));
+      if (opts.length > 2 || o.full) b.style.flexBasis = "100%";
+      b.style.animationDelay = (0.1 + i * 0.1) + "s, " + (1.2 + i * 0.5) + "s"; b.textContent = t;
+      b.onclick = function () { unlocked = true; vid.pause(); dock.innerHTML = ""; cb(i); };
+      dock.appendChild(b);
+    });
+  }
+
+  /* ===================== PARCOURS ===================== */
+  function start() {
+    prog(8); step("Arrivée");
+    say(C.hook, function () {
+      ask(["Oui, je veux ! 🔥", { t: "Tu es vraiment une IA ? 🤔", c: "ask" }], function (i) {
+        if (i === 1) return text("Oui, à 100 % 😄 Aucune caméra, aucune actrice. Tout a été créé avec un *téléphone*.", function () { ask([{ t: "Ok, je veux apprendre ! 🔥", full: true }], objectif); });
+        objectif();
+      });
+    }, C.objectif);
+  }
+
+  function objectif() {
+    step("Intéressé"); px("TunnelDemarre", {}, true); prog(22);
+    say(C.objectif, function () {
+      ask(["💰 Gagner de l'argent", { t: "📦 Faire la pub de mes produits", c: "" }, { t: "📱 Créer du contenu", c: "" }], function (i) {
+        S.but = ["Revenu", "Pub produits", "Contenu"][i]; save(); step("Objectif"); simple();
+      });
+    }, C.simple);
+  }
+
+  function simple() {
+    prog(36);
+    say(C.simple, function () {
+      say(C.grandMere, function () {
+        ask([{ t: "Oui, je veux la voir 🎁", full: true }], function () {
+          if (S.tel) return plateforme();
+          text("Super ! Ton *prénom* et ton *WhatsApp*, et je t'ouvre la vidéo 👇", function () { contactForm("Voir la vidéo gratuite 🎁", plateforme); });
+        });
+      }, C.plateforme);
+    }, C.grandMere);
+  }
+
+  var PAYS = [["🇧🇫", "Burkina", "226", [8]], ["🇨🇮", "Côte d'Ivoire", "225", [10]], ["🇸🇳", "Sénégal", "221", [9]], ["🇧🇯", "Bénin", "229", [8, 10]], ["🇹🇬", "Togo", "228", [8]], ["🇲🇱", "Mali", "223", [8]], ["🇳🇪", "Niger", "227", [8]], ["🌍", "Autre", "", [7, 8, 9, 10, 11, 12, 13]]];
+  function contactForm(label, after) {
+    compact(true);
+    var opts = PAYS.map(function (p, i) { return '<option value="' + i + '">' + p[0] + " " + (p[2] ? "+" + p[2] : p[1]) + "</option>"; }).join("");
+    dock.innerHTML = '<form class="form" novalidate><input class="fld" name="nom" placeholder="Ton prénom" autocomplete="given-name" value="' + esc(S.nom || "") + '">' +
+      '<div class="tel"><select class="fld" name="pays" aria-label="Pays">' + opts + '</select><input class="fld" name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ton WhatsApp"></div>' +
+      '<p class="note" id="ferr" style="display:none;color:#B42335">Vérifie ton prénom et ton numéro 👆</p><button class="cta" type="submit">' + label + '</button><p class="note">🔒 Ton numéro reste privé. Pas de spam.</p></form>';
+    var f = dock.querySelector("form");
+    f.onsubmit = function (e) {
+      e.preventDefault(); unlocked = true;
+      var nom = f.nom.value.trim(), p = PAYS[+f.pays.value], d = f.tel.value.replace(/\D/g, "");
+      if (p[2] && d.indexOf(p[2]) === 0 && p[3].indexOf(d.length) < 0) d = d.slice(p[2].length);
+      var okN = /[a-zA-ZÀ-ÿ]{2,}/.test(nom), okT = p[3].indexOf(d.length) >= 0 && !/^(\d)\1+$/.test(d);
+      f.nom.style.borderColor = okN ? "" : "#B42335"; f.tel.style.borderColor = okT ? "" : "#B42335"; document.getElementById("ferr").style.display = okN && okT ? "none" : "block";
+      if (!okN || !okT) return;
+      S.nom = nom.charAt(0).toUpperCase() + nom.slice(1); S.pays = p[1]; S.tel = (p[2] ? "+" + p[2] + " " : "") + d.replace(/(\d{2})(?=\d)/g, "$1 "); save();
+      send({ type: "lead", step: "Numéro donné", nom: S.nom, tel: S.tel, prix: CFG.prix });
+      px("Lead", { content_name: PROD, value: CFG.prix, currency: "XOF" });
+      dock.innerHTML = ""; after();
+    };
+  }
+
+  function plateforme() {
+    prog(52);
+    say(C.plateforme, function () {
+      say(C.accompagnement, function () {
+        compact(true);
+        stage.innerHTML = '<div class="card"><h4>Ta formation</h4><div class="steps">' +
+          "<div>📱 Sur ton <b>téléphone</b></div><div>🎬 <b>8 vidéos</b> courtes</div><div>✍️ Un <b>exercice</b> par vidéo</div>" +
+          "<div>♾️ Accès <b>à vie</b></div><div>💬 Groupe <b>WhatsApp</b></div><div>✨ <b>Gemini Pro</b> offert</div></div></div>";
+        ask([{ t: "Oui, montre-moi la leçon 🎁", full: true }], lecon);
+      }, C.voilaLecon);
+    }, C.accompagnement);
+  }
+
+  function lecon() {
+    prog(66);
+    say(C.voilaLecon, function () {
+      C.lecon1.onStart = function () { step("Extrait lancé"); px("LeconGratuite", {}, true); };
+      C.lecon1.onHalf = function () { step("Extrait vu"); };
+      say(C.lecon1, function () {
+        setTimeout(function () { ask([{ t: "J'ai regardé ✓", full: true }, { t: "Je la regarde plus tard", c: "ask" }], offre); }, 1200);
+      });
+    }, C.offre);
+  }
+
+  function offre() {
+    prog(82); step("Offre vue"); px("OffreVue", {}, true);
+    say(C.offre, function () {
+      compact(true);
+      stage.innerHTML = '<div class="card"><div style="display:flex;align-items:baseline;gap:10px"><span class="price">' + fmt(CFG.prix) + '</span><s style="color:#8A958E">' + fmt(CFG.prixBarre) + "</s></div>" +
+        "<ul><li>8 vidéos courtes + un exercice par vidéo</li><li class=\"bn\">Gemini Pro offert (Google Flow)</li><li class=\"bn\">Groupe d'entraide WhatsApp</li><li>Accès à vie, sur ton téléphone</li></ul></div>";
+      ask([{ t: "Oui, je prends ma place ✅", full: true }, { t: "Je réfléchis", c: "ask" }], function (i) { i ? reflechit() : whatsapp(); });
+    }, C.whatsapp);
+  }
+
+  function reflechit() {
+    step("Question");
+    text("Pas de souci 🙂 Pose ta question directement à *Wilfried*, il te répond sur WhatsApp 👇", function () {
+      var url = "https://wa.me/" + CFG.wa + "?text=" + encodeURIComponent("Bonjour Wilfried, j'ai une question sur la formation vidéos IA" + (S.nom ? " (" + S.nom + ")" : "") + " : ");
+      dock.innerHTML = '<a class="cta" href="' + url + '" target="_blank" rel="noopener">' + WAI + 'Poser ma question sur WhatsApp</a><button type="button" class="qlink" id="back">Finalement, je prends ma place</button>';
+      document.getElementById("back").onclick = function () { whatsapp(); };
+    });
+  }
+
+  function whatsapp() {
+    prog(96);
+    say(C.whatsapp, function () {
+      compact(true);
+      stage.innerHTML = '<div class="recu"><div><span>Formation Vidéos IA</span><span>' + fmt(CFG.prix) + "</span></div><div><span>Gemini Pro (Google Flow)</span><span class=\"off\">Offert</span></div>" +
+        "<div><span>Groupe WhatsApp</span><span class=\"off\">Offert</span></div><div class=\"tot\"><span>Total</span><span>" + fmt(CFG.prix) + "</span></div></div>";
+      var t = "Bonjour Wilfried 👋 Je veux ma place pour la Formation Vidéos IA (" + fmt(CFG.prix) + "). Je m'appelle " + S.nom + (S.pays ? ", je suis au " + S.pays : "") + ". Mon objectif : " +
+        ({ "Revenu": "gagner de l'argent", "Pub produits": "faire la pub de mes produits", "Contenu": "créer du contenu" }[S.but] || "apprendre les vidéos IA") + ". Comment je paie ?";
+      dock.innerHTML = '<a class="cta" id="go" href="https://wa.me/' + CFG.wa + "?text=" + encodeURIComponent(t) + '" target="_blank" rel="noopener">' + WAI + "Rejoindre Wilfried sur WhatsApp</a>" +
+        '<p class="note">Ton message est prêt : appuie sur <b>Envoyer</b>.<br>Paiement Orange Money ou Moov · ajout à la formation et au groupe.</p>';
+      document.getElementById("go").onclick = function () {
+        send({ type: "order", nom: S.nom, tel: S.tel, prix: CFG.prix });
+        px("InitiateCheckout", { value: CFG.prix, currency: "XOF", num_items: 1, content_name: PROD });
+        S.fini = true; save();
+      };
+    });
+  }
+
+  /* Quelqu'un qui revient : on ne repose pas les questions */
+  function retour() {
+    prog(75); step("Arrivée"); vid.poster = C.hook.poster;
+    text("Re-bonjour " + S.nom + " 👋 Content(e) de te revoir ! On reprend ?", function () {
+      ask([{ t: S.fini ? "Rejoindre Wilfried sur WhatsApp" : "Voir l'offre", full: true }, { t: "Revoir ma leçon gratuite", c: "ask" }], function (i) { i ? lecon() : (S.fini ? whatsapp() : offre()); });
+    });
+  }
+
+  if (S.nom && S.tel) retour(); else start();
+})();
+</script>

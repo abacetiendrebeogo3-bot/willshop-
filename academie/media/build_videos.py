@@ -1,9 +1,11 @@
 # Montage des vidéos de Sadia pour le tunnel Will Academy.
-# Recadrage 4:5 (720x900), sous-titres animés (mots clés en vert), logo, son normalisé, compression mobile.
+# Recadrage 4:5 (720x900), logo, son normalisé, compression mobile. Sous-titres incrustés seulement avec --subs.
 # Usage : python3 build_videos.py <dossier_des_vidéos_brutes>
 import subprocess, sys, os, glob
 
 SRC = sys.argv[1]
+# Sans sous-titres incrustés : le tunnel écrit lui-même les paroles sous la vidéo (passer "--subs" pour les incruster)
+SUBS = "--subs" in sys.argv
 OUT = os.path.dirname(os.path.abspath(__file__))
 LOGO = os.path.join(OUT, "..", "icons", "icon-192.png")
 W, H = 720, 900
@@ -50,12 +52,14 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     lines = ["Dialogue: 0,%s,%s,Sub,,0,0,0,,%s" % (ts(a), ts(b), ass_text(t)) for a, b, t in segs]
     open(path, "w").write(head + "\n".join(lines) + "\n")
 
+TIMINGS = {}
 for key, name, off, segs in CLIPS:
     src = glob.glob(os.path.join(SRC, key + "-*.mp4"))[0]
     ass = os.path.join(OUT, name + ".ass")
     make_ass(ass, segs)
+    subs_filter = "[v2]ass=%s" % ass if SUBS else "[v2]null"
     # recadrage 4:5 : largeur entière, hauteur = largeur * 5/4, à partir de off * hauteur
-    vf = ("crop=iw:iw*5/4:0:ih*%.3f,scale=%d:%d,setsar=1[v];[1]scale=64:64[lg];[v][lg]overlay=W-w-22:22[v2];[v2]ass=%s" % (off, W, H, ass))
+    vf = ("crop=iw:iw*5/4:0:ih*%.3f,scale=%d:%d,setsar=1[v];[1]scale=64:64[lg];[v][lg]overlay=W-w-22:22[v2];" % (off, W, H)) + subs_filter
     out = os.path.join(OUT, name + ".mp4")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-i", LOGO, "-filter_complex", vf,
                     "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-c:v", "libx264", "-preset", "veryfast", "-crf", "26", "-pix_fmt", "yuv420p",
@@ -63,4 +67,9 @@ for key, name, off, segs in CLIPS:
     # image d'attente (première image) pour un affichage immédiat
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "0.3", "-i", out, "-frames:v", "1", "-q:v", "5", os.path.join(OUT, name + ".jpg")], check=True)
     os.remove(ass)
+    TIMINGS[name] = segs
     print(name, os.path.getsize(out) // 1024, "Ko")
+
+# Minutage des paroles pour l'écriture synchronisée dans le tunnel
+import json
+json.dump(TIMINGS, open(os.path.join(OUT, "captions.json"), "w"), ensure_ascii=False, indent=1)
