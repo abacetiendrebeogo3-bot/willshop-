@@ -1,0 +1,384 @@
+<!-- ============================================================
+  Tunnel « Will Academy » — parcours guidé avec Sadia, formation vidéos IA
+  Un seul message de Sadia par étape, une réponse, un petit « ✓ » d'encouragement, étape suivante.
+  À coller dans UN bloc « Code HTML » de la page Systeme.io videos-ia.
+  Suivi Sheet « WillShop Académie » + Pixel : seulement sur systeme.io (jamais en aperçu ni avec ?test).
+  Source : tunnels/will-academy-parcours.src.html → build : python3 build-will-academy.py
+============================================================= -->
+<style>
+#wa-game{--dk:#0B4A36;--dk2:#062A1F;--gr:#22C32A;--gr-l:#7BE883;--gold:#FFC83D;--ink:#14201B;--mut:#5E6862;--card:#FFFFFF;--wa:#1F8F4E;--f:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:radial-gradient(120% 80% at 50% 0%,#11674B 0%,var(--dk) 45%,var(--dk2) 100%);color:#fff;
+  font:16px/1.4 var(--f);-webkit-font-smoothing:antialiased;overflow:hidden}
+#wa-game *{box-sizing:border-box}
+body.wag-on{overflow:hidden!important}
+#wa-game .app{flex:1;display:flex;flex-direction:column;width:100%;max-width:460px;margin:0 auto;min-height:0;padding:calc(10px + env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+/* barre du haut : niveau + XP */
+#wa-game .hud{display:flex;align-items:center;gap:10px;flex:none}
+#wa-game .hud img{width:34px;height:34px;border-radius:10px;background:#CACDC9}
+#wa-game .lv{flex:1;min-width:0}
+#wa-game .lv small{display:block;font:700 11px/1 var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--gr-l);margin-bottom:6px}
+#wa-game .dots{display:flex;gap:4px}
+#wa-game .dots i{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.18);transition:background .4s}
+#wa-game .dots i.on{background:var(--gr)}
+#wa-game .dots i.now{background:linear-gradient(90deg,var(--gr),var(--gold));animation:wag-glow 1.4s ease-in-out infinite}
+#wa-game .xp{flex:none;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:7px 11px;font:800 14px/1 var(--f);font-variant-numeric:tabular-nums;color:var(--gold);white-space:nowrap}
+#wa-game .xp.bump{animation:wag-bump .5s ease}
+/* scène : Sadia + son message */
+#wa-game .stage{flex:1;min-height:0;position:relative;margin:12px 0;border-radius:22px;overflow:hidden;background:#000;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+#wa-game .stage .media{position:absolute;inset:0}
+#wa-game .stage img.media,#wa-game .stage video.media{width:100%;height:100%;object-fit:cover}
+#wa-game .stage img.media{animation:wag-ken 12s ease-in-out infinite alternate}
+#wa-game .stage .shade{position:absolute;inset:auto 0 0 0;height:60%;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);pointer-events:none}
+#wa-game .snd,#wa-game .play{position:absolute;border:0;cursor:pointer;font-family:inherit}
+#wa-game .snd{top:12px;right:12px;background:rgba(0,0,0,.6);color:#fff;border-radius:99px;padding:8px 12px;font:700 13px/1 var(--f)}
+#wa-game .play{inset:0;background:rgba(0,0,0,.2);display:grid;place-items:center}
+#wa-game .play span{width:72px;height:72px;border-radius:50%;background:var(--gr);display:grid;place-items:center;box-shadow:0 0 0 10px rgba(34,195,42,.25);animation:wag-pulse 1.6s ease-in-out infinite}
+#wa-game .play svg{width:30px;height:30px;margin-left:5px}
+#wa-game .say{position:absolute;left:12px;right:12px;bottom:12px;background:var(--card);color:var(--ink);border-radius:18px 18px 18px 6px;padding:12px 14px;font-weight:600;font-size:16.5px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.25);animation:wag-up .35s ease both}
+#wa-game .say .who{display:flex;align-items:center;gap:6px;font:800 11px/1 var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--dk);margin-bottom:6px}
+#wa-game .say .who i{width:7px;height:7px;border-radius:50%;background:var(--gr)}
+#wa-game .say b{color:var(--dk)}
+#wa-game .typing{display:inline-flex;gap:4px;padding:4px 0}
+#wa-game .typing i{width:8px;height:8px;border-radius:50%;background:#9AA6A0;animation:wag-dot 1s infinite}
+#wa-game .typing i:nth-child(2){animation-delay:.15s}#wa-game .typing i:nth-child(3){animation-delay:.3s}
+/* carte dans la scène (offre, programme, trophée) */
+#wa-game .panel{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,42,31,.55),rgba(6,42,31,.92));display:flex;flex-direction:column;justify-content:center;align-items:center;padding:18px 18px 118px;text-align:center;gap:8px;animation:wag-fade .35s ease both;overflow-y:auto}
+#wa-game .stage.nosay .panel{padding-bottom:18px}
+#wa-game .stage.nosay .say{display:none}
+#wa-game .panel .line{background:#fff;color:var(--ink);border-radius:14px;padding:9px 12px;font-weight:700;font-size:15px;max-width:340px}
+@media (max-height:640px){#wa-game .panel ul li{padding:6px 9px;font-size:13.5px}#wa-game .panel .big{font-size:36px}#wa-game .panel ol li{padding:5px 9px}}
+#wa-game .panel .big{font:900 44px/1 var(--f);letter-spacing:-.03em;color:#fff}
+#wa-game .panel s{color:rgba(255,255,255,.6);font-weight:600}
+#wa-game .panel .tag{background:var(--gold);color:#3A2A00;font:800 11.5px/1 var(--f);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;border-radius:99px}
+#wa-game .panel ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px;text-align:left;font-size:14.5px;width:100%;max-width:330px}
+#wa-game .panel ul li{background:rgba(255,255,255,.1);border-radius:12px;padding:8px 10px}
+#wa-game .panel ol{margin:0;padding:0;list-style:none;display:grid;gap:5px;width:100%;max-width:340px;text-align:left;font-size:14px}
+#wa-game .panel ol li{display:flex;gap:9px;align-items:center;background:rgba(255,255,255,.1);border-radius:12px;padding:7px 10px}
+#wa-game .panel ol li span{flex:none;width:24px;height:24px;border-radius:50%;background:var(--gr);color:#06301F;font:800 12px/24px var(--f);text-align:center}
+#wa-game .panel ol li.lock span{background:rgba(255,255,255,.25);color:#fff}
+#wa-game .trophy{font-size:64px;line-height:1;animation:wag-bump 1s ease}
+#wa-game .badge{border:2px solid var(--gold);color:var(--gold);border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px}
+/* réponses */
+#wa-game .dock{flex:none;display:flex;flex-direction:column;gap:9px;min-height:56px}
+#wa-game .opt{border:0;background:#fff;color:var(--dk);font:800 16px var(--f);padding:15px 16px;border-radius:16px;cursor:pointer;text-align:center;box-shadow:0 5px 0 rgba(0,0,0,.25);transition:transform .08s;animation:wag-pop .3s ease both;min-height:54px}
+#wa-game .opt.main{background:var(--gr);color:#06301F;box-shadow:0 5px 0 #138A1A}
+#wa-game .opt.soft{background:transparent;color:#DCEFE4;box-shadow:none;border:1.5px solid rgba(255,255,255,.3);font-weight:600;font-size:15px;padding:12px}
+#wa-game .opt:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+#wa-game .opt.main:active{box-shadow:0 1px 0 #138A1A}
+#wa-game .row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+#wa-game .cta{display:flex;align-items:center;justify-content:center;gap:10px;border:0;background:var(--gr);color:#06301F;font:900 17px var(--f);padding:16px;border-radius:16px;cursor:pointer;text-decoration:none;min-height:58px;box-shadow:0 5px 0 #138A1A;animation:wag-pulse 1.6s ease-in-out infinite}
+#wa-game .cta.wa{background:var(--wa);color:#fff;box-shadow:0 5px 0 #136436}
+#wa-game .cta svg{width:22px;height:22px;flex:none}
+#wa-game .form{display:grid;gap:8px}
+#wa-game .form .tel{display:flex;gap:8px}
+#wa-game .form input,#wa-game .form select{border:2px solid transparent;background:#fff;color:var(--ink);border-radius:14px;padding:13px 12px;font:16px var(--f);min-width:0;width:100%}
+#wa-game .form select{width:auto;flex:none;padding:13px 6px}
+#wa-game .form input:focus,#wa-game .form select:focus{outline:none;border-color:var(--gr)}
+#wa-game .form .err{border-color:#FF6B5B}
+#wa-game .note{font-size:12.5px;color:#BFE3CF;text-align:center}
+#wa-game .note.bad{color:#FFB3A8;display:none}
+/* célébration */
+#wa-game .cele{position:absolute;inset:0;z-index:5;display:grid;place-items:center;pointer-events:none;background:rgba(6,42,31,.55);animation:wag-fade .2s ease both}
+#wa-game .cele .box{text-align:center;animation:wag-bump .6s ease both}
+#wa-game .cele .e{font-size:64px;line-height:1}
+#wa-game .cele b{display:block;font:900 30px/1.1 var(--f);margin-top:8px}
+#wa-game .cele span{display:inline-block;margin-top:8px;background:var(--gold);color:#3A2A00;font:900 18px/1 var(--f);padding:8px 14px;border-radius:99px}
+#wa-game .cele small{display:block;margin-top:8px;color:#DCEFE4;font-size:14.5px;max-width:280px}
+#wa-game .ok-chip{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:5;background:#fff;color:var(--dk);font:800 15px/1 var(--f);padding:10px 16px;border-radius:99px;box-shadow:0 6px 16px rgba(0,0,0,.25);white-space:nowrap;animation:wag-up .3s ease both;transition:opacity .25s}
+#wa-game .ok-chip.out{opacity:0}
+#wa-game canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+@keyframes wag-pop{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes wag-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes wag-fade{from{opacity:0}to{opacity:1}}
+@keyframes wag-bump{0%{transform:scale(.6)}55%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes wag-pulse{0%,100%{transform:none}50%{transform:scale(1.03)}}
+@keyframes wag-glow{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes wag-ken{from{transform:scale(1.02)}to{transform:scale(1.12) translateY(-2%)}}
+@keyframes wag-dot{0%,60%,100%{opacity:.35;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){#wa-game *{animation:none!important;transition:none!important}}
+@media (max-height:600px){#wa-game .opt{padding:12px 14px;min-height:48px}#wa-game .say{font-size:15px;padding:10px 12px}#wa-game .stage{margin:8px 0}}
+</style>
+
+<div id="wa-game" role="main" aria-label="Will Academy : le parcours avec Sadia">
+  <div class="app">
+    <div class="hud">
+      <img src="__LOGO__" alt="Will Academy">
+      <div class="lv"><small id="wag-lvl">Étape 1 sur 7</small><div class="dots" id="wag-dots"></div></div>
+    </div>
+    <div class="stage" id="wag-stage"></div>
+    <div class="dock" id="wag-dock"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ===================== RÉGLAGES ===================== */
+  var CFG = {
+    prix: 7500, prixBarre: 15000, wa: "22672019524",
+    sheet: "https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec",
+    /* Une vidéo de Sadia par niveau (lien .mp4). Vide = sa photo animée + le texte. */
+    videos: {
+      hello: "https://d1yei2z3i6k35z.cloudfront.net/1170093/6ad1fe571e78b8.72595249_sadia_teaser.mp4",
+      objectif: "", niveau: "", cadeau: "", offre: "", bravo: ""
+    },
+    lecon1: "https://d1yei2z3i6k35z.cloudfront.net/1170093/6ad02dce51de09.43882998_Video1_Bienvenue.mp4",
+    presentation: "https://d1yei2z3i6k35z.cloudfront.net/1170093/6ad1fbf46cafc4.52218401_Formation_presentation_720.mp4"
+  };
+  var PORTRAIT = "__PORTRAIT__", P_TEASER = "__P_TEASER__", P_PRES = "__P_PRES__", P_L1 = "__P_L1__";
+  var PROD = "Formation Vidéos IA", NLV = 7;
+  var LIVE = /systeme\.io$/.test(location.hostname) && !/[?&]test/.test(location.search);
+  /* ==================================================== */
+
+  var root = document.getElementById("wa-game"); if (!root) return;
+  document.body.classList.add("wag-on");
+  var stage = document.getElementById("wag-stage"), dock = document.getElementById("wag-dock");
+  var S = {}, SID;
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  SID = store("wag_sid"); if (!SID) { SID = "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); store("wag_sid", SID); }
+  try { S = JSON.parse(store("wag_s") || "{}") || {}; } catch (e) { S = {}; }
+  S.xp = S.xp || 0;
+  function save() { store("wag_s", JSON.stringify(S)); }
+
+  /* ---------- Suivi ---------- */
+  function send(o) {
+    if (!LIVE) return;
+    try {
+      o.sid = SID; o.produit = PROD; o.zone = o.zone || S.pays || ""; o.lieu = o.lieu || S.but || "";
+      if (S.nom && !o.nom) o.nom = S.nom; if (S.tel && !o.tel) o.tel = S.tel;
+      var d = JSON.stringify(o);
+      if (!(navigator.sendBeacon && navigator.sendBeacon(CFG.sheet, d))) fetch(CFG.sheet, { method: "POST", mode: "no-cors", body: d, keepalive: true });
+    } catch (e) {}
+  }
+  function step(s) { send({ type: "visit", step: s }); }
+  function px(ev, data, custom) { if (!LIVE) return; try { if (window.fbq) window.fbq(custom ? "trackCustom" : "track", ev, data || {}); } catch (e) {} }
+
+  /* ---------- Outils ---------- */
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " F"; }
+  var PLAY = '<svg viewBox="0 0 24 24" fill="#06301F"><path d="M8 5v14l11-7z"/></svg>';
+  var WAI = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2c0 1.3.9 2.5 1.1 2.7.1.2 1.9 2.9 4.6 4 1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.5-.2z"/></svg>';
+
+  function hud(lv) {
+    document.getElementById("wag-lvl").textContent = lv > NLV ? "Dernière étape ✓" : "Étape " + lv + " sur " + NLV;
+    var h = ""; for (var i = 1; i <= NLV; i++) h += '<i class="' + (i < lv ? "on" : i === lv ? "now" : "") + '"></i>';
+    document.getElementById("wag-dots").innerHTML = h;
+  }
+
+
+  /* Média de la scène : vidéo de Sadia si elle existe, sinon sa photo animée */
+  function media(src, poster, mode) {
+    stage.innerHTML = ""; stage.classList.remove("nosay");
+    if (!src) { stage.innerHTML = '<img class="media" src="' + (poster || PORTRAIT) + '" alt="Sadia"><div class="shade"></div>'; return; }
+    var v = document.createElement("video");
+    v.className = "media"; v.playsInline = true; v.setAttribute("playsinline", ""); v.src = src; if (poster) v.poster = poster;
+    stage.appendChild(v); stage.insertAdjacentHTML("beforeend", '<div class="shade"></div>');
+    if (mode === "tap") {
+      v.preload = "metadata";
+      var b = document.createElement("button"); b.type = "button"; b.className = "play"; b.setAttribute("aria-label", "Lire la vidéo"); b.innerHTML = "<span>" + PLAY + "</span>";
+      b.onclick = function () { b.remove(); var s = stage.querySelector(".say"); if (s) s.style.display = "none"; v.controls = true; v.play().catch(function () {}); media.onPlay && media.onPlay(); };
+      stage.appendChild(b);
+    } else {
+      v.muted = true; v.loop = true; v.preload = "auto";
+      var c = navigator.connection || {};
+      if (!(c.saveData || /2g/.test(c.effectiveType || ""))) v.play().catch(function () {});
+      var s = document.createElement("button"); s.type = "button"; s.className = "snd"; s.textContent = "🔊 Son";
+      s.onclick = function () { v.muted = !v.muted; if (!v.muted) { v.loop = false; v.currentTime = 0; v.play().catch(function () {}); } s.textContent = v.muted ? "🔊 Son" : "🔇"; };
+      stage.appendChild(s);
+    }
+    return v;
+  }
+  /* Un seul message de Sadia, avec un court « en train d'écrire » */
+  function say(html, done) {
+    var old = stage.querySelector(".say"); if (old) old.remove();
+    var d = document.createElement("div"); d.className = "say";
+    d.innerHTML = '<div class="who"><i></i>Sadia</div><div class="typing"><i></i><i></i><i></i></div>';
+    stage.appendChild(d);
+    setTimeout(function () { d.innerHTML = '<div class="who"><i></i>Sadia</div>' + html; done && done(); }, 650);
+  }
+  function panel(html) { var p = document.createElement("div"); p.className = "panel"; p.innerHTML = html; stage.appendChild(p); return p; }
+  function ask(opts, cb, layout) {
+    dock.innerHTML = "";
+    var wrap = dock;
+    if (layout === "two") { wrap = document.createElement("div"); wrap.className = "row2"; dock.appendChild(wrap); }
+    opts.forEach(function (o, i) {
+      var b = document.createElement("button"); b.type = "button";
+      b.className = "opt " + (o.c !== undefined ? o.c : (i === 0 ? "main" : ""));
+      b.style.animationDelay = (i * .07) + "s"; b.textContent = o.t || o;
+      b.onclick = function () { dock.innerHTML = ""; cb(i); };
+      wrap.appendChild(b);
+    });
+  }
+
+  /* Petit encouragement entre deux étapes (une pastille « ✓ », pas de jeu) */
+  function bravo(emoji, title, xp, sub, next) {
+    var c = document.createElement("div"); c.className = "ok-chip"; c.textContent = emoji + " " + title;
+    stage.appendChild(c);
+    setTimeout(function () { c.classList.add("out"); }, 850);
+    setTimeout(function () { c.remove(); next && next(); }, 1100);
+  }
+
+  /* ===================== NIVEAUX ===================== */
+  function n1() {
+    hud(1); step("Arrivée"); media(CFG.videos.hello, P_TEASER);
+    say("Salut 👋 Moi c'est Sadia, une <b>IA</b>. Tu veux apprendre à créer des vidéos comme moi ?", function () {
+      ask(["Oui, je veux ! 🔥", { t: "Tu es vraiment une IA ? 🤔", c: "soft" }], function (i) {
+        if (i === 1) return say("Oui, 100 % IA, créée sur un téléphone. Et tu peux apprendre à le faire 😉", function () { ask(["Ok, c'est parti ! 🔥"], gagne1); });
+        gagne1();
+      });
+    });
+  }
+  function gagne1() { step("Intéressé"); px("TunnelDemarre", {}, true); bravo("✓", "C'est parti !", 0, "", n2); }
+
+  function n2() {
+    hud(2); media(CFG.videos.objectif);
+    say("Tu veux faire quoi avec les vidéos IA ?", function () {
+      ask(["💰 Gagner de l'argent", { t: "📦 Faire la pub de mes produits", c: "" }, { t: "📱 Créer du contenu", c: "" }], function (i) {
+        S.but = ["Revenu", "Pub produits", "Contenu"][i]; save(); step("Objectif");
+        bravo(["💰", "📦", "📱"][i], "Bon choix !", 0, ["Un seul spot vendu à une boutique et ta formation est remboursée.", "Fini de payer un tournage : tu crées tes pubs toi-même.", "Tu publies tous les jours sans jamais te filmer."][i], n3);
+      });
+    });
+  }
+
+  function n3() {
+    hud(3); media(CFG.videos.niveau);
+    say("Tu as déjà utilisé l'IA ?", function () {
+      ask(["Jamais", "Un peu"], function (i) {
+        S.niveau = i ? "Un peu" : "Débutant"; save();
+        bravo(i ? "💪" : "✓", i ? "Tu vas aller vite !" : "Parfait, on part de zéro", 0, i ? "" : "La formation part de zéro, sur ton téléphone.", n4);
+      }, "two");
+    });
+  }
+
+  var PAYS = [["🇧🇫", "Burkina", "226", [8]], ["🇨🇮", "Côte d'Ivoire", "225", [10]], ["🇸🇳", "Sénégal", "221", [9]], ["🇧🇯", "Bénin", "229", [8, 10]], ["🇹🇬", "Togo", "228", [8]], ["🇲🇱", "Mali", "223", [8]], ["🇳🇪", "Niger", "227", [8]], ["🌍", "Autre", "", [7, 8, 9, 10, 11, 12, 13]]];
+  function form(label, after) {
+    var opts = PAYS.map(function (p, i) { return '<option value="' + i + '">' + p[0] + " " + (p[2] ? "+" + p[2] : p[1]) + "</option>"; }).join("");
+    dock.innerHTML = '<form class="form" novalidate><input name="nom" placeholder="Ton prénom" autocomplete="given-name" value="' + esc(S.nom || "") + '">' +
+      '<div class="tel"><select name="pays" aria-label="Pays">' + opts + '</select><input name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ton WhatsApp"></div>' +
+      '<div class="note bad">Vérifie ton prénom et ton numéro 👆</div><button class="cta" type="submit">' + label + '</button><div class="note">🔒 Ton numéro reste privé</div></form>';
+    var f = dock.querySelector("form");
+    f.onsubmit = function (e) {
+      e.preventDefault();
+      var nom = f.nom.value.trim(), p = PAYS[+f.pays.value], d = f.tel.value.replace(/\D/g, "");
+      if (p[2] && d.indexOf(p[2]) === 0 && p[3].indexOf(d.length) < 0) d = d.slice(p[2].length);
+      var okN = /[a-zA-ZÀ-ÿ]{2,}/.test(nom), okT = p[3].indexOf(d.length) >= 0 && !/^(\d)\1+$/.test(d);
+      f.nom.classList.toggle("err", !okN); f.tel.classList.toggle("err", !okT); f.querySelector(".bad").style.display = okN && okT ? "none" : "block";
+      if (!okN || !okT) return;
+      S.nom = nom.charAt(0).toUpperCase() + nom.slice(1); S.pays = p[1]; S.tel = (p[2] ? "+" + p[2] + " " : "") + d.replace(/(\d{2})(?=\d)/g, "$1 "); save();
+      send({ type: "lead", step: "Numéro donné", nom: S.nom, tel: S.tel, prix: CFG.prix });
+      px("Lead", { content_name: PROD, value: CFG.prix, currency: "XOF" });
+      dock.innerHTML = ""; after();
+    };
+  }
+
+  function n4() {
+    hud(4); media(CFG.videos.cadeau);
+    panel('<div class="trophy">🎁</div><div class="tag">Cadeau débloqué</div><b style="font-size:20px">Leçon 1 offerte</b>').style.justifyContent = "flex-start";
+    say("Tu as débloqué un cadeau 🎁 Mets ton prénom et ton WhatsApp pour l'ouvrir.", function () {
+      form("Ouvrir mon cadeau 🎁", function () { bravo("🎁", "Merci " + S.nom + " !", 0, "", n5); });
+    });
+  }
+
+  function n5() {
+    hud(5);
+    media.onPlay = function () { step("Extrait lancé"); px("LeconGratuite", {}, true); media.onPlay = null; };
+    var v = media(CFG.lecon1, P_L1, "tap");
+    var half = false; v.addEventListener("timeupdate", function () { if (!half && v.duration && v.currentTime / v.duration > .5) { half = true; step("Extrait vu"); } });
+    say("Voici ta leçon 1 offerte 👇 Regarde-la, puis continue.", function () {
+      ask(["J'ai regardé ✓", { t: "Je la regarde plus tard", c: "soft" }], function (i) {
+        v.pause(); bravo(i ? "👍" : "🔥", i ? "Ok, on continue" : "Bien joué !", 0, "", n6);
+      });
+    });
+  }
+
+  function n6() {
+    hud(6);
+    var v = media(CFG.presentation, P_PRES, "tap");
+    say("Voici comment se passe la formation, en 1 minute 👇", function () {
+      ask(["Compris ✓", { t: "Voir les 8 leçons", c: "soft" }], function choix(i) {
+        v.pause();
+        if (i === 1) {
+          var p = panel("<b style=\"font-size:18px\">Les 8 leçons</b><ol>" + ["Bienvenue", "Les outils (ChatGPT, Google Flow, Claude)", "Écrire un script qui vend", "Créer ton personnage", "Le faire bouger et parler", "Le montage", "Gagner de l'argent", "La suite"]
+            .map(function (l, k) { return '<li class="' + (k ? "lock" : "") + '"><span>' + (k ? "🔒" : "✓") + "</span>" + l + "</li>"; }).join("") + "</ol>");
+          stage.classList.add("nosay");
+          return ask(["Compris ✓"], function () { p.remove(); stage.classList.remove("nosay"); choix(0); });
+        }
+        bravo("✓", "Parfait !", 0, "", n7);
+      });
+    });
+  }
+
+  function n7() {
+    hud(7); step("Offre vue"); px("OffreVue", {}, true); media(CFG.videos.offre);
+    stage.classList.add("nosay");
+    panel('<div class="line">Prêt(e) ? Prends ta place 👇</div><div class="tag">Prix de lancement</div><div class="big">' + fmt(CFG.prix) + "</div><s>" + fmt(CFG.prixBarre) + "</s>" +
+      "<ul><li>🎬 8 leçons + 1 exercice par leçon</li><li>✨ Gemini Pro offert (Google Flow)</li><li>💬 Groupe d'entraide WhatsApp</li><li>♾️ Accès à vie, sur ton téléphone</li></ul>");
+    setTimeout(offreBoutons, 500);
+  }
+  function offreBoutons() {
+    ask(["Je prends ma place ✅", { t: "J'ai une question", c: "soft" }, { t: "J'hésite", c: "soft" }], function (i) {
+      if (i === 0) return prendre();
+      if (i === 1) return faq();
+      hesite();
+    });
+  }
+
+  var FAQ = [["Il faut un ordinateur ?", "Non, ton téléphone suffit 📱"], ["Google Flow est payant ?", "Gemini Pro est offert avec la formation, donc Google Flow aussi ✨"],
+    ["Je ne suis pas au Burkina", "Pas de souci : c'est en ligne, tu paies par Mobile Money depuis ton pays 🌍"], ["Combien de temps ?", "8 leçons courtes, à ton rythme, accès à vie ♾️"]];
+  function clearPanel() { stage.querySelectorAll(".panel").forEach(function (x) { x.remove(); }); stage.classList.remove("nosay"); }
+  function faq() {
+    step("Question"); clearPanel();
+    say("Choisis ta question 👇", function () {
+      ask(FAQ.map(function (q) { return { t: q[0], c: "" }; }).concat([{ t: "Écrire à Wilfried", c: "soft" }]), function (i) {
+        if (i === FAQ.length) return waQ();
+        say(FAQ[i][1], function () { ask(["Je prends ma place ✅", { t: "Autre question", c: "soft" }], function (j) { j ? faq() : prendre(); }); });
+      });
+    });
+  }
+  function hesite() {
+    step("Question"); clearPanel();
+    say("Qu'est-ce qui te bloque ?", function () {
+      ask([{ t: "Le prix", c: "" }, { t: "Le temps", c: "" }, { t: "Peur que ce soit dur", c: "" }], function (i) {
+        S.frein = ["Prix", "Temps", "Difficulté"][i]; save();
+        say(["7 500 F, c'est moins qu'un seul spot vendu. Et Gemini Pro est offert 😉", "Les leçons sont courtes, tu avances à ton rythme ⏱️", "Tout est montré pas à pas, et on t'aide dans le groupe WhatsApp 🤝"][i], function () {
+          ask(["Ok, je prends ma place ✅", { t: "Écrire à Wilfried", c: "soft" }], function (j) { j ? waQ() : prendre(); });
+        });
+      }, "");
+    });
+  }
+  function waQ() {
+    var url = "https://wa.me/" + CFG.wa + "?text=" + encodeURIComponent("Bonjour Wilfried, j'ai une question sur la formation vidéos IA" + (S.nom ? " (" + S.nom + ")" : "") + " : ");
+    dock.innerHTML = '<a class="cta wa" href="' + url + '" target="_blank" rel="noopener">' + WAI + 'Écrire sur WhatsApp</a><button type="button" class="opt soft" id="wag-back">Revenir à l\'offre</button>';
+    document.getElementById("wag-back").onclick = function () { n7(); };
+  }
+
+  function prendre() {
+    if (!S.tel) { clearPanel(); say("Ton prénom et ton WhatsApp pour recevoir ton accès 👇"); return form("Valider ma place ✅", fin); }
+    fin();
+  }
+  /* Fin du parcours : récap + paiement sur WhatsApp */
+  function fin() {
+    hud(NLV + 1); media(CFG.videos.bravo); stage.classList.add("nosay");
+    panel('<div class="trophy">✅</div><b style="font-size:22px">C\'est presque fini, ' + esc(S.nom) + " !</b>" +
+      "<ul><li>🎬 Formation Vidéos IA · " + fmt(CFG.prix) + "</li><li>✨ Gemini Pro (Google Flow) · offert</li><li>💬 Groupe WhatsApp · offert</li></ul>" +
+      '<div style="font-size:14.5px;color:#DCEFE4;max-width:300px">Paie par Orange Money ou Moov et reçois ton accès tout de suite.</div>');
+    var t = "Bonjour Wilfried 👋 Je veux ma place pour la Formation Vidéos IA (" + fmt(CFG.prix) + "). Je m'appelle " + S.nom + (S.pays ? ", je suis au " + S.pays : "") +
+      ". Mon objectif : " + ({ "Revenu": "gagner de l'argent", "Pub produits": "faire la pub de mes produits", "Contenu": "créer du contenu" }[S.but] || "apprendre les vidéos IA") + ". Comment je paie ?";
+    dock.innerHTML = '<a class="cta wa" id="wag-pay" href="https://wa.me/' + CFG.wa + "?text=" + encodeURIComponent(t) + '" target="_blank" rel="noopener">' + WAI + "Payer " + fmt(CFG.prix) + ' sur WhatsApp</a><div class="note">WhatsApp s\'ouvre avec ton message prêt : appuie sur Envoyer.</div>';
+    document.getElementById("wag-pay").onclick = function () {
+      send({ type: "order", nom: S.nom, tel: S.tel, prix: CFG.prix });
+      px("InitiateCheckout", { value: CFG.prix, currency: "XOF", num_items: 1, content_name: PROD });
+      S.fini = true; save();
+    };
+  }
+
+  /* Quelqu'un qui revient : il reprend au bon niveau */
+  function retour() {
+    hud(S.fini ? NLV + 1 : 7); step("Arrivée"); media(CFG.videos.hello, P_TEASER);
+    say("Re-bonjour " + esc(S.nom) + " 👋 On reprend où tu t'étais arrêté(e) ?", function () {
+      ask(["Continuer", { t: "Revoir ma leçon gratuite", c: "soft" }], function (i) { i ? n5() : (S.fini ? fin() : n7()); });
+    });
+  }
+
+  if (S.nom && S.tel) retour(); else n1();
+})();
+</script>

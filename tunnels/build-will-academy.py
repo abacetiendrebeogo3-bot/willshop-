@@ -1,7 +1,7 @@
 # Construit les tunnels Will Academy prêts à coller dans Systeme.io (source + images en ligne)
 import json
 b=json.load(open('assets-academy/b64.json')); logo=open('assets-academy/logo64.txt').read()
-for name in ['will-academy-chat','will-academy-jeu']:
+for name in ['will-academy-chat','will-academy-jeu','will-academy-parcours']:
     s=open(name+'.src.html').read()
     for k,v in [('__AV__',b['AV']),('__P_TEASER__',b['P_TEASER']),('__P_PRES__',b['P_PRES']),('__P_L1__',b['P_L1']),('__PORTRAIT__',b['PORTRAIT']),('__LOGO__',logo)]:
         s=s.replace(k,v)
