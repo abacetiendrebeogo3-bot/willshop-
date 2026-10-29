@@ -61,7 +61,7 @@ STEPS = {
  "etape6": [
   ("A6", 0, 8.04, 1, [(0.80, 1.80, "Avant, c'était *8 000 F*."), (2.75, 4.42, "Aujourd'hui, c'est *6 500 F*,"),
                       (5.19, 7.46, "et tu paies seulement quand le *livreur* arrive chez toi.")],
-   [(0.80, 2.75, "~8 000 F", WHT, LOW), (2.75, 5.19, "6 500 F", GRN, LOW), (5.19, 8.04, "💵 TU PAIES À LA LIVRAISON", YEL, LOW)]),
+   [(0.80, 2.75, "~8 000 F", WHT, LOW), (2.75, 5.19, "6 500 F", GRN, LOW), (5.19, 8.04, "💵 OUAGA : PAIEMENT À LA LIVRAISON", YEL, LOW)]),
   ("A6b", 0, 8.04, 1, [(0.12, 0.87, "Hors de *Ouaga* ?"), (1.18, 2.25, "On t'expédie par *STAF*,"), (2.50, 3.60, "*TSR*, *Rahimo*,"),
                        (3.75, 4.98, "ou la compagnie de *ton choix*."), (5.63, 6.95, "Frais d'expédition : *1 000 F*,"),
                        (7.12, 8.04, "partout au *Burkina*.")],
