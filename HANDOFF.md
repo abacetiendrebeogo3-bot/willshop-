@@ -57,7 +57,7 @@
 ### Kit Minceur v2 (29/10, en cours)
 - Nouveau tunnel « page de vente » en 6 étapes avec Awa en mouvement : script et noms des clips dans `tunnels/kit-minceur-media/SCRIPT_AWA.md`.
 - Clips Flow attendus : A1–A6 (Awa) + 1a, 1b, 1c, 2a, 3a, 4a, 4b, 6a (illustrations). Images de référence : Awa, Awa avec le kit (sachet Fit Tea + flacon Slim Fit Tablet), Mariam avant/après, Issouf avant/après.
-- À faire : monter une vidéo par étape (illustration → Awa, incrustations, sous-titres), compresser pour mobile, héberger sur Vercel (`media/`), brancher dans `kit-minceur-awa.html`, tester aux 4 tailles, coller dans Systeme.io.
+- ✅ 29/10 : vidéos montées (`media/kit-v2/etape1…6.mp4`, script `tunnels/kit-minceur-media/build_kit_v2.py`) et tunnel `tunnels/kit-minceur-v2.html` (6 étapes vidéo puis parcours ville → récap). Vidéo refaite = augmenter `MVV` dans le tunnel (cache 1 an). Reste : coller dans Systeme.io.
 - Plan pub : 10 000 F le premier jour, réinjection quotidienne (J1 10k, J2 10k, J3 15k, J4 20k, J5 25k, J6 30k, J7 35k), coût max 2 000 F par kit livré.
 
 ## 6. App WillShop (`index.html`)
