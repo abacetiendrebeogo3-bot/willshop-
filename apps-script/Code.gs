@@ -202,6 +202,18 @@ function waData_(days) {
   return { msgs: msgs, suivi: suivi, last: last, total: Math.max(0, n - 1) };
 }
 
+// ---------- Campagne pub ----------
+// Onglet « Pub » : Date · Campagne · Dépense (F) · Saisi par · Le · Note (une ligne par jour et par campagne)
+function pubSheet_() {
+  var ss = ss_(), sh = ss.getSheetByName("Pub");
+  if (!sh) { sh = ss.insertSheet("Pub"); sh.appendRow(["Date", "Campagne", "Dépense (F)", "Saisi par", "Le", "Note"]); sh.setFrozenRows(1); sh.getRange("A:A").setNumberFormat("@"); }
+  return sh;
+}
+function pubRows_() {
+  var sh = pubSheet_(), n = sh.getLastRow();
+  return n < 2 ? [] : sh.getRange(2, 1, n - 1, 6).getDisplayValues();
+}
+
 function api(action, cred, p) {
   if (action === "names") return names();
   var me = auth_(cred), role = roleOf_(me.role);
@@ -233,6 +245,7 @@ function api(action, cred, p) {
       var vs = ss.getSheetByName("Visites"), vn = vs.getLastRow();
       var from = Math.max(2, vn - 3000);
       res.visits = vn < 2 ? [] : vs.getRange(from, 1, vn - from + 1, 4).getDisplayValues();
+      try { res.pub = pubRows_(); } catch (e) { res.pub = []; }
       res.team = t.map(function (m) { return { nom: m.nom, role: m.role, tel: m.tel, actif: m.actif, pin: !!m.pin }; });
     }
     return res;
@@ -467,6 +480,24 @@ function api(action, cred, p) {
   if (action === "waKey") {
     if (role !== "ceo") throw new Error("Réservé à la direction");
     return { key: waKey_(), url: ScriptApp.getService().getUrl() };
+  }
+
+  if (action === "pubSet") {
+    if (role !== "ceo") throw new Error("Réservé à la direction");
+    var pd = String(p.date || "").trim();
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(pd)) throw new Error("Date invalide");
+    var mt = Math.round(Number(p.montant));
+    if (!(mt >= 0) || mt > 10000000) throw new Error("Montant invalide");
+    var camp = String(p.campagne || "Kit Minceur").trim().slice(0, 60);
+    var lk6 = LockService.getScriptLock(); lk6.waitLock(10000);
+    try {
+      var psh = pubSheet_(), rows = pubRows_(), at = -1;
+      rows.forEach(function (r, i) { if (r[0] === pd && r[1] === camp) at = i; });
+      var line = ["'" + pd, camp, mt, me.nom, stamp_(), String(p.note || "").slice(0, 200)];
+      if (at >= 0) psh.getRange(at + 2, 1, 1, 6).setValues([line]); else psh.appendRow(line);
+      journal_(me.nom, "Dépense pub du " + pd + " : " + mt + " F", "", "", camp);
+      return { ok: true };
+    } finally { lk6.releaseLock(); }
   }
 
   if (action === "taskAdd") {

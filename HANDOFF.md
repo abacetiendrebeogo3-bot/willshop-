@@ -34,6 +34,7 @@
 | **Mouvements** | Date · Produit · Type · Quantité · Stock après · Par · Note |
 | **Caisse** | Déclaré le · Livreur · Montant · Commandes (lignes) · Statut · Validé par · Validé le · Note |
 | **Journal** | Date · Qui · Action · Ligne · Client · Détail |
+| **Pub** | Date (jj/mm/aaaa) · Campagne · Dépense (F) · Saisi par · Le · Note — une ligne par jour et par campagne, créé tout seul par le pont |
 
 - **Statuts** : Prospect, Nouvelle, Confirmée, En livraison, Reprogrammée, Injoignable, Échec, Livrée, Annulée.
 - **Colonne K (Relances)** : jetons séparés par des virgules (`J+1`, `J+3`, `Veille`, `Jour dd/mm`, `Rdd/mm`…).
@@ -41,7 +42,7 @@
 ## 4. Pont Apps Script (`apps-script/Code.gs`)
 - URL d'exécution, utilisée dans `index.html` (constante `API`) et dans `api/chat.js` : `https://script.google.com/macros/s/AKfycbxudwbiZxBeTqbPU5XxCkAx1KsCuzcA8Y3qEbTEERqQ8IB6XX4hDwH7Cs3o8l9Sv8G0/exec`
 - `doPost` reçoit `{action, cred:{nom,pin}, p}` en `Content-Type: text/plain` (pour éviter les soucis CORS) et répond `{ok, data|error}`.
-- Actions : `names`, `login`, `data`, `update`, `addMember`, `setMember`, `remise`, `remiseOk`, `stockMove`, `stockProduct`.
+- Actions : `names`, `login`, `data`, `update`, `addMember`, `setMember`, `remise`, `remiseOk`, `stockMove`, `stockProduct`, `pubSet` (Direction : dépense pub d'un jour, remplace la ligne si elle existe). `data` renvoie aussi `pub` (onglet Pub) à la Direction.
 - **Pour mettre à jour le script** : copier `Code.gs` dans l'éditeur Apps Script, puis Déployer → Gérer les déploiements → crayon → Version : **Nouvelle version** → Déployer. L'URL reste la même.
 
 ## 5. Tunnel Kit Minceur (`tunnels/kit-minceur-awa.html`)
@@ -79,6 +80,15 @@
 - **Présentation en bulles (19/10)** : `todoBubbles()` (étapes en bulles, Commandes « À faire » + accueils Direction et Commerciale), `orderCard()` = carte simple qui ouvre la feuille d'actions `sheetHtml()` / `bindSheet()` (état `sh`). Couleurs : classes `k-red`, `k-green`, etc.
 - **Fidélisation** : clients livrés relancés à J+3, J+10, J+25 et J+45 après la livraison (`FID_STEPS`, `T_FID`, `fidStep()`), jetons `F+3`… dans la colonne K. Bulle « Fidélisation ». Le tag « Ne pas relancer » les bloque.
 - **Tags clients** : enregistrés au début de la colonne J (Note) sous la forme `[Tags: VIP, Fidèle]` ; `tagsOf()` les lit, `noteText()` donne la note sans les tags.
+
+## 6 bis. Écran « Campagne » (Direction, 29/10)
+- Onglet `camp` « Campagne » (2e onglet de la Direction) : suivi de la relance Kit Minceur lancée le **29/10/2026** selon `tunnels/kit-minceur-media/PLAN_PUB.md`.
+- Code : bloc `/* ---------- Campagne pub Kit Minceur ... */` dans `index.html` : `CAMP` (date de départ, tableau des 7 jours, seuil 2 000 F, achat 2 400 F par défaut ou prix d'achat de l'onglet Stock, 1 000 F de livraison, capacité 15 livraisons/jour), `campDay()`, `campAdvice()`, `renderCamp()`, `bindCamp()`, `savePub()`.
+- **Chiffres** (produit contenant « minceur ») : visiteurs = lignes de l'onglet Visites du jour ; commandes = commandes du jour hors prospects, promesses et annulées ; kits livrés = quantités des commandes passées à « Livrée » ce jour-là (colonne Q) ; encaissé = prix des commandes payées ce jour-là (colonne S).
+- **Bilan** : coût par kit livré = pub ÷ kits livrés (vert ≤ 2 000 F, rouge au-dessus) ; gain = Σ(prix − 1 000 F − qté × achat) des kits livrés − pub ; cumul de J1 au jour choisi. Les pastilles J1…J7 permettent de revoir un jour passé et de corriger sa dépense.
+- **Conseil de demain** (ordre des règles) : pas de dépense saisie → rien à conseiller ; plus de 15 commandes Kit à livrer → on bloque ; ≥ 5 000 F dépensés sans commande → couper et remplacer ; J1 → garder 10 000 F (argent pas rentré) ; coût par kit de la semaine > 2 000 F → ne pas monter ; sinon budget du plan, plafonné à +50 % de la dépense du jour. Toujours confirmé par Wilfried avant de toucher Meta.
+- **Saisie** : Wilfried rentre la dépense pub chaque soir (champ + boutons rapides) → action `pubSet` → onglet **Pub**. Si le pont n'est pas à jour, l'app affiche « recolle Code.gs… ».
+- Pour une prochaine campagne : changer `CAMP` (nom, `start`, `plan`, `produit`).
 
 ## 8. Superviseur WhatsApp (22/10)
 - **But** : lire le WhatsApp de la commerciale (connecté par QR code via Evolution API, serveur Railway) et lui dire qui répondre ou relancer. **Lecture seule** : rien n'est jamais envoyé depuis ce numéro (risque de bannissement), la commerciale envoie elle-même avec le bouton « Écrire ».

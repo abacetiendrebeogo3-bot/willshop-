@@ -502,6 +502,33 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 .sv-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bad);margin-right:7px;vertical-align:1px} .sv-dot.on{background:var(--ok)} .sv-dot.wait{background:var(--gold-fill)}
 .sv-qr{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
 .sv-qr img{width:240px;max-width:100%;aspect-ratio:1;background:#fff;border-radius:12px;padding:8px;border:1px solid var(--line)}
+/* Campagne pub */
+.cdays{display:flex;gap:6px;overflow-x:auto;margin:12px 0 4px;padding-bottom:2px;scrollbar-width:none}
+.cdays button{flex:1 0 46px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:7px 4px;font:inherit;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;position:relative}
+.cdays button b{font-size:14px}.cdays button span{font-size:11px;color:var(--mut)}
+.cdays button[aria-pressed="true"]{border-color:var(--bx);background:var(--bx-soft)}
+.cdays button i{position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:9px;background:var(--faint)}
+.cdays button i.ok{background:var(--ok)}.cdays button i.bad{background:var(--bad)}
+.cgoal{background:var(--hero);color:var(--on-bx);border-radius:20px;padding:15px 16px;margin-top:12px}
+.cgoal .eyebrow{color:var(--gold-fill)}.cgoal .tg{background:rgba(255,255,255,.14);color:var(--on-bx)}
+.cg-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.cg-row small{display:block;font-size:12px;color:var(--hero-mut)}.cg-row b{font:800 24px/1.2 var(--sans);font-variant-numeric:tabular-nums}
+.cbar{height:8px;border-radius:9px;background:rgba(255,255,255,.18);margin-top:12px;overflow:hidden}.cbar div{height:100%;background:var(--gold-fill);border-radius:9px;transition:width .4s}
+.cgoal .meta{color:var(--hero-mut)}
+.cbubs .bub{cursor:default}.cbubs .l small{font-weight:500;color:var(--mut)}.cbubs .bub.cm{grid-column:1/-1}.cbubs .n.cmoney{font-size:21px;white-space:nowrap}
+.cspend .cin{display:flex;gap:8px}.cspend input{flex:1;min-width:0;font:700 20px var(--sans);padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+.cspend input:focus{outline:none;border-color:var(--bx)}
+.tile.c-ok{border-color:var(--ok);box-shadow:inset 4px 0 0 var(--ok)}.tile.c-ok b{color:var(--ok)}
+.tile.c-bad{border-color:var(--bad);box-shadow:inset 4px 0 0 var(--bad)}.tile.c-bad b{color:var(--bad)}
+.tiles .tile{cursor:default}
+.cadv{background:var(--s);border:1.5px solid var(--c);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.cadv .eyebrow{color:var(--c)}.cadv b{font:800 20px/1.25 var(--sans);color:var(--c)}.cadv p{margin:2px 0;font-size:14px;line-height:1.45}.cadv small{color:var(--mut);font-size:12px}
+.ctable{padding:6px 4px;overflow-x:auto}.ctable table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.ctable th{font-size:11px;font-weight:600;color:var(--mut);text-align:right;padding:6px}.ctable th:first-child,.ctable td:first-child{text-align:left}
+.ctable td{text-align:right;padding:7px 6px;border-top:1px solid var(--line);white-space:nowrap}.ctable tr.cur td{background:var(--bx-soft);font-weight:700}
+.ctable .ok{color:var(--ok);font-weight:700}.ctable .bad{color:var(--bad);font-weight:700}.ctable .faint{color:var(--faint)}
+nav.tabs .in.n7 button{font-size:10px;letter-spacing:-.1px}
 </style>
 </head>
 <body>
@@ -571,10 +598,11 @@ const ICONS = {
   runs: '<path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
   history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
   stock: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  camp: '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
   wa: '<path d="M21 11.5a8.4 8.4 0 0 1-12.5 7.4L3 20.5l1.6-5.3A8.5 8.5 0 1 1 21 11.5z"/><path d="M9 10h.01M12.5 10h.01M16 10h.01"/>'
 };
 const ROLES = {
-  ceo:    [["home", "Accueil"], ["wa", "WhatsApp"], ["orders", "Commandes"], ["stock", "Stock"], ["team", "Équipe"], ["ai", "Assistant"]],
+  ceo:    [["home", "Accueil"], ["camp", "Campagne"], ["wa", "WhatsApp"], ["orders", "Commandes"], ["stock", "Stock"], ["team", "Équipe"], ["ai", "Assistant"]],
   sales:  [["day", "Ma journée"], ["wa", "WhatsApp"], ["home", "Accueil"], ["orders", "Commandes"], ["clients", "Clients"], ["ai", "Assistant"]],
   driver: [["runs", "Livraisons"], ["history", "Historique"]]
 };
@@ -774,6 +802,7 @@ function applyData(d) {
     if (d.remises) remises = d.remises;
     if (d.journal) journal = d.journal;
     if (d.tasks) tasks = d.tasks;
+    if (d.pub) { pubRows = d.pub.map(r => ({ date: parseDate(r[0]), montant: Number(String(r[2]).replace(/\D/g, "")) || 0 })).filter(r => r.date); pubLoaded = true; }
     loaded = true;
 }
 document.getElementById("refresh").onclick = () => load();
@@ -1902,6 +1931,145 @@ function stockStats() {
     return Object.assign({}, x, { reserve, sold7, dispo, days: perDay > 0 ? Math.floor(Math.max(0, dispo) / perDay) : null });
   });
 }
+/* ---------- Campagne pub Kit Minceur (plan du 29/10/2026, tunnels/kit-minceur-media/PLAN_PUB.md) ---------- */
+// Onglet « Pub » du Sheet : Date · Campagne · Dépense (F) · Saisi par · Le · Note
+const CAMP = {
+  nom: "Relance Kit Minceur", produit: /minceur/i, start: new Date(2026, 9, 29),
+  plan: [[10000, 5, "5"], [10000, 5, "5"], [15000, 7.5, "7-8"], [20000, 10, "10"], [25000, 12.5, "12-13"], [30000, 15, "15"], [35000, 17.5, "17-18"]],
+  seuil: 2000, achat: 2400, livraison: 1000, capacite: 15, objectifSemaine: 58
+};
+let pubRows = [], pubLoaded = false, pubEdit = false, pubDay = null;
+const campDayIndex = d => daysBetween(CAMP.start, d);           // 0 = J1
+const campLabel = i => "J" + (i + 1);
+function pubFor(d) {
+  const k = startOfDay(d).getTime(), r = pubRows.find(x => x.date && startOfDay(x.date).getTime() === k);
+  return r ? r.montant : null;
+}
+function achatKit() { const s = stock.find(x => CAMP.produit.test(x.produit)); return (s && s.achat) || CAMP.achat; }
+// Chiffres d'une journée de campagne
+function campDay(d) {
+  const t0 = startOfDay(d).getTime(), on = x => x && startOfDay(x).getTime() === t0, kit = o => CAMP.produit.test(o.produit);
+  const vis = visits.filter(v => on(v.date) && CAMP.produit.test(v.produit)).length;
+  const cmds = orders.filter(o => kit(o) && on(o.date) && !isProspect(o) && !isPromise(o) && !is(o, /^annul/i));
+  const livr = orders.filter(o => kit(o) && is(o, /^livr/i) && on(o.livreeLe));
+  const kits = livr.reduce((n, o) => n + (o.qte || 1), 0);
+  const cash = orders.filter(o => kit(o) && on(o.payeLe)).reduce((n, o) => n + o.prix, 0);
+  const ca = livr.reduce((n, o) => n + o.prix, 0);
+  const marge = livr.reduce((n, o) => n + o.prix - CAMP.livraison * (o.prix ? 1 : 0) - (o.qte || 1) * achatKit(), 0);
+  const pub = pubFor(d);
+  return { d, vis, cmds: cmds.length, kitsCmd: cmds.reduce((n, o) => n + (o.qte || 1), 0), kits, cash, ca, marge, pub,
+    cpk: pub && kits ? Math.round(pub / kits) : null, gain: pub === null ? null : marge - pub };
+}
+// Conseil du budget de demain selon les règles du plan
+function campAdvice(i, day, week) {
+  const next = i + 1, planNext = CAMP.plan[Math.min(next, CAMP.plan.length - 1)][0];
+  const spent = day.pub || CAMP.plan[Math.min(i, 6)][0];
+  const aLivrer = orders.filter(o => CAMP.produit.test(o.produit) && isToDeliver(o)).length;
+  const cpk = week.kits ? week.pub / week.kits : null;
+  if (i >= 6) return { lvl: "info", n: spent, t: "Fin des 7 jours", d: "La semaine du plan est finie. Garde le même budget demain et fais le bilan : on continue la même logique sur le mois." };
+  if (day.pub === null) return { lvl: "info", n: CAMP.plan[Math.min(i, 6)][0], t: "Rentre d'abord la dépense du jour", d: "Le conseil se calcule avec la dépense pub de ce soir. En attendant, le plan prévoit " + F(planNext) + " pour " + campLabel(next) + "." };
+  if (aLivrer > CAMP.capacite) return { lvl: "bad", n: spent, t: "On bloque le budget", d: aLivrer + " commandes attendent encore la livraison (≈ " + CAMP.capacite + " livraisons par jour avec 2 livreurs). On garde " + F(spent) + " tant que les livreurs ne suivent pas." };
+  if (week.pub >= 5000 && !week.kits && !week.kitsCmd) return { lvl: "bad", n: Math.min(spent, CAMP.plan[0][0]), t: "Couper et remplacer les pubs", d: F(week.pub) + " dépensés sans aucune commande. Coupe les pubs qui ont dépensé 5 000 F sans 2 commandes, remplace-les, et ne monte pas le budget." };
+  if (cpk === null) {
+    if (i === 0) return { lvl: "ok", n: CAMP.plan[1][0], t: "Garder " + F(CAMP.plan[1][0]), d: "Comme prévu au plan : l'argent de J1 n'est pas encore rentré, on reste à " + F(CAMP.plan[1][0]) + ". Ce soir, coupe une pub qui a dépensé 5 000 F sans au moins 2 commandes." };
+    return { lvl: "warm", n: spent, t: "Garder " + F(spent), d: "Pas encore de kit livré : on ne monte pas avant de voir les premières livraisons." };
+  }
+  if (cpk > CAMP.seuil) return { lvl: "bad", n: spent, t: "Ne pas monter : rester à " + F(spent), d: "Le coût par kit livré de la semaine est de " + F(Math.round(cpk)) + ", au-dessus de " + F(CAMP.seuil) + ". Coupe la pub la plus chère, remplace-la, et on remonte quand on repasse sous " + F(CAMP.seuil) + "." };
+  if (i === 0) return { lvl: "ok", n: CAMP.plan[1][0], t: "Garder " + F(CAMP.plan[1][0]), d: "Bon départ (" + F(Math.round(cpk)) + " par kit livré). Le plan garde " + F(CAMP.plan[1][0]) + " demain : l'argent de J1 n'est pas encore rentré." };
+  const max = Math.round(spent * 1.5 / 1000) * 1000, n = Math.min(planNext, max);
+  return { lvl: "ok", n, t: "Monter à " + F(n), d: "Coût par kit livré de la semaine : " + F(Math.round(cpk)) + ", sous " + F(CAMP.seuil) + ". On suit le plan (" + campLabel(next) + " : " + F(planNext) + "), +50 % maximum. Au-delà de 30 000 F, duplique l'ensemble gagnant au lieu de le gonfler." };
+}
+function renderCamp() {
+  const t0 = today(), iToday = campDayIndex(t0);
+  if (iToday < 0) return `<h1>Campagne</h1>${empty("La campagne démarre le " + CAMP.start.toLocaleDateString("fr-FR") + ".")}`;
+  const end = Math.min(iToday, CAMP.plan.length - 1);
+  if (pubDay === null || pubDay > end) pubDay = end;
+  const i = pubDay, d = new Date(CAMP.start.getFullYear(), CAMP.start.getMonth(), CAMP.start.getDate() + i);
+  const days = []; for (let k = 0; k <= end; k++) days.push(campDay(new Date(CAMP.start.getFullYear(), CAMP.start.getMonth(), CAMP.start.getDate() + k)));
+  const day = days[i], upto = days.slice(0, i + 1);
+  const sum = f => upto.reduce((n, x) => n + (x[f] || 0), 0);
+  const week = { pub: sum("pub"), kits: sum("kits"), kitsCmd: sum("kitsCmd"), cash: sum("cash"), marge: sum("marge"), gain: upto.some(x => x.pub !== null) ? sum("marge") - sum("pub") : null };
+  const [budget, , kitsTxt] = CAMP.plan[i], kitsGoal = CAMP.plan[i][1];
+  const isToday = i === iToday, pct = Math.min(100, Math.round(day.kits / kitsGoal * 100));
+  const col = v => v === null ? "" : v <= CAMP.seuil ? "ok" : "bad";
+  const weekCpk = week.kits && upto.some(x => x.pub !== null) ? Math.round(week.pub / week.kits) : null, adv = campAdvice(i, day, week);
+  const tile = (l, v, sub, cls = "") => `<div class="tile ${cls}"><span class="l">${l}</span><b>${v}</b><small>${sub}</small></div>`;
+  const fmtGain = g => g === null ? "—" : (g < 0 ? "− " : "") + F(Math.abs(g));
+  const label = x => (sameDay(x.d, t0) ? "Aujourd'hui" : x.d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" }));
+  return `
+    <h1>Campagne</h1>
+    <p class="sub">${esc(CAMP.nom)} · lancée le ${CAMP.start.toLocaleDateString("fr-FR")} · <b>${campLabel(Math.min(iToday, 6))}</b>${iToday > 6 ? " (semaine finie)" : ""}</p>
+    <div class="cdays" role="tablist">${days.map((x, k) => `<button data-cday="${k}" aria-pressed="${k === i}"><b>${campLabel(k)}</b><span>${x.d.getDate()}/${x.d.getMonth() + 1}</span>${x.pub !== null ? `<i class="${col(x.cpk) || "mut"}"></i>` : ""}</button>`).join("")}</div>
+
+    <div class="cgoal">
+      <div class="cg-top"><span class="eyebrow">Objectif ${isToday ? "du jour" : "de " + campLabel(i)}</span><span class="tg">${label(day)}</span></div>
+      <div class="cg-row"><div><small>Budget pub</small><b>${F(budget)}</b></div><div><small>Kits livrés visés</small><b>${kitsTxt}</b></div></div>
+      <div class="cbar"><div style="width:${pct}%"></div></div>
+      <p class="meta" style="margin:6px 0 0">${day.kits} kit${day.kits > 1 ? "s" : ""} livré${day.kits > 1 ? "s" : ""} sur ${kitsTxt} · ${pct >= 100 ? "objectif atteint 🎉" : "encore " + Math.max(0, Math.ceil(kitsGoal - day.kits)) + " à livrer"}</p>
+    </div>
+
+    <h2>Avancement ${isToday ? "en direct" : "de " + campLabel(i)}</h2>
+    <div class="bubbles cbubs">
+      <div class="bub k-blue"><span class="ic">${SV('<circle cx="12" cy="12" r="3"/><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/>')}</span><span class="l">Visiteurs du tunnel</span><span class="n">${visitsLoaded ? day.vis : "…"}</span></div>
+      <div class="bub k-orange"><span class="ic">${SV('<path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/>')}</span><span class="l">Commandes</span><span class="n">${day.cmds}</span></div>
+      <div class="bub k-green"><span class="ic">${SV('<path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>')}</span><span class="l">Kits livrés</span><span class="n">${day.kits}</span></div>
+      <div class="bub k-bx cm"><span class="ic">${SV('<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>')}</span><span class="l">Argent encaissé</span><span class="n cmoney">${F(day.cash)}</span></div>
+    </div>
+    ${day.vis ? `<p class="verdict">${day.kitsCmd} kit${day.kitsCmd > 1 ? "s" : ""} commandé${day.kitsCmd > 1 ? "s" : ""} · ${Math.round(day.cmds / day.vis * 100)} % des visiteurs ont commandé${day.pub ? " · " + F(Math.round(day.pub / day.vis)) + " de pub par visiteur" : ""}.</p>` : ""}
+
+    <h2>Dépense pub ${isToday ? "du jour" : "de " + campLabel(i)}</h2>
+    ${day.pub !== null && !pubEdit ? `<div class="card cspend"><div class="c-top"><div><div class="place">${F(day.pub)} dépensés</div><div class="meta">Enregistré dans l'onglet Pub du Sheet</div></div><button class="btn small ghost" data-pubedit="1">Modifier</button></div></div>`
+      : `<form class="card cspend" data-pubform="${i}">
+        <label class="meta" for="pubAmt">Montant dépensé sur Meta (en F CFA)</label>
+        <div class="cin"><input id="pubAmt" name="m" inputmode="numeric" pattern="[0-9 ]*" placeholder="${budget}" value="${day.pub !== null ? day.pub : ""}" autocomplete="off"><button class="btn pri" type="submit">Enregistrer</button></div>
+        <div class="choices">${[budget, Math.round(budget * .8 / 500) * 500, Math.round(budget * 1.1 / 500) * 500].filter((v, k, a) => a.indexOf(v) === k).map(v => `<button class="choice" type="button" data-pubquick="${v}">${F(v)}</button>`).join("")}</div>
+        ${pubEdit ? `<button class="linkbtn" type="button" data-pubedit="0">Annuler</button>` : ""}
+      </form>`}
+
+    <h2>Bilan</h2>
+    <div class="tiles">
+      ${tile("Coût par kit livré", day.cpk === null ? "—" : F(day.cpk), day.pub === null ? "dépense à rentrer" : day.kits ? (day.cpk <= CAMP.seuil ? "sous " : "au-dessus de ") + F(CAMP.seuil) : "aucun kit livré", "c-" + col(day.cpk))}
+      ${tile("Gain " + (isToday ? "du jour" : "de " + campLabel(i)), fmtGain(day.gain), "marge des kits livrés − pub", day.gain === null ? "" : day.gain >= 0 ? "c-ok" : "c-bad")}
+      ${tile("Coût par kit · semaine", weekCpk === null ? "—" : F(weekCpk), week.kits + " kits livrés · " + F(week.pub) + " de pub", "c-" + col(weekCpk))}
+      ${tile("Gain cumulé · semaine", fmtGain(week.gain), "objectif semaine : ≥ " + CAMP.objectifSemaine + " kits", week.gain === null ? "" : week.gain >= 0 ? "c-ok" : "c-bad")}
+    </div>
+    <p class="meta" style="margin:6px 2px 0">Marge = prix encaissé − ${F(CAMP.livraison)} de livraison − ${F(achatKit())} d'achat par kit. On compte les kits <b>livrés</b>, pas les commandes.</p>
+
+    <h2>Budget de demain</h2>
+    <div class="cadv k-${adv.lvl === "ok" ? "green" : adv.lvl === "bad" ? "red" : adv.lvl === "warm" ? "orange" : "blue"}">
+      <span class="eyebrow">Conseil pour ${campLabel(Math.min(i + 1, 6))}${i >= 6 ? "+" : ""}</span>
+      <b>${esc(adv.t).replace(/(\d) (\d{3}) F/g, "$1&nbsp;$2&nbsp;F")}</b>
+      <p>${esc(adv.d)}</p>
+      <small>Plan : ${F(CAMP.plan[Math.min(i + 1, 6)][0])} · Toujours confirmer avant de changer le budget dans Meta.</small>
+    </div>
+
+    <h2>Les 7 jours</h2>
+    <div class="card ctable"><table><thead><tr><th>Jour</th><th>Pub</th><th>Visé</th><th>Livrés</th><th>Coût/kit</th><th>Gain</th></tr></thead><tbody>
+      ${CAMP.plan.map((p, k) => { const x = days[k]; return `<tr class="${k === i ? "cur" : ""}"><td>${campLabel(k)}</td><td>${x && x.pub !== null ? F(x.pub) : `<span class="faint">${F(p[0])}</span>`}</td><td>${p[2]}</td><td>${x ? x.kits : "—"}</td><td class="${x ? col(x.cpk) : ""}">${x && x.cpk !== null ? F(x.cpk) : "—"}</td><td class="${x && x.gain !== null ? (x.gain >= 0 ? "ok" : "bad") : ""}">${x ? fmtGain(x.gain) : "—"}</td></tr>`; }).join("")}
+    </tbody></table></div>`;
+}
+async function savePub(i, montant) {
+  const d = new Date(CAMP.start.getFullYear(), CAMP.start.getMonth(), CAMP.start.getDate() + i);
+  const key = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const prev = pubRows.slice();
+  pubRows = pubRows.filter(x => !sameDay(x.date, d)).concat([{ date: d, montant }]); pubEdit = false; render();
+  try { await api("pubSet", { date: key, montant, campagne: CAMP.nom }); toast("Dépense enregistrée : " + F(montant)); }
+  catch (e) {
+    pubRows = prev; render();
+    banner(/inconnue/i.test(e.message) ? "Le pont Google Sheet n'est pas encore à jour : recolle <b>apps-script/Code.gs</b> dans Apps Script et déploie une nouvelle version." : "Pas enregistré : " + esc(e.message));
+  }
+}
+function bindCamp() {
+  view.querySelectorAll("[data-cday]").forEach(b => b.onclick = () => { pubDay = +b.dataset.cday; pubEdit = false; render(); });
+  view.querySelectorAll("[data-pubedit]").forEach(b => b.onclick = () => { pubEdit = b.dataset.pubedit === "1"; render(); const i = document.getElementById("pubAmt"); if (i && pubEdit) i.focus(); });
+  view.querySelectorAll("[data-pubquick]").forEach(b => b.onclick = () => { const i = document.getElementById("pubAmt"); if (i) i.value = b.dataset.pubquick; });
+  view.querySelectorAll("[data-pubform]").forEach(f => f.onsubmit = e => {
+    e.preventDefault();
+    const m = Math.round(Number(String(f.m.value).replace(/\D/g, "")));
+    if (!(m >= 0) || String(f.m.value).trim() === "") { f.m.focus(); return; }
+    savePub(+f.dataset.pubform, m);
+  });
+}
 function renderStock() {
   const st = stockStats();
   const value = st.reduce((n, x) => n + Math.max(0, x.stock) * (x.achat || 0), 0);
@@ -2927,6 +3095,7 @@ function bindSv() {
 function renderTabs() {
   const due = loaded ? salesBuckets() : null;
   const badge = { wa: svData ? svBadge() : 0, day: due ? Object.values(due).reduce((n, l) => n + l.length, 0) : 0, runs: loaded ? driverOrders().filter(o => isToDeliver(o) && (deliveryDate(o) || 0) < today().getTime() + DAY).length : 0 };
+  document.getElementById("tabs").classList.toggle("n7", ROLES[role].length > 6);
   document.getElementById("tabs").innerHTML = ROLES[role].map(([k, l]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>${l}${badge[k] ? `<span class="badge">${badge[k]}</span>` : ""}</button>`).join("");
   document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => { tab = b.dataset.tab; store("ws_tab", tab + "|" + dayKey()); query = ""; panel = null; sh = null; window.scrollTo(0, 0); render(); });
   document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.role === role)));
@@ -2935,14 +3104,14 @@ function render() {
   renderTabs();
   const fab = document.getElementById("fabAdd");
   if (fab) {
-    fab.hidden = !cred || role === "driver";
+    fab.hidden = !cred || role === "driver" || tab === "camp";
     fab.onclick = () => openOrderModal(filter === "promesses" ? "promesse" : "commande");
   }
   if (!cred) return renderLogin("");
   if (false) { view.innerHTML = `<h1>Connexion</h1>${empty("Cette app lit tes commandes dans Google Sheets. Ouvre-la dans Claude pour la connecter.")}`; return; }
   if (!loaded && tab !== "ai") { view.innerHTML = `<h1>Chargement</h1>${empty("Lecture de tes commandes dans Google Sheets…")}`; return; }
   const y = window.scrollY;
-  const R = { wa: renderSv, stock: renderStock, home: renderHome, orders: renderOrders, clients: renderClients, team: renderTeam, ai: renderAI, day: renderDay, runs: renderRuns, history: renderHistory };
+  const R = { camp: renderCamp, wa: renderSv, stock: renderStock, home: renderHome, orders: renderOrders, clients: renderClients, team: renderTeam, ai: renderAI, day: renderDay, runs: renderRuns, history: renderHistory };
   view.innerHTML = (R[tab] || R[ROLES[role][0][0]])() + `<p class="sub" style="text-align:center;margin-top:30px"><button class="btn small ghost" id="out">Se déconnecter</button></p>` + (sh ? sheetHtml() : "");
   bind();
   window.scrollTo(0, y);
@@ -2951,6 +3120,7 @@ const findO = el => orders.find(x => x.row === +el.closest("[data-row]").dataset
 function bind() {
   bindSheet();
   if (tab === "wa") bindSv();
+  if (tab === "camp") bindCamp();
   view.querySelectorAll("[data-dir-src]").forEach(b => b.onclick = () => { dirSourceFilter = b.dataset.dirSrc; render(); });
   view.querySelectorAll("[data-client-filter]").forEach(b => b.onclick = () => { clientFilter = b.dataset.clientFilter; render(); });
   view.querySelectorAll("[data-client-view]").forEach(b => b.onclick = () => openClientModal(b.dataset.clientView));
