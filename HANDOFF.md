@@ -54,6 +54,12 @@
 - Systeme.io refuse un code trop long (environ 100 000 caractères) : garder les images sur Vercel, pas en base64.
 - **Avant chaque mise en ligne**, tester aux tailles 320×568, 360×640, 375×667 et 412×860. Les boutons doivent rester visibles sans défiler.
 
+### Kit Minceur v2 (29/10, en cours)
+- Nouveau tunnel « page de vente » en 6 étapes avec Awa en mouvement : script et noms des clips dans `tunnels/kit-minceur-media/SCRIPT_AWA.md`.
+- Clips Flow attendus : A1–A6 (Awa) + 1a, 1b, 1c, 2a, 3a, 4a, 4b, 6a (illustrations). Images de référence : Awa, Awa avec le kit (sachet Fit Tea + flacon Slim Fit Tablet), Mariam avant/après, Issouf avant/après.
+- À faire : monter une vidéo par étape (illustration → Awa, incrustations, sous-titres), compresser pour mobile, héberger sur Vercel (`media/`), brancher dans `kit-minceur-awa.html`, tester aux 4 tailles, coller dans Systeme.io.
+- Plan pub : 10 000 F le premier jour, réinjection quotidienne (J1 10k, J2 10k, J3 15k, J4 20k, J5 25k, J6 30k, J7 35k), coût max 2 000 F par kit livré.
+
 ## 6. App WillShop (`index.html`)
 - **Rôles** : `ceo` (Direction), `sales` (Commerciale), `driver` (Livreur). Les onglets sont définis dans `const ROLES`.
 - **Session** : `localStorage` (`ws_name`, `ws_pin`, `ws_profile`, `ws_cache`). L'app s'ouvre avec les dernières données en cache, puis se met à jour en arrière-plan.
