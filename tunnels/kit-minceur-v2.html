@@ -1,6 +1,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://willshop-app.vercel.app" crossorigin>
-<link rel="preload" as="image" href="https://willshop-app.vercel.app/media/kit-v2/etape1.jpg">
+<link rel="preload" as="image" href="https://willshop-app.vercel.app/media/kit-v2/awa-kit.jpg">
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
 #drb,#zoom{--bg:#F6F4EE;--ink:#13221A;--mut:#56655B;--green:#1C6B37;--soft:#E7F1E9;--line:#E3E0D7;--gold:#C9A227;--red:#B42335}
@@ -426,7 +426,9 @@ intro();
 
 var PROD = "Kit Minceur";
 var SID = "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+var ESSAI = /\/essai\//.test(location.pathname); // page d'essai sur Vercel : rien n'est envoyé au Sheet
 function send(obj) {
+if (ESSAI) return;
 try {
 obj.sid = SID; obj.produit = obj.produit || PROD;
 var d = JSON.stringify(obj);
@@ -573,6 +575,7 @@ return "https://api.whatsapp.com/send?phone=" + WA + "&text=" + encodeURICompone
 function goWA(url) { try { window.top.location.href = url; } catch (e) { window.location.href = url; } }
 var SHEET = "https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec";
 function logSheet() {
+if (ESSAI) return;
 try {
 var d = JSON.stringify({ type: "order", sid: SID, produit: "Kit Minceur", qte: S.qty, prix: total(), zone: S.zone === "ouaga" ? "Ouaga" : "Autre ville", lieu: S.lieu, tel: S.tel, jour: S.day });
 if (!(navigator.sendBeacon && navigator.sendBeacon(SHEET, d))) fetch(SHEET, { method: "POST", mode: "no-cors", body: d, keepalive: true });
