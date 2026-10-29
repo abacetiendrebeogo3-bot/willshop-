@@ -603,7 +603,33 @@ var SALES = {
   6: { v: "etape6", q: "<s>8 000 F</s> <b>6 500 F</b> + 1 000 F de livraison partout au Burkina = <b>7 500 F</b>", o: ["Commander"] }
 };
 var SND = false, vEnd = null, subt = document.getElementById("subt");
-function capHtml(t) { return esc(t).replace(/\*([^*]+)\*/g, "<b>$1</b>"); }
+function capWords(t) {  // « *mot* » = surligné ; découpe en mots en gardant le surlignage et la ponctuation collée
+  var bold = false;
+  return t.split(" ").filter(Boolean).map(function (w) {
+    var h = bold ? "<b>" : "";
+    for (var i = 0; i < w.length; i++) {
+      if (w[i] === "*") { bold = !bold; h += bold ? "<b>" : "</b>"; } else h += esc(w[i]);
+    }
+    return h + (bold ? "</b>" : "");
+  });
+}
+// Paroles d'Awa écrites mot à mot pendant qu'elle parle (calées sur le minutage de captions.json)
+function capLoop(v, caps, stop) {
+  cancelAnimationFrame(window.capRaf);
+  var words = caps.map(function (c) { return capWords(c[2]); });
+  (function tick() {
+    if (stop()) return;
+    var t = v.currentTime, k = -1;
+    caps.forEach(function (c, i) { if (t >= c[0] - 0.05) k = i; });
+    if (k >= 0) {
+      var c = caps[k], w = words[k];
+      var f = Math.min(1, (t - c[0] + 0.05) / Math.max(0.3, c[1] - c[0]));
+      var h = w.slice(0, Math.max(1, Math.ceil(f * w.length))).join(" ");
+      if (subt.innerHTML !== h) subt.innerHTML = h;
+    }
+    window.capRaf = requestAnimationFrame(tick);
+  })();
+}
 function vid(src, loop, cb, caps) {
   var v = document.getElementById("awaVid");
   v.onended = v.onerror = v.onloadedmetadata = v.ontimeupdate = null; clearTimeout(vEnd);
@@ -613,11 +639,7 @@ function vid(src, loop, cb, caps) {
   v.setAttribute("poster", src.replace(/\.mp4(\?.*)?$/, ".jpg"));
   if (!window.VID_OK) return fire();
   v.src = src;
-  if (caps) v.ontimeupdate = function () {  // paroles d'Awa écrites en direct
-    var t = v.currentTime, cur = null;
-    caps.forEach(function (c) { if (t >= c[0] - 0.05) cur = c; });
-    if (cur) { var h = capHtml(cur[2]); if (subt.innerHTML !== h) subt.innerHTML = h; }
-  };
+  if (caps) capLoop(v, caps, function () { return fired; });
   if (typeof cb === "function") {
     v.onended = fire;
     v.onerror = function () { setTimeout(fire, 500); };
@@ -663,6 +685,7 @@ function commander() {
   // étapes pratiques : image fixe de la nouvelle Awa avec le kit (plus l'ancienne vidéo)
   var v = document.getElementById("awaVid");
   v.onended = v.onerror = v.onloadedmetadata = v.ontimeupdate = null; clearTimeout(vEnd);
+  cancelAnimationFrame(window.capRaf);
   v.pause(); v.removeAttribute("src"); v.load(); v.setAttribute("poster", MV + "awa-kit.jpg");
   document.getElementById("sndb").classList.remove("show");
   px("TunnelDemarre", {}, true);
