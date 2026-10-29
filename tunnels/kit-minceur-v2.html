@@ -32,7 +32,7 @@ body.drb-on{margin:0;height:100%;background:#E8E5DC;color:var(--ink);font-family
 #drb .opt{flex:1 1 40%;min-height:54px;border:1.5px solid var(--green);background:#fff;color:var(--green);border-radius:14px;font:700 16px 'DM Sans',sans-serif;cursor:pointer;padding:8px 12px;animation:rise .35s cubic-bezier(.2,.8,.2,1) both;transition:background .15s,transform .1s}
 #drb .opt:hover{background:var(--soft)}#drb .opt:active{transform:scale(.97)}
 #drb .opt.main{background:var(--green);color:#fff}
-#drb #dock.intro .opt{flex-basis:100%;min-height:62px;font-size:18px;background:var(--green);color:#fff;box-shadow:0 6px 18px rgba(28,107,55,.35)}
+#drb #dock.solo .opt{flex:1 1 100%;min-height:62px;font-size:19px}
 #drb .introsub{display:block;margin-top:6px;font-size:14px;font-weight:600;color:#FFD84D}
 #drb .days .opt{flex:1 1 22%;font-size:14px;min-height:50px}
 #drb .form{width:100%;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:rise .4s both}
@@ -719,7 +719,7 @@ function intro() {
     SND = true;
     px("IntroOui", {}, true);
     sales(1);
-  }, "intro");
+  }, "solo");
   // la vidéo 1 se charge pendant que la personne lit la question
   setTimeout(function () { if (!window.VID_OK || PRE.etape1) return; PRE.etape1 = 1; try { var x = document.createElement("video"); x.preload = "auto"; x.muted = true; x.src = MV + "etape1.mp4?v=" + MVV; } catch (e) {} }, 800);
 }
