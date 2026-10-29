@@ -29,7 +29,11 @@ Objectif semaine : ≥ 58 kits. Ensuite on continue la même logique sur le mois
 - Objectif : **Ventes**, conversion sur le site, pixel 1530587975198974, optimisation sur **Lead** (passer sur InitiateCheckout ou Contact quand il y a assez de volume).
 - Budget au niveau de la campagne (CBO), 10 000 F/jour au départ (convertir dans la devise du compte).
 - 1 ensemble de pub : Burkina Faso — Ouagadougou + Bobo-Dioulasso (+20 km), hommes ET femmes, 25-50 ans, audience large (Advantage+), placements automatiques.
-- 2 pubs au départ (2 vidéos différentes tirées du montage Awa : ex. hook « tout essayé » et hook « ventre qui gonfle »).
+- 1 seul ensemble de pubs (10 000 F/jour est trop peu pour diviser), avec **4 pubs** au départ :
+  - 2 vidéos tirées du montage Awa (étape 1 « miroir » et étape 2 « tout essayé ») ;
+  - 1 image : Awa qui tient le kit (sachet Fit Tea + flacon Slim Fit Tablet) ;
+  - 1 image « offre » : Awa + kit, 8 000 F barré, 6 500 F, paiement à la livraison.
+- Les images avant/après (Mariam, Issouf) restent dans le tunnel, jamais dans la pub.
 - Texte de pub conforme Meta : ne JAMAIS viser le corps du lecteur (« tu es gros », « ton ventre »). Parler du kit, des 28 jours, du confort, du paiement à la livraison. Pas d'avant/après dans la pub.
 
 ## Règles de pilotage
