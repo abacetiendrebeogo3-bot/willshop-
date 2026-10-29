@@ -54,9 +54,11 @@
 - Systeme.io refuse un code trop long (environ 100 000 caractères) : garder les images sur Vercel, pas en base64.
 - **Avant chaque mise en ligne**, tester aux tailles 320×568, 360×640, 375×667 et 412×860. Les boutons doivent rester visibles sans défiler.
 
-### Kit Minceur v2 (29/10) — prêt, PAS ENCORE sur Systeme.io
-- **Fichier à coller** : `tunnels/kit-minceur-v2.html` (≈ 66 000 caractères, sous la limite Systeme.io). Test en ligne : https://willshop-app.vercel.app/tunnels/kit-minceur-v2.html (chaque test y ajoute une visite au Sheet).
-- **Prochaine étape** : remplacer le code de la page Systeme.io Kit Minceur (https://abacetiendrebeogo3.systeme.io/kit-minceur) par ce fichier, puis vérifier en ligne (vidéo « BALLONNÉ ? » au démarrage, Pixel qui reçoit les événements). Garder `kit-minceur-awa.html` pour revenir en arrière.
+### Kit Minceur v2 (29/10) — EN LIGNE sur Systeme.io depuis le 29/10 à 13 h 35
+- **Fichier en ligne** : `tunnels/kit-minceur-v2.html` (≈ 66 000 caractères). Page Systeme.io : tunnel « TUNNEL SERVICE OFFERT » (celui créé le 17/01/2022, n° 789751), étape « Kit Minceur Dr Bebe », éditeur https://systeme.io/dashboard/page/8445438/edit.
+- Vérifié le 29/10 : vidéo `etape1.mp4` au démarrage, Pixel `1530587975198974` (PageView, ViewContent, EtapeVente), visites reçues dans l'onglet Visites.
+- **Validateur Systeme.io** : le bouton « Enregistrer » reste grisé (« Le code est invalide ») si une balise `<img>` a `src=""`. Ne jamais laisser de `src` vide.
+- **Retour en arrière** : recoller `kit-minceur-awa.html` (c'était exactement le code en ligne avant la v2).
 - **Parcours** : 6 étapes vidéo (1 miroir, 2 tout essayé, 3 déclic, 4 solution → « Voir les avis » = 5 preuve ou « Je le veux » = 6 offre) puis Awa en vidéo pour ville (p1), quartier/ville (p2), jour (p3 « aujourd'hui même », bouton « Oui, aujourd'hui 🚀 » + lien discret « Un autre jour » ; après 20 h « demain » sans vidéo), numéro (p4), récap + Commander (p5) → WhatsApp.
 - Sous les boutons des étapes 1–5 : lien « ⚡ Commander directement · 6 500 F » (saute à la ville) et « 💬 J'ai une question » (WhatsApp).
 - **Vidéo** : Awa en haut (moitié de l'écran), paroles écrites mot à mot sous la vidéo (`CAPS` = `media/kit-v2/captions.json` recopié dans le tunnel), boutons après 1,5 s, bouton « 🔊 Touche pour le son » sur la 1re vidéo (le son s'active ensuite au premier clic). Écran « Décrocher » et plein écran : essayés puis refusés par Wilfried.
