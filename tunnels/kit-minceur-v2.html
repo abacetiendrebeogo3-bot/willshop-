@@ -421,7 +421,7 @@ S = { qty: 1 };
 track("Arrivée");
 px("ViewContent", { content_name: "Kit Minceur 28 jours", value: 6500, currency: "XOF" });
 chat.innerHTML = ""; dock.innerHTML = "";
-sales(1);
+intro();
 }
 
 var PROD = "Kit Minceur";
@@ -701,6 +701,27 @@ function sales(n) {
   vid(MV + st.v + ".mp4?v=" + MVV, false, function () { subt.innerHTML = st.q; buttons(); }, CAPS[st.v]);
   setTimeout(buttons, 1500);  // les boutons arrivent vite, la vidéo continue
   preload(n === 6 ? "p1" : n === 4 ? 5 : n + 1);
+}
+/* Étape 0 : photo fixe d'Awa + une seule question, sans son. Le toucher sur la réponse active le son pour la vidéo 1. */
+function intro() {
+  var v = document.getElementById("awaVid"), drb = document.getElementById("drb");
+  drb.classList.add("sales");
+  v.pause(); v.removeAttribute("src"); v.setAttribute("poster", MV + "awa-kit.jpg");
+  document.getElementById("sndb").classList.remove("show");
+  prog(4);
+  subt.innerHTML = "Salut 👋 c’est Awa. <b>Tu veux découvrir le Kit Minceur 28&nbsp;jours&nbsp;?</b>";
+  ask(["Oui 👍", "Non merci"], function (a) {
+    SND = true;
+    if (/^Oui/.test(a)) { px("IntroOui", {}, true); return sales(1); }
+    px("IntroNon", {}, true);
+    subt.innerHTML = "Pas de souci 🙏 <b>Regarde quand même, c’est rapide</b>, ou pose-moi ta question.";
+    ask(["D’accord, je regarde", "J’ai une question"], function (b) {
+      if (/question/i.test(b)) return other();
+      sales(1);
+    });
+  });
+  // la vidéo 1 se charge pendant que la personne lit la question
+  setTimeout(function () { if (!window.VID_OK || PRE.etape1) return; PRE.etape1 = 1; try { var x = document.createElement("video"); x.preload = "auto"; x.muted = true; x.src = MV + "etape1.mp4?v=" + MVV; } catch (e) {} }, 800);
 }
 function sndOn() {
   SND = true; document.getElementById("sndb").classList.remove("show");
