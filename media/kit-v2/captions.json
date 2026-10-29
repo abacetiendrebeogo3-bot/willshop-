@@ -1,77 +1,77 @@
 {
  "etape1": [
   [
-   9.45,
-   10.24,
+   0.45,
+   1.24,
    "Tu manges un peu,"
   ],
   [
-   10.64,
-   11.51,
+   1.64,
+   2.51,
    "et ton ventre *gonfle*."
   ],
   [
-   12.23,
-   14.37,
+   3.23,
+   5.37,
    "Tes habits te *serrent*, tu as pris beaucoup de *poids*…"
   ],
   [
-   14.75,
-   15.63,
+   5.75,
+   6.63,
    "tu te sens *lourd*."
   ],
   [
-   16.15,
-   17.04,
+   7.15,
+   8.04,
    "C'est *ton cas* ?"
   ]
  ],
  "etape2": [
   [
-   4.25,
-   6.69,
+   0.75,
+   3.19,
    "Tisanes, régimes, produits du *marché*…"
   ],
   [
-   6.92,
-   7.82,
+   3.42,
+   4.32,
    "Tu as *tout essayé*."
   ],
   [
-   8.18,
-   8.8,
+   4.68,
+   5.3,
    "Tu as *payé*,"
   ],
   [
-   9.08,
-   10.27,
+   5.58,
+   6.77,
    "mais ton ventre est *toujours là*."
   ],
   [
-   10.68,
-   11.22,
+   7.18,
+   7.72,
    "C'est vrai ?"
   ]
  ],
  "etape3": [
   [
-   4.45,
-   5.29,
+   0.43,
+   1.27,
    "Ce n'est *pas ta faute*."
   ],
   [
-   6.26,
-   8.35,
+   2.24,
+   4.33,
    "Ton ventre garde trop d'*eau* et de *déchets*,"
   ],
   [
-   8.56,
-   9.54,
+   4.54,
+   5.52,
    "c'est pour ça qu'il *gonfle*."
   ],
   [
-   10.58,
-   11.63,
+   6.56,
+   7.61,
    "Il faut d'abord le *vider*."
   ]
  ],
@@ -105,6 +105,23 @@
    7.02,
    8.04,
    "tu te sens *léger*…"
+  ]
+ ],
+ "etape5": [
+  [
+   0.87,
+   3.0,
+   "Regarde les *messages* de mes clients."
+  ],
+  [
+   4.07,
+   5.26,
+   "Des *femmes* et des *hommes*,"
+  ],
+  [
+   5.58,
+   6.4,
+   "ici à *Ouaga*."
   ]
  ],
  "etape6": [
@@ -152,23 +169,6 @@
    15.16,
    16.08,
    "partout au *Burkina*."
-  ]
- ],
- "etape5": [
-  [
-   0.87,
-   3.0,
-   "Regarde les *messages* de mes clients."
-  ],
-  [
-   4.07,
-   5.26,
-   "Des *femmes* et des *hommes*,"
-  ],
-  [
-   5.58,
-   6.4,
-   "ici à *Ouaga*."
   ]
  ]
 }
