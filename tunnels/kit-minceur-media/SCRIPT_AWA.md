@@ -1,7 +1,7 @@
 # Tunnel Kit Minceur v2 — Script Awa (structure A, 29/10/2026)
 
 Chaque étape = plan d'illustration (sans parole) → Awa en mouvement face caméra → incrustations ajoutées au montage.
-Fichiers attendus : A1.mp4 … A6.mp4 (Awa) et 1a.mp4, 1b.mp4, 1c.mp4, 2a.mp4, 3a.mp4, 4a.mp4, 4b.mp4, 6a.mp4 (illustrations).
+Fichiers attendus : A1.mp4 … A6.mp4 + A6b.mp4 (Awa) et 1a.mp4, 1b.mp4, 1c.mp4, 2a.mp4, 3a.mp4, 4a.mp4, 4b.mp4, 6a.mp4 (illustrations).
 
 | # | Plans | Awa dit | Incrustations | Boutons |
 |---|---|---|---|---|
@@ -10,6 +10,6 @@ Fichiers attendus : A1.mp4 … A6.mp4 (Awa) et 1a.mp4, 1b.mp4, 1c.mp4, 2a.mp4, 3
 | 3 Déclic | 3a → A3 | Ce n'est pas ta faute. Ton ventre garde trop d'eau et de déchets, c'est pour ça qu'il gonfle. Il faut d'abord le vider. | ✅ CE N'EST PAS TA FAUTE | Et comment on fait ? |
 | 4 Solution | A4 → 4a 4b | Voici le Kit Minceur. Le thé le matin, une gélule le matin et le soir, pendant 28 jours. Ton ventre dégonfle, tu te sens léger, et tes habits te vont encore. | 📅 28 JOURS · VENTRE PLAT · LÉGER | Voir les avis / Je le veux |
 | 5 Preuve | A5 + avis WhatsApp | Regarde les messages que mes clients m'envoient. Des femmes et des hommes, ici à Ouaga. | — | Je le veux |
-| 6 Offre | A6 → 6a | Avant, c'était 8 000 F. Aujourd'hui, c'est 6 500 F. Et tu paies seulement quand le livreur arrive chez toi. | ~~8 000 F~~ 6 500 F · PAIEMENT À LA LIVRAISON | Commander |
+| 6 Offre | A6 → A6b → 6a | A6 : Avant, c'était 8 000 F. Aujourd'hui, seulement 6 500 F. Et la livraison, 1 000 F partout où tu es. — A6b : Donc 7 500 F en tout. Mais le stock est limité, la promo finit cette semaine ! | ~~8 000 F~~ 6 500 F · 🚚 LIVRAISON 1 000 F PARTOUT · TOTAL 7 500 F · ⏳ STOCK LIMITÉ | Commander |
 
 Puis étapes pratiques (ville, quartier, jour, numéro, récap) avec la vidéo actuelle awa-full.mp4.
