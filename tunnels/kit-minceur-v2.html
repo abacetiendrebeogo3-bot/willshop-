@@ -199,6 +199,9 @@ body.drb-on{overflow:hidden}
 #drb .bgblur{background-image:url(https://willshop-app.vercel.app/media/kit-v2/awa-kit-bg.jpg)!important}
 #drb .sndb{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(0,0,0,.72);color:#fff;border:0;border-radius:99px;padding:10px 16px;font:700 14px 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
 #drb .sndb.show{display:flex}
+#drb #dock.today .opt.main{flex:1 1 100%}
+@media (max-height:620px){#drb .form .qty~.note{display:none}}  /* petits écrans : Commander visible sans défiler */
+#drb #dock.today .opt:not(.main){flex:1 1 100%;background:none!important;border:0!important;box-shadow:none!important;color:#56655B;text-decoration:underline;font-size:14px;font-weight:500;min-height:0;padding:4px;animation:none!important}
 #drb .subt b{color:#FCD116}
 </style>
 <div id="drb"><div class="app">
@@ -378,7 +381,7 @@ speak(m, row, function () { setTimeout(next, 250); });
 }, 500);
 })();
 }
-function me(text) { add('<div class="row me"><div class="bub">' + esc(text) + "</div></div>"); }
+function me(text) { cancelAnimationFrame(window.capRaf); window.vidTok = (window.vidTok || 0) + 1; add('<div class="row me"><div class="bub">' + esc(text) + "</div></div>"); }
 function ask(opts, cb, cls) {
 dock.className = cls || "";
 dock.innerHTML = '<div class="yourturn"><span>👇</span> À toi de choisir</div>';
@@ -430,7 +433,8 @@ send({ type: "visit", step: step, veut: (data && data.veut) || "", zone: S.zone 
 }
 function phoneStep() {
 prog(72);
-bot([S.zone === "ouaga" ? "Super ! Le livreur va t’appeler avant de passer. C’est quoi ton numéro WhatsApp ?" : "Super ! On va te contacter pour l’envoi. C’est quoi ton numéro WhatsApp ?"], function () {
+preload("p5");
+say("p4", S.zone === "ouaga" ? "Écris ton <b>numéro</b> juste en dessous. Le livreur va t’appeler avant de venir." : "Écris ton <b>numéro</b> juste en dessous. On t’appelle pour l’envoi.", function () {
 dock.className = "";
 dock.innerHTML = '<div class="form"><input class="fld" id="ftel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Ton numéro (ex : 70 12 34 56)" aria-label="Ton numéro WhatsApp"><button class="cta" id="telok" onclick="telOk()">Continuer</button><div class="note" style="text-align:center">Juste pour organiser ta livraison.</div></div>';
 var t = document.getElementById("ftel");
@@ -464,7 +468,8 @@ setTimeout(offre, 250);
 /* Étape 2 */
 function zone() {
 prog(45);
-bot(["Super ! Tu es où ?"], function () {
+preload("p2");
+say("p1", "Tu habites à <b>Ouaga</b>, ou dans une autre ville ?", function () {
 ask(["À Ouaga", "Autre ville"], function (a) {
 S.zone = a === "À Ouaga" ? "ouaga" : "ville";
 px("VilleChoisie", { zone: S.zone }, true);
@@ -483,7 +488,8 @@ return l.length >= 3 && /[aeiou\u00E0\u00E2\u00E4\u00E9\u00E8\u00EA\u00EB\u00EE\
 /* Quartier ou ville, tout de suite */
 function lieuStep() {
 var ouaga = S.zone === "ouaga";
-bot([ouaga ? "Tu es dans quel quartier de Ouaga ?" : "Tu es dans quelle ville ?"], function () {
+preload("p3");
+say("p2", ouaga ? "Dis-moi ton <b>quartier</b> à Ouaga." : "Dis-moi ta <b>ville</b>.", function () {
 dock.className = "";
 dock.innerHTML = '<div class="form"><input class="fld" id="flieu" placeholder="' + (ouaga ? "Ton quartier (ex : Pissy, Tampouy)" : "Ta ville (ex : Bobo, Koudougou)") + '" aria-label="' + (ouaga ? "Ton quartier" : "Ta ville") + '"><button class="cta" id="lieuok">Continuer</button></div>';
 var f = document.getElementById("flieu");
@@ -494,34 +500,35 @@ scroll();
 });
 }
 
-/* Jour */
+/* Jour : on pousse « aujourd'hui » (ou demain après 20 h), avec un petit lien discret « Un autre jour » */
 function jour() {
 prog(62);
+preload("p4");
 var late = new Date().getHours() >= 20, first = late ? "Demain" : "Aujourd’hui";
-var q = late ? (S.zone === "ouaga" ? "On peut te livrer demain ?" : "On peut l’expédier demain ?")
-: (S.zone === "ouaga" ? "Tu veux être livré(e) aujourd’hui ?" : "Tu veux qu’on l’expédie aujourd’hui ?");
 var DAYS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"], d0 = new Date().getDay(), more = [];
 for (var i = late ? 2 : 1; i <= 7; i++) more.push(i === 1 ? "Demain" : DAYS[(d0 + i) % 7]);
-bot([q], function () {
-ask(["Oui", "Non"], function (a) {
-if (a === "Oui") { S.day = first; track("Jour", { veut: "Oui" }); return phoneStep(); }
-bot(["Ok ! Quel jour tu préfères ?"], function () {
-ask(more, function (d) { S.day = d; track("Jour", { veut: "Oui" }); phoneStep(); }, "days");
-});
-});
-});
+function choose() {
+  ask([late ? "Oui, demain 🚀" : "Oui, aujourd’hui 🚀", "Un autre jour"], function (a) {
+    if (/^Oui/.test(a)) { S.day = first; track("Jour", { veut: "Oui" }); return phoneStep(); }
+    bot(["Ok ! Quel jour tu préfères ?"], function () {
+      ask(more, function (d) { S.day = d; track("Jour", { veut: "Oui" }); phoneStep(); }, "days");
+    });
+  }, "today");
+  var m = dock.querySelector(".opt"); if (m) m.classList.add("main");
 }
-
+if (late) bot([S.zone === "ouaga" ? "On peut te livrer <b>demain</b> ?" : "On peut l’expédier <b>demain</b> ?"], choose);
+else say("p3", "Je peux t’envoyer ton kit <b>aujourd’hui même</b>. Ça te va ?", choose);
+}
 /* Étape 3 */
 function offre() {
 prog(80);
 var ouaga = S.zone === "ouaga";
-var msg = ouaga
-? "Parfait, on te livre à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". La livraison coûte <b>1 000 F</b>, et tu paies à la livraison."
-: "Pas de souci, on t’expédie le kit à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". L’expédition coûte <b>1 000 F</b>, et le paiement se fait <b>avant l’envoi</b> par Mobile Money.";
+var msg = ouaga  // court : le bouton Commander doit rester visible sans défiler
+? "Livraison à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". Tu paies à la livraison."
+: "Envoi à " + esc(S.lieu) + " " + S.day.toLowerCase() + ". Paiement <b>avant l’envoi</b> par Mobile Money.";
 px("OffreVue", { zone: S.zone }, true);
 track("Offre vue");
-bot([msg, "Combien de kits tu veux ?"], function () {
+say("p5", msg, function () {
 dock.className = "";
 var p = PRIX[S.zone];
 dock.innerHTML = '<div class="form">' +
@@ -530,7 +537,7 @@ dock.innerHTML = '<div class="form">' +
 '<button class="qbtn" id="q2" onclick="setQty(2)"><span class="tag">−3 000 F</span><b>2 kits</b><em>' + fmt(p[1] - 1000) + '</em><small>+ 1 000 F livraison</small></button>' +
 '</div>' +
 '<div class="note">' + (ouaga
-? "✓ Tu paies à la livraison<br>⏳ Prix promo valable jusqu'à minuit"
+? "✓ Tu paies à la livraison<br>⏳ Prix promo valable jusqu'à dimanche"
 : "Paiement avant l’envoi par Mobile Money<br>On t’envoie le numéro sur WhatsApp") + '</div>' +
 '<div class="recu" id="recu">' + recu() + '</div>' +
 '<button class="cta" id="go" onclick="order()">' + WA_ICON + '<span id="gotxt">Commander · ' + fmt(total()) + '</span></button>' +
@@ -592,8 +599,8 @@ scroll();
 
 /* ---------- Kit Minceur v2 : page de vente en 6 étapes vidéo (plein écran) ---------- */
 var MV = "https://willshop-app.vercel.app/media/kit-v2/";
-var MVV = 2; // à augmenter quand une vidéo est refaite (les vidéos sont gardées en cache 1 an)
-var CAPS = {"etape1":[[0.45,1.24,"Tu manges un peu,"],[1.64,2.51,"et ton ventre *gonfle*."],[3.23,5.37,"Tes habits te *serrent*, tu as pris beaucoup de *poids*…"],[5.75,6.63,"tu te sens *lourd*."],[7.15,8.04,"C'est *ton cas* ?"]],"etape2":[[0.75,3.19,"Tisanes, régimes, produits du *marché*…"],[3.42,4.32,"Tu as *tout essayé*."],[4.68,5.3,"Tu as *payé*,"],[5.58,6.77,"mais ton ventre est *toujours là*."],[7.18,7.72,"C'est vrai ?"]],"etape3":[[0.43,1.27,"Ce n'est *pas ta faute*."],[2.24,4.33,"Ton ventre garde trop d'*eau* et de *déchets*,"],[4.54,5.52,"c'est pour ça qu'il *gonfle*."],[6.56,7.61,"Il faut d'abord le *vider*."]],"etape4":[[0.43,1.3,"Voici le *Kit Minceur*."],[1.43,2.32,"Le *thé* le matin,"],[2.57,4.02,"une *gélule* le matin et le soir,"],[4.41,5.47,"pendant *28 jours*."],[5.87,6.79,"Ton ventre *dégonfle*,"],[7.02,8.04,"tu te sens *léger*…"]],"etape5":[[0.87,3.0,"Regarde les *messages* de mes clients."],[4.07,5.26,"Des *femmes* et des *hommes*,"],[5.58,6.4,"ici à *Ouaga*."]],"etape6":[[0.8,1.8,"Avant, c'était *8 000 F*."],[2.75,4.42,"Aujourd'hui, seulement *6 500 F*."],[5.19,7.46,"Et la livraison, *1 000 F*, partout où tu es."],[8.16,8.91,"Hors de *Ouaga* ?"],[9.22,10.29,"On t'expédie par *STAF*,"],[10.54,11.64,"*TSR*, *Rahimo*,"],[11.79,13.02,"ou la compagnie de *ton choix*."],[13.67,14.99,"Frais d'expédition : *1 000 F*,"],[15.16,16.08,"partout au *Burkina*."]]};
+var MVV = 3; // à augmenter quand une vidéo est refaite (les vidéos sont gardées en cache 1 an)
+var CAPS = {"etape1":[[0.45,1.24,"Tu manges un peu,"],[1.64,2.51,"et ton ventre *gonfle*."],[3.23,5.37,"Tes habits te *serrent*, tu as pris du *poids*…"],[5.75,6.63,"tu te sens *lourd*."],[7.15,8.04,"C'est *ton cas* ?"]],"etape2":[[0.75,3.19,"Tisanes, régimes, produits du *marché*…"],[3.42,4.32,"Tu as *tout essayé*."],[4.68,5.3,"Tu as *payé*,"],[5.58,6.77,"mais ton ventre est *toujours là*."],[7.18,7.72,"C'est vrai, non ?"]],"etape3":[[0.43,1.27,"Ce n'est *pas ta faute*."],[2.24,4.33,"Ton ventre garde trop d'*eau* et de *déchets*,"],[4.54,5.52,"c'est pour ça qu'il *gonfle*."],[6.56,7.61,"Il faut d'abord le *vider*."]],"etape4":[[0.43,1.3,"Le *Kit Minceur* :"],[1.43,2.32,"le *thé* le matin,"],[2.57,4.02,"une *gélule* matin et soir,"],[4.41,5.47,"pendant *28 jours*."],[5.87,6.79,"Ton ventre *dégonfle*,"],[7.02,8.04,"tu te sens *léger*."]],"etape5":[[0.87,3.0,"Regarde les *messages* que mes clients m'envoient."],[4.07,5.26,"Des *femmes* et des *hommes*,"],[5.58,6.4,"ici à *Ouaga*."]],"etape6":[[0.8,1.8,"Avant, c'était *8 000 F*."],[2.75,4.42,"Aujourd'hui, c'est *6 500 F*,"],[5.19,7.46,"et tu paies seulement quand le *livreur* arrive chez toi."],[8.16,8.91,"Hors de *Ouaga* ?"],[9.22,10.29,"On t'expédie par *STAF*,"],[10.54,11.64,"*TSR*, *Rahimo*,"],[11.79,13.02,"ou la compagnie de *ton choix*."],[13.67,14.99,"Frais d'expédition : *1 000 F*,"],[15.16,16.08,"partout au *Burkina*."]],"p1":[[0.41,0.86,"Parfait !"],[1.51,2.72,"Tu habites à *Ouaga*,"],[3.37,4.44,"ou dans une *autre ville* ?"]],"p2":[[0.5,0.94,"D'accord !"],[1.26,2.37,"Dis-moi ton *quartier*,"],[2.76,3.42,"ou ta *ville*."]],"p3":[[0.53,1.29,"Bonne nouvelle !"],[1.7,4.1,"Je peux t'envoyer ton kit *aujourd'hui même*."],[4.79,5.25,"Ça te va ?"]],"p4":[[0.49,2.15,"Écris ton *numéro* juste en dessous."],[3.45,5.53,"Le *livreur* va t'appeler avant de venir."]],"p5":[[0.33,1.32,"C'est *presque fini* !"],[2.16,3.37,"Vérifie ta *commande*,"],[4.16,5.87,"et appuie sur *Commander*."]]};
 var SALES = {
   1: { v: "etape1", q: "Ton ventre gonfle, tes habits te serrent… <b>C’est ton cas ?</b>", o: ["Oui, c’est moi 😔", "Un peu"] },
   2: { v: "etape2", q: "Tisanes, régimes… <b>tu as déjà tout essayé ?</b>", o: ["Oui, plusieurs fois", "Non, jamais"] },
@@ -633,8 +640,9 @@ function capLoop(v, caps, stop) {
 function vid(src, loop, cb, caps) {
   var v = document.getElementById("awaVid");
   v.onended = v.onerror = v.onloadedmetadata = v.ontimeupdate = null; clearTimeout(vEnd);
-  var fired = false;
-  function fire() { if (fired) return; fired = true; clearTimeout(vEnd); v.onended = v.onerror = v.ontimeupdate = null; if (typeof cb === "function") cb(); }
+  var fired = false, tok = window.vidTok;
+  function fire() { if (fired) return; fired = true; if (tok !== window.vidTok) return;  // la personne a déjà répondu
+    clearTimeout(vEnd); v.onended = v.onerror = v.ontimeupdate = null; if (typeof cb === "function") cb(); }
   v.loop = !!loop; v.muted = !SND || !!loop;
   v.setAttribute("poster", src.replace(/\.mp4(\?.*)?$/, ".jpg"));
   if (!window.VID_OK) return fire();
@@ -650,8 +658,9 @@ function vid(src, loop, cb, caps) {
   if (p && p.catch) p.catch(function () { v.muted = true; var q = v.play(); if (q && q.catch) q.catch(fire); });
 }
 function preload(n) {
-  if (!SALES[n] || !window.VID_OK) return;
-  try { var x = document.createElement("video"); x.preload = "auto"; x.muted = true; x.src = MV + SALES[n].v + ".mp4?v=" + MVV; } catch (e) {}
+  var name = SALES[n] ? SALES[n].v : n;
+  if (!window.VID_OK || typeof name !== "string") return;
+  try { var x = document.createElement("video"); x.preload = "auto"; x.muted = true; x.src = MV + name + ".mp4?v=" + MVV; } catch (e) {}
 }
 function sales(n) {
   var st = SALES[n], drb = document.getElementById("drb");
@@ -673,7 +682,7 @@ function sales(n) {
   document.getElementById("sndb").classList.toggle("show", !SND && !!window.VID_OK);
   vid(MV + st.v + ".mp4?v=" + MVV, false, function () { subt.innerHTML = st.q; buttons(); }, CAPS[st.v]);
   setTimeout(buttons, 1500);  // les boutons arrivent vite, la vidéo continue
-  preload(n === 4 ? 5 : n + 1);
+  preload(n === 6 ? "p1" : n === 4 ? 5 : n + 1);
 }
 function sndOn() {
   SND = true; document.getElementById("sndb").classList.remove("show");
@@ -681,6 +690,12 @@ function sndOn() {
   if (v.src) { v.muted = false; v.currentTime = 0; v.play().catch(function () {}); }
 }
 document.getElementById("sndb").onclick = sndOn;
+/* Awa pose la question en vidéo (paroles écrites mot à mot), puis on affiche la réponse au bout de 1,2 s */
+function say(name, text, done) {
+  subt.innerHTML = window.VID_OK ? '<div class="typing"><i></i><i></i><i></i></div>' : text;
+  vid(MV + name + ".mp4?v=" + MVV, false, function () { subt.innerHTML = text; }, CAPS[name]);
+  setTimeout(done, window.VID_OK ? 1200 : 300);
+}
 function commander() {
   // étapes pratiques : image fixe de la nouvelle Awa avec le kit (plus l'ancienne vidéo)
   var v = document.getElementById("awaVid");

@@ -13,7 +13,7 @@
   [
    3.23,
    5.37,
-   "Tes habits te *serrent*, tu as pris beaucoup de *poids*…"
+   "Tes habits te *serrent*, tu as pris du *poids*…"
   ],
   [
    5.75,
@@ -50,7 +50,7 @@
   [
    7.18,
    7.72,
-   "C'est vrai ?"
+   "C'est vrai, non ?"
   ]
  ],
  "etape3": [
@@ -79,17 +79,17 @@
   [
    0.43,
    1.3,
-   "Voici le *Kit Minceur*."
+   "Le *Kit Minceur* :"
   ],
   [
    1.43,
    2.32,
-   "Le *thé* le matin,"
+   "le *thé* le matin,"
   ],
   [
    2.57,
    4.02,
-   "une *gélule* le matin et le soir,"
+   "une *gélule* matin et soir,"
   ],
   [
    4.41,
@@ -104,14 +104,14 @@
   [
    7.02,
    8.04,
-   "tu te sens *léger*…"
+   "tu te sens *léger*."
   ]
  ],
  "etape5": [
   [
    0.87,
    3.0,
-   "Regarde les *messages* de mes clients."
+   "Regarde les *messages* que mes clients m'envoient."
   ],
   [
    4.07,
@@ -133,12 +133,12 @@
   [
    2.75,
    4.42,
-   "Aujourd'hui, seulement *6 500 F*."
+   "Aujourd'hui, c'est *6 500 F*,"
   ],
   [
    5.19,
    7.46,
-   "Et la livraison, *1 000 F*, partout où tu es."
+   "et tu paies seulement quand le *livreur* arrive chez toi."
   ],
   [
    8.16,
@@ -169,6 +169,86 @@
    15.16,
    16.08,
    "partout au *Burkina*."
+  ]
+ ],
+ "p1": [
+  [
+   0.41,
+   0.86,
+   "Parfait !"
+  ],
+  [
+   1.51,
+   2.72,
+   "Tu habites à *Ouaga*,"
+  ],
+  [
+   3.37,
+   4.44,
+   "ou dans une *autre ville* ?"
+  ]
+ ],
+ "p2": [
+  [
+   0.5,
+   0.94,
+   "D'accord !"
+  ],
+  [
+   1.26,
+   2.37,
+   "Dis-moi ton *quartier*,"
+  ],
+  [
+   2.76,
+   3.42,
+   "ou ta *ville*."
+  ]
+ ],
+ "p3": [
+  [
+   0.53,
+   1.29,
+   "Bonne nouvelle !"
+  ],
+  [
+   1.7,
+   4.1,
+   "Je peux t'envoyer ton kit *aujourd'hui même*."
+  ],
+  [
+   4.79,
+   5.25,
+   "Ça te va ?"
+  ]
+ ],
+ "p4": [
+  [
+   0.49,
+   2.15,
+   "Écris ton *numéro* juste en dessous."
+  ],
+  [
+   3.45,
+   5.53,
+   "Le *livreur* va t'appeler avant de venir."
+  ]
+ ],
+ "p5": [
+  [
+   0.33,
+   1.32,
+   "C'est *presque fini* !"
+  ],
+  [
+   2.16,
+   3.37,
+   "Vérifie ta *commande*,"
+  ],
+  [
+   4.16,
+   5.87,
+   "et appuie sur *Commander*."
   ]
  ]
 }

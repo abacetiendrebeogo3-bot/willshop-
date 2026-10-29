@@ -28,14 +28,14 @@ PL, PC = 0.355, (540 - 210 - 16 + 105) / 540     # étiquette sous l'incrustatio
 STEPS = {
  "etape1": [
   ("A1", 0, 8.04, 1, [(0.45, 1.24, "Tu manges un peu,"), (1.64, 2.51, "et ton ventre *gonfle*."),
-                      (3.23, 5.37, "Tes habits te *serrent*, tu as pris beaucoup de *poids*…"),
+                      (3.23, 5.37, "Tes habits te *serrent*, tu as pris du *poids*…"),
                       (5.75, 6.63, "tu te sens *lourd*."), (7.15, 8.04, "C'est *ton cas* ?")],
    [(1.4, 3.2, "BALLONNÉ ?", RED, PL, PC), (3.2, 4.4, "TROP SERRÉ", RED, PL, PC), (4.4, 6.7, "⚖️ + DE KILOS", RED, PL, PC)],
    [(1.4, 3.2, "1a", 2.0, 1), (3.2, 4.4, "1b", 2.0, 1), (4.4, 6.7, "1c", 3.2, 1)]),
  ],
  "etape2": [
   ("A2", 0, 8.04, 1, [(0.75, 3.19, "Tisanes, régimes, produits du *marché*…"), (3.42, 4.32, "Tu as *tout essayé*."),
-                      (4.68, 5.30, "Tu as *payé*,"), (5.58, 6.77, "mais ton ventre est *toujours là*."), (7.18, 7.72, "C'est vrai ?")],
+                      (4.68, 5.30, "Tu as *payé*,"), (5.58, 6.77, "mais ton ventre est *toujours là*."), (7.18, 7.72, "C'est vrai, non ?")],
    [(0.75, 3.4, "❌❌❌", None, PL, PC), (3.42, 6.8, "💸 ARGENT PERDU", RED, PL, PC)],
    [(0.75, 6.8, "2a", 0.5, 1)]),
  ],
@@ -46,22 +46,22 @@ STEPS = {
    [(2.24, 7.7, "3a", 0, 1.5)]),
  ],
  "etape4": [
-  ("A4", 0, 8.04, 1, [(0.43, 1.30, "Voici le *Kit Minceur*."), (1.43, 2.32, "Le *thé* le matin,"),
-                      (2.57, 4.02, "une *gélule* le matin et le soir,"), (4.41, 5.47, "pendant *28 jours*."),
-                      (5.87, 6.79, "Ton ventre *dégonfle*,"), (7.02, 8.04, "tu te sens *léger*…")],
+  ("A4", 0, 8.04, 1, [(0.43, 1.30, "Le *Kit Minceur* :"), (1.43, 2.32, "le *thé* le matin,"),
+                      (2.57, 4.02, "une *gélule* matin et soir,"), (4.41, 5.47, "pendant *28 jours*."),
+                      (5.87, 6.79, "Ton ventre *dégonfle*,"), (7.02, 8.04, "tu te sens *léger*.")],
    [(4.41, 5.8, "📅 28 JOURS", YEL, LOW), (5.87, 7.0, "VENTRE PLAT", GRN, PL, PC), (7.0, 8.04, "LÉGER", GRN, PL, PC)],
    [(5.87, 7.0, "4a", 4.5, 1), (7.0, 8.04, "4b", 2.5, 1)]),
  ],
  "etape5": [
-  ("A5", 1.2, 8.04, 1, [(2.07, 4.20, "Regarde les *messages* de mes clients."), (5.27, 6.46, "Des *femmes* et des *hommes*,"),
+  ("A5", 1.2, 8.04, 1, [(2.07, 4.20, "Regarde les *messages* que mes clients m'envoient."), (5.27, 6.46, "Des *femmes* et des *hommes*,"),
                         (6.78, 7.60, "ici à *Ouaga*.")],
    [(2.07, 8.04, "⭐ ILS ONT TESTÉ", YEL, 0.255), (4.2, 8.04, "img:media/avis1.webp", None, 0.33),
     (5.27, 8.04, "img:media/avis3.webp", None, 0.45), (6.46, 8.04, "img:media/avis2.webp", None, 0.575)]),
  ],
  "etape6": [
-  ("A6", 0, 8.04, 1, [(0.80, 1.80, "Avant, c'était *8 000 F*."), (2.75, 4.42, "Aujourd'hui, seulement *6 500 F*."),
-                      (5.19, 7.46, "Et la livraison, *1 000 F*, partout où tu es.")],
-   [(0.80, 2.75, "~8 000 F", WHT, LOW), (2.75, 5.19, "6 500 F", GRN, LOW), (5.19, 8.04, "🛵 LIVRAISON 1 000 F", YEL, LOW)]),
+  ("A6", 0, 8.04, 1, [(0.80, 1.80, "Avant, c'était *8 000 F*."), (2.75, 4.42, "Aujourd'hui, c'est *6 500 F*,"),
+                      (5.19, 7.46, "et tu paies seulement quand le *livreur* arrive chez toi.")],
+   [(0.80, 2.75, "~8 000 F", WHT, LOW), (2.75, 5.19, "6 500 F", GRN, LOW), (5.19, 8.04, "💵 TU PAIES À LA LIVRAISON", YEL, LOW)]),
   ("A6b", 0, 8.04, 1, [(0.12, 0.87, "Hors de *Ouaga* ?"), (1.18, 2.25, "On t'expédie par *STAF*,"), (2.50, 3.60, "*TSR*, *Rahimo*,"),
                        (3.75, 4.98, "ou la compagnie de *ton choix*."), (5.63, 6.95, "Frais d'expédition : *1 000 F*,"),
                        (7.12, 8.04, "partout au *Burkina*.")],
@@ -69,6 +69,14 @@ STEPS = {
     (5.63, 8.04, "TOTAL 7 500 F", YEL, 0.40), (6.2, 8.04, "⏳ PROMO CETTE SEMAINE · STOCK LIMITÉ", RED, LOW)],
    [(1.18, 5.6, "6a", 3.5, 1)]),
  ],
+
+ # Étapes pratiques (Awa pose les questions) : sans incrustation
+ "p1": [("P1", 0.5, 5.2, 1, [(0.91, 1.36, "Parfait !"), (2.01, 3.22, "Tu habites à *Ouaga*,"), (3.87, 4.94, "ou dans une *autre ville* ?")], [])],
+ "p2": [("P2", 0.9, 1.95, 1, [(1.40, 1.84, "D'accord !")], []),   # on coupe le long silence après « D'accord »
+        ("P2", 3.0, 5.8, 1, [(3.21, 4.32, "Dis-moi ton *quartier*,"), (4.71, 5.37, "ou ta *ville*.")], [])],
+ "p3": [("P3", 1.0, 6.8, 1, [(1.53, 2.29, "Bonne nouvelle !"), (2.70, 5.10, "Je peux t'envoyer ton kit *aujourd'hui même*."), (5.79, 6.25, "Ça te va ?")], [])],
+ "p4": [("P4", 0.8, 6.9, 1, [(1.29, 2.95, "Écris ton *numéro* juste en dessous."), (4.25, 6.33, "Le *livreur* va t'appeler avant de venir.")], [])],
+ "p5": [("P5", 0.3, 6.4, 1, [(0.63, 1.62, "C'est *presque fini* !"), (2.46, 3.67, "Vérifie ta *commande*,"), (4.46, 6.17, "et appuie sur *Commander*.")], [])],
 }
 
 def label_png(text, color, path):
