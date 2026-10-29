@@ -56,6 +56,7 @@
 - **Avant chaque mise en ligne**, tester aux tailles 320×568, 360×640, 375×667 et 412×860. Les boutons doivent rester visibles sans défiler.
 
 ### Kit Minceur v2 (29/10) — EN LIGNE sur Systeme.io depuis le 29/10 à 13 h 35
+- **Mis à jour le 29/10 à 15 h 55** avec l'étape 0 (question d'Awa sur photo) et le bouton « Oui, c'est mon cas » (commit fa86386), collé par Claude dans l'éditeur Systeme.io (bloc Code HTML : l'éditeur est un Ace, `document.querySelector('.ace_editor').env.editor.setValue(code)`, puis « Enregistrer » et « Sauvegarder »). Vérifié sur la page en ligne.
 - **Fichier en ligne** : `tunnels/kit-minceur-v2.html` (≈ 66 000 caractères). Page Systeme.io : tunnel « TUNNEL SERVICE OFFERT » (celui créé le 17/01/2022, n° 789751), étape « Kit Minceur Dr Bebe », éditeur https://systeme.io/dashboard/page/8445438/edit.
 - Vérifié le 29/10 : vidéo `etape1.mp4` au démarrage, Pixel `1530587975198974` (PageView, ViewContent, EtapeVente), visites reçues dans l'onglet Visites.
 - **Validateur Systeme.io** : le bouton « Enregistrer » reste grisé (« Le code est invalide ») si une balise `<img>` a `src=""`. Ne jamais laisser de `src` vide.
