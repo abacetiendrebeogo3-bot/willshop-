@@ -67,7 +67,7 @@
 - **Remonter les vidéos** : clips bruts Flow renommés A1…A6, A6b, 1a…6a, P1…P5 dans un dossier, puis `python3 tunnels/kit-minceur-media/build_kit_v2.py <dossier>` (ou `… <dossier> etape3` pour une seule). Les illustrations sont incrustées en haut à droite pendant qu'Awa parle. Après un nouveau montage : recopier `captions.json` dans `CAPS` du tunnel et augmenter `MVV` (vidéos en cache 1 an).
 - **Suivi** : Sheet (onglet Visites) : Arrivée, Étape 1…6, Raccourci commande, Question, Veut le produit, Ville, Quartier, Jour, Numéro donné (lead), Offre vue, commande. Pixel (seulement si le Pixel `1530587975198974` est installé sur la page Systeme.io) : ViewContent, EtapeVente, RaccourciCommande, TunnelDemarre, VilleChoisie, Lead, OffreVue, InitiateCheckout, Contact.
 - **Prompts Flow** : toujours écrire les nombres en lettres, éviter les marques (« WhatsApp » refusé) et les phrases d'urgence (« stock limité » refusé), écrire « Wagadougou » pour la prononciation. Transcrire les clips reçus pour vérifier ce qu'Awa dit vraiment (Whisper via sherpa-onnx, modèle sur GitHub releases k2-fsa/sherpa-onnx).
-- Plan pub : 10 000 F le premier jour, réinjection quotidienne (J1 10k, J2 10k, J3 15k, J4 20k, J5 25k, J6 30k, J7 35k), coût max 2 000 F par kit livré.
+- Plan pub complet (compte, pixel, budget jour par jour, structure de campagne, règles) : `tunnels/kit-minceur-media/PLAN_PUB.md`.
 
 ## 6. App WillShop (`index.html`)
 - **Rôles** : `ceo` (Direction), `sales` (Commerciale), `driver` (Livreur). Les onglets sont définis dans `const ROLES`.
