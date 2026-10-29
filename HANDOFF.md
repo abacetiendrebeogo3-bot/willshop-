@@ -54,10 +54,17 @@
 - Systeme.io refuse un code trop long (environ 100 000 caractères) : garder les images sur Vercel, pas en base64.
 - **Avant chaque mise en ligne**, tester aux tailles 320×568, 360×640, 375×667 et 412×860. Les boutons doivent rester visibles sans défiler.
 
-### Kit Minceur v2 (29/10, en cours)
-- Nouveau tunnel « page de vente » en 6 étapes avec Awa en mouvement : script et noms des clips dans `tunnels/kit-minceur-media/SCRIPT_AWA.md`.
-- Clips Flow attendus : A1–A6 (Awa) + 1a, 1b, 1c, 2a, 3a, 4a, 4b, 6a (illustrations). Images de référence : Awa, Awa avec le kit (sachet Fit Tea + flacon Slim Fit Tablet), Mariam avant/après, Issouf avant/après.
-- ✅ 29/10 : vidéos montées (`media/kit-v2/etape1…6.mp4`, script `tunnels/kit-minceur-media/build_kit_v2.py`) et tunnel `tunnels/kit-minceur-v2.html` (6 étapes vidéo puis parcours ville → récap). Vidéo refaite = augmenter `MVV` dans le tunnel (cache 1 an). Reste : coller dans Systeme.io.
+### Kit Minceur v2 (29/10) — prêt, PAS ENCORE sur Systeme.io
+- **Fichier à coller** : `tunnels/kit-minceur-v2.html` (≈ 66 000 caractères, sous la limite Systeme.io). Test en ligne : https://willshop-app.vercel.app/tunnels/kit-minceur-v2.html (chaque test y ajoute une visite au Sheet).
+- **Prochaine étape** : remplacer le code de la page Systeme.io Kit Minceur (https://abacetiendrebeogo3.systeme.io/kit-minceur) par ce fichier, puis vérifier en ligne (vidéo « BALLONNÉ ? » au démarrage, Pixel qui reçoit les événements). Garder `kit-minceur-awa.html` pour revenir en arrière.
+- **Parcours** : 6 étapes vidéo (1 miroir, 2 tout essayé, 3 déclic, 4 solution → « Voir les avis » = 5 preuve ou « Je le veux » = 6 offre) puis Awa en vidéo pour ville (p1), quartier/ville (p2), jour (p3 « aujourd'hui même », bouton « Oui, aujourd'hui 🚀 » + lien discret « Un autre jour » ; après 20 h « demain » sans vidéo), numéro (p4), récap + Commander (p5) → WhatsApp.
+- Sous les boutons des étapes 1–5 : lien « ⚡ Commander directement · 6 500 F » (saute à la ville) et « 💬 J'ai une question » (WhatsApp).
+- **Vidéo** : Awa en haut (moitié de l'écran), paroles écrites mot à mot sous la vidéo (`CAPS` = `media/kit-v2/captions.json` recopié dans le tunnel), boutons après 1,5 s, bouton « 🔊 Touche pour le son » sur la 1re vidéo (le son s'active ensuite au premier clic). Écran « Décrocher » et plein écran : essayés puis refusés par Wilfried.
+- **Prix / paiement** : 6 500 F + 1 000 F de livraison (Ouaga) ou d'expédition (STAF, TSR, Rahimo ou compagnie au choix) = 7 500 F ; 2 kits 11 000 F. Ouaga : paiement à la livraison. Autres villes : Mobile Money avant l'envoi. Promo affichée « jusqu'à dimanche ». Pas de réduction « aujourd'hui » (idée −500 F abandonnée).
+- **Médias** : `media/kit-v2/etape1…6.mp4`, `p1…p5.mp4` (+ .jpg d'attente), `awa-kit.jpg` (image fixe), 360×640, ≈ 3,9 Mo au total. Préchargement de la vidéo suivante seulement quand la vidéo en cours joue (3G).
+- **Remonter les vidéos** : clips bruts Flow renommés A1…A6, A6b, 1a…6a, P1…P5 dans un dossier, puis `python3 tunnels/kit-minceur-media/build_kit_v2.py <dossier>` (ou `… <dossier> etape3` pour une seule). Les illustrations sont incrustées en haut à droite pendant qu'Awa parle. Après un nouveau montage : recopier `captions.json` dans `CAPS` du tunnel et augmenter `MVV` (vidéos en cache 1 an).
+- **Suivi** : Sheet (onglet Visites) : Arrivée, Étape 1…6, Raccourci commande, Question, Veut le produit, Ville, Quartier, Jour, Numéro donné (lead), Offre vue, commande. Pixel (seulement si le Pixel `1530587975198974` est installé sur la page Systeme.io) : ViewContent, EtapeVente, RaccourciCommande, TunnelDemarre, VilleChoisie, Lead, OffreVue, InitiateCheckout, Contact.
+- **Prompts Flow** : toujours écrire les nombres en lettres, éviter les marques (« WhatsApp » refusé) et les phrases d'urgence (« stock limité » refusé), écrire « Wagadougou » pour la prononciation. Transcrire les clips reçus pour vérifier ce qu'Awa dit vraiment (Whisper via sherpa-onnx, modèle sur GitHub releases k2-fsa/sherpa-onnx).
 - Plan pub : 10 000 F le premier jour, réinjection quotidienne (J1 10k, J2 10k, J3 15k, J4 20k, J5 25k, J6 30k, J7 35k), coût max 2 000 F par kit livré.
 
 ## 6. App WillShop (`index.html`)
