@@ -690,7 +690,7 @@ function sales(n) {
       SND = true; document.getElementById("sndb").classList.remove("show");  // la réponse active le son pour la suite
       if (n === 6) return commander();
       if (/Je le veux/.test(a)) return sales(6);
-      sales(n + 1);
+      sales(n === 1 ? 3 : n + 1);  // la vidéo 2 « tout essayé » est sautée (29/10)
     });
     var l = document.createElement("div"); l.className = "links";
     if (n < 6) l.innerHTML = '<button type="button" class="fast">⚡ Commander directement · 6 500 F</button>';
@@ -703,7 +703,7 @@ function sales(n) {
   document.getElementById("sndb").classList.toggle("show", !SND && !!window.VID_OK);
   vid(MV + st.v + ".mp4?v=" + MVV, false, function () { subt.innerHTML = st.q; buttons(); }, CAPS[st.v]);
   setTimeout(buttons, 1500);  // les boutons arrivent vite, la vidéo continue
-  preload(n === 6 ? "p1" : n === 4 ? 5 : n + 1);
+  preload(n === 6 ? "p1" : n === 4 ? 5 : n === 1 ? 3 : n + 1);
 }
 /* Étape 0 : photo fixe d'Awa + une seule question, sans son. Le toucher sur la réponse active le son pour la vidéo 1. */
 function intro() {
