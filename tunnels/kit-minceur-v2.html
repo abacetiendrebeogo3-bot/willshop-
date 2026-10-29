@@ -606,20 +606,23 @@ var SALES = {
 var SND = false, vEnd = null;
 function vid(src, loop, cb) {
   var v = document.getElementById("awaVid");
-  v.onended = null; clearTimeout(vEnd);
+  v.onended = v.onerror = v.onloadedmetadata = null; clearTimeout(vEnd);
+  // fire() ne s'exécute qu'une seule fois : fin de la vidéo, erreur de chargement, « Passer » ou délai maximum
+  var fired = false;
+  function fire() { if (fired) return; fired = true; clearTimeout(vEnd); v.onended = v.onerror = null; if (typeof cb === "function") cb(); }
+  window.skipVid = fire;
   v.loop = !!loop; v.muted = !SND || !!loop;
   v.setAttribute("poster", src.replace(/\.mp4(\?.*)?$/, ".jpg").replace("awa-full.jpg", "awa-full-poster.webp"));
-  if (!window.VID_OK) { if (cb) cb(); return; }
+  if (!window.VID_OK) return fire();
   v.src = src;
-  var p = v.play();
-  if (p && p.catch) p.catch(function () { v.muted = true; v.play().catch(function () { if (cb) cb(); cb = null; }); });
-  if (cb) {
-    var fired = false, fire = function () { if (fired) return; fired = true; clearTimeout(vEnd); cb(); };
+  if (typeof cb === "function") {
     v.onended = fire;
+    v.onerror = function () { setTimeout(fire, 800); };  // vidéo introuvable : on affiche quand même les boutons
     v.onloadedmetadata = function () { clearTimeout(vEnd); vEnd = setTimeout(fire, (v.duration || 20) * 1000 + 1500); };
     vEnd = setTimeout(fire, 25000);
-    window.skipVid = fire;
   }
+  var p = v.play();
+  if (p && p.catch) p.catch(function () { v.muted = true; var q = v.play(); if (q && q.catch) q.catch(fire); });
 }
 function sndOn() {
   SND = true; document.getElementById("sndb").classList.remove("show");
