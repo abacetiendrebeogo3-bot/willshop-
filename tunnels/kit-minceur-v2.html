@@ -32,6 +32,8 @@ body.drb-on{margin:0;height:100%;background:#E8E5DC;color:var(--ink);font-family
 #drb .opt{flex:1 1 40%;min-height:54px;border:1.5px solid var(--green);background:#fff;color:var(--green);border-radius:14px;font:700 16px 'DM Sans',sans-serif;cursor:pointer;padding:8px 12px;animation:rise .35s cubic-bezier(.2,.8,.2,1) both;transition:background .15s,transform .1s}
 #drb .opt:hover{background:var(--soft)}#drb .opt:active{transform:scale(.97)}
 #drb .opt.main{background:var(--green);color:#fff}
+#drb #dock.intro .opt{flex-basis:100%;min-height:62px;font-size:18px;background:var(--green);color:#fff;box-shadow:0 6px 18px rgba(28,107,55,.35)}
+#drb .introsub{display:block;margin-top:6px;font-size:14px;font-weight:600;color:#FFD84D}
 #drb .days .opt{flex:1 1 22%;font-size:14px;min-height:50px}
 #drb .form{width:100%;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:rise .4s both}
 #drb .fld{width:100%;height:52px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font:500 16px 'DM Sans',sans-serif;background:#FBFAF7;color:var(--ink);outline:none}
@@ -712,17 +714,12 @@ function intro() {
   v.pause(); v.removeAttribute("src"); v.setAttribute("poster", MV + "awa-kit.jpg");
   document.getElementById("sndb").classList.remove("show");
   prog(4);
-  subt.innerHTML = "Salut 👋 c’est Awa. <b>Tu veux découvrir le Kit Minceur 28&nbsp;jours&nbsp;?</b>";
-  ask(["Oui 👍", "Non merci"], function (a) {
+  subt.innerHTML = "Salut 👋 c’est Awa. <b>Tu veux découvrir le Kit Minceur 28&nbsp;jours&nbsp;?</b><span class=\"introsub\">6 500 F · livré chez toi · tu paies à la livraison</span>";
+  ask(["Oui, montre-moi 👀"], function () {
     SND = true;
-    if (/^Oui/.test(a)) { px("IntroOui", {}, true); return sales(1); }
-    px("IntroNon", {}, true);
-    subt.innerHTML = "Pas de souci 🙏 <b>Regarde quand même, c’est rapide</b>, ou pose-moi ta question.";
-    ask(["D’accord, je regarde", "J’ai une question"], function (b) {
-      if (/question/i.test(b)) return other();
-      sales(1);
-    });
-  });
+    px("IntroOui", {}, true);
+    sales(1);
+  }, "intro");
   // la vidéo 1 se charge pendant que la personne lit la question
   setTimeout(function () { if (!window.VID_OK || PRE.etape1) return; PRE.etape1 = 1; try { var x = document.createElement("video"); x.preload = "auto"; x.muted = true; x.src = MV + "etape1.mp4?v=" + MVV; } catch (e) {} }, 800);
 }
