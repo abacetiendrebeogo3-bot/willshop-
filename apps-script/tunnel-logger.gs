@@ -1,6 +1,6 @@
 var SHEET_ID = "1pTd-mhmjUVUYX1tDb37XChKd23ATgKYhuW9rpLq2Flo";
 // Ordre réel du tunnel : Oui → ville → quartier → jour → numéro → offre → commande
-var STEPS_ORDER = ["Arrivée", "Question", "Veut le produit", "Ville", "Quartier", "Jour", "Numéro donné", "Offre vue", "Commande"];
+var STEPS_ORDER = ["Arrivée", "Question", "Étape 1", "Étape 2", "Étape 3", "Étape 4", "Étape 5", "Étape 6", "Raccourci commande", "Veut le produit", "Ville", "Quartier", "Jour", "Numéro donné", "Offre vue", "Commande"];
 
 function txt(v, n) { return String(v == null ? "" : v).slice(0, n || 120); }
 
