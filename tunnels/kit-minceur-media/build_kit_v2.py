@@ -48,6 +48,12 @@ STEPS = {
   ("4a", 3.5, 7.0, 1, [], [(3.5, 7.0, "VENTRE PLAT", GRN, TOP)]),
   ("4b", 2.0, 5.5, 1, [], [(2.0, 5.5, "LÉGER", GRN, TOP)]),
  ],
+ "etape5": [
+  ("A5", 1.2, 8.04, 1, [(2.07, 4.20, "Regarde les *messages* de mes clients."), (5.27, 6.46, "Des *femmes* et des *hommes*,"),
+                        (6.78, 7.60, "ici à *Ouaga*.")],
+                       [(2.07, 8.04, "⭐ ILS ONT TESTÉ", YEL, TOP), (4.2, 8.04, "img:media/avis1.webp", None, 0.40),
+                        (5.27, 8.04, "img:media/avis3.webp", None, 0.55), (6.46, 8.04, "img:media/avis2.webp", None, 0.71)]),
+ ],
  "etape6": [
   ("A6", 0, 8.04, 1, [(0.80, 1.80, "Avant, c'était *8 000 F*."), (2.75, 4.42, "Aujourd'hui, seulement *6 500 F*."),
                       (5.19, 7.46, "Et la livraison, *1 000 F*, partout où tu es.")],
@@ -62,6 +68,13 @@ STEPS = {
 
 def label_png(text, color, path):
     """Étiquette arrondie (texte + émojis en couleur) ou émoji seul en grand."""
+    if text.startswith("img:"):  # capture d'avis WhatsApp sur fond blanc arrondi
+        im = Image.open(os.path.join(ROOT, text[4:])).convert("RGBA")
+        r = 440 / im.width; im = im.resize((440, int(im.height * r)), Image.LANCZOS)
+        c = Image.new("RGBA", (im.width + 20, im.height + 20), (0, 0, 0, 0))
+        ImageDraw.Draw(c).rounded_rectangle((6, 6, c.width - 1, c.height - 1), radius=16, fill=(0, 0, 0, 90))
+        ImageDraw.Draw(c).rounded_rectangle((0, 0, c.width - 7, c.height - 7), radius=16, fill="#ffffff")
+        c.alpha_composite(im, (7, 7)); c.save(path); return
     strike = text.startswith("~")  # « ~texte » = prix barré
     text = text.lstrip("~")
     f = ImageFont.truetype(FONT, 46)
