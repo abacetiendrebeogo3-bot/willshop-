@@ -214,11 +214,12 @@ for step, shots in STEPS.items():
     lst = os.path.join(TMP, step + ".txt")
     open(lst, "w").write("".join("file '%s'\n" % p for p in parts))
     out = os.path.join(OUT, step + ".mp4")
-    run("-f", "concat", "-safe", "0", "-i", lst, "-i", LOGO, "-filter_complex", "[1]scale=56:56[lg];[0:v][lg]overlay=W-w-18:18[v]",
+    run("-f", "concat", "-safe", "0", "-i", lst, "-i", LOGO, "-filter_complex", "[1]scale=56:56[lg];[0:v][lg]overlay=W-w-18:18,scale=360:640:flags=lanczos[v]",
         "-map", "[v]", "-map", "0:a", "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "27", "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "96k", "-ar", "44100", "-movflags", "+faststart", out)
-    run("-ss", "0.3", "-i", out, "-frames:v", "1", "-q:v", "5", os.path.join(OUT, step + ".jpg"))
+        # léger pour les téléphones : 360x640 (la vidéo occupe la moitié de l'écran), voix en mono
+        "-c:v", "libx264", "-preset", "slow", "-crf", "30", "-maxrate", "450k", "-bufsize", "900k", "-profile:v", "main", "-pix_fmt", "yuv420p",
+        "-c:a", "aac", "-b:a", "48k", "-ac", "1", "-ar", "44100", "-movflags", "+faststart", out)
+    run("-ss", "0.3", "-i", out, "-frames:v", "1", "-q:v", "7", os.path.join(OUT, step + ".jpg"))
     CAPTIONS[step] = caps
     print(step, "%.1f s" % t_off, os.path.getsize(out) // 1024, "Ko")
 
