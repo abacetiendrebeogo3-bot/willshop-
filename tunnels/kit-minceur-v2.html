@@ -194,33 +194,20 @@ body.drb-on{overflow:hidden}
 #drb .avis img{display:block;width:100%;height:auto;border-radius:12px;border-top-left-radius:3px;box-shadow:0 6px 18px rgba(0,0,0,.35);background:#fff}
 #drb.compact .avis{display:none}
 @media (max-height:700px){#drb .avis{width:min(60%,220px)}}
-#drb.sales .fxo,#drb.sales .ptag,#drb.sales .avis,#drb.sales .promo,#drb.sales .nm,#drb.sales #stage,#drb.sales .bgblur{display:none!important}
-#drb.sales .app{position:relative;justify-content:flex-end;background:#111}
-#drb.sales header.vc{position:absolute!important;inset:0;height:auto!important;min-height:0!important;max-height:none!important;flex:none!important}
-#drb.sales header.vc video{object-fit:cover;object-position:center 30%}
-#drb.sales header.vc::after{display:none}
-#drb .shade{display:none}
-#drb.sales .shade{display:block;position:absolute;left:0;right:0;bottom:0;height:52%;z-index:3;background:linear-gradient(180deg,transparent,rgba(0,0,0,.55) 35%,rgba(0,0,0,.85))}
-#drb.sales .subt{position:relative;z-index:5;background:none;padding:4px 16px;margin:0;min-height:58px;color:#fff;font:700 19px/1.35 'DM Sans',sans-serif;text-shadow:0 2px 6px rgba(0,0,0,.7)}
-#drb.sales .subt::before{color:#FCD116}
-#drb.sales .subt b{color:#5BE36A}
-#drb.sales #dock{position:relative;z-index:5;background:none;flex:none!important;padding-top:6px}
-#drb.sales .yourturn{color:#fff}
-#drb.sales .prog{top:0;bottom:auto;z-index:6}
-#drb .call{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12vh 20px 9vh;color:#fff;text-align:center;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.75)),url(https://willshop-app.vercel.app/media/kit-v2/etape1.jpg) center 30%/cover}
-#drb .call img{width:112px;height:112px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 0 0 10px rgba(255,255,255,.18),0 0 0 22px rgba(255,255,255,.08);animation:ring 1.6s ease-in-out infinite}
-#drb .call b{display:block;font:800 30px 'Bricolage Grotesque',sans-serif;margin-top:16px}
-#drb .call span{font-size:15px;opacity:.9}
-#drb .call button{border:0;border-radius:99px;background:#22C32A;color:#fff;font:800 18px 'DM Sans',sans-serif;padding:16px 34px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(34,195,42,.45);animation:bob 1.4s ease-in-out infinite;cursor:pointer}
-@keyframes ring{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+/* v2 : nouvelle Awa partout, sans les anciens textes animés */
+#drb .fxo,#drb .ptag,#drb .avis,#drb .nm{display:none!important}
+#drb .bgblur{background-image:url(https://willshop-app.vercel.app/media/kit-v2/awa-kit-bg.jpg)!important}
+#drb .sndb{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(0,0,0,.72);color:#fff;border:0;border-radius:99px;padding:10px 16px;font:700 14px 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
+#drb .sndb.show{display:flex}
+#drb .subt b{color:#FCD116}
 </style>
 <div id="drb"><div class="app">
 <header class="vc">
-<video id="awaVid" muted loop playsinline preload="none" poster="https://willshop-app.vercel.app/media/awa-full-poster.webp"></video>
+<video id="awaVid" muted loop playsinline preload="none" poster="https://willshop-app.vercel.app/media/kit-v2/awa-kit.jpg"></video>
 <div class="bgblur"></div>
 <span class="live"><i></i>EN LIGNE</span>
 <div class="nm"><b>Awa</b>Conseillère WillShop</div>
-<div class="promo" id="promo">La promo finit aujourd'hui · <b id="cd">--:--:--</b></div>
+<div class="promo" id="promo">Promo jusqu'à dimanche · <b id="cd">--:--:--</b></div>
 <div class="fxo">
   <span class="mc l1">Thé le matin</span>
   <span class="mc l2">Gélule matin et soir</span>
@@ -230,14 +217,13 @@ body.drb-on{overflow:hidden}
   <span class="ptag"><s>8 000 F</s><b>6 500 F</b><i>-19 %</i></span>
 </div>
 <div class="avis" id="avis" aria-live="polite"><div class="avh">⭐ Avis clientes · WhatsApp</div><img id="avimg" alt="Avis d’une cliente sur WhatsApp"></div>
-<div class="shade"></div>
+<button class="sndb" id="sndb" type="button">🔊 Touche pour le son</button>
 <div class="prog" id="prog" style="width:0"></div>
 </header>
 <div class="subt" id="subt" aria-live="polite"></div>
 <div id="stage"></div>
 <div id="chat"></div>
 <div id="dock"></div>
-<div class="call" id="call"><div><img src="https://willshop-app.vercel.app/media/awa-face.webp" alt="Awa"><b>Awa</b><span>Conseillère WillShop · appel vidéo…</span></div><button type="button" id="pick">📞 Décrocher</button></div>
 </div></div>
 <div id="zoom" onclick="this.style.display='none'" role="dialog" aria-label="Témoignage agrandi"><img src="" alt="Témoignage client agrandi"></div>
 
@@ -369,9 +355,9 @@ function add(html) {
 }
 // Compte à rebours jusqu'à minuit (promo du jour)
 (function cd() {
-  var now = new Date(), end = new Date(now); end.setHours(24, 0, 0, 0);
-  var t = Math.max(0, Math.floor((end - now) / 1000)), h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), x = t % 60;
-  var el = document.getElementById("cd"); if (el) el.textContent = [h, m, x].map(function (n) { return (n < 10 ? "0" : "") + n; }).join(":");
+  var now = new Date(), end = new Date(now); end.setDate(now.getDate() + (7 - now.getDay()) % 7); end.setHours(24, 0, 0, 0);  // dimanche minuit
+  var t = Math.max(0, Math.floor((end - now) / 1000)), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), x = t % 60;
+  var el = document.getElementById("cd"); if (el) el.textContent = (d ? d + "j " : "") + [h, m, x].map(function (n) { return (n < 10 ? "0" : "") + n; }).join(":");
   setTimeout(cd, 1000);
 })();
 
@@ -427,8 +413,7 @@ S = { qty: 1 };
 track("Arrivée");
 px("ViewContent", { content_name: "Kit Minceur 28 jours", value: 6500, currency: "XOF" });
 chat.innerHTML = ""; dock.innerHTML = "";
-document.getElementById("drb").classList.add("sales");
-if (document.getElementById("call").style.display === "none") sales(1);  // retour depuis « question »
+sales(1);
 }
 
 var PROD = "Kit Minceur";
@@ -625,7 +610,7 @@ function vid(src, loop, cb, caps) {
   var fired = false;
   function fire() { if (fired) return; fired = true; clearTimeout(vEnd); v.onended = v.onerror = v.ontimeupdate = null; if (typeof cb === "function") cb(); }
   v.loop = !!loop; v.muted = !SND || !!loop;
-  v.setAttribute("poster", src.replace(/\.mp4(\?.*)?$/, ".jpg").replace("awa-full.jpg", "awa-full-poster.webp"));
+  v.setAttribute("poster", src.replace(/\.mp4(\?.*)?$/, ".jpg"));
   if (!window.VID_OK) return fire();
   v.src = src;
   if (caps) v.ontimeupdate = function () {  // paroles d'Awa écrites en direct
@@ -657,30 +642,34 @@ function sales(n) {
   function buttons() {
     if (shown) return; shown = true;
     ask(st.o, function (a) {
+      SND = true; document.getElementById("sndb").classList.remove("show");  // la réponse active le son pour la suite
       if (n === 6) return commander();
       if (/Je le veux/.test(a)) return sales(6);
       sales(n + 1);
     });
   }
+  document.getElementById("sndb").classList.toggle("show", !SND && !!window.VID_OK);
   vid(MV + st.v + ".mp4?v=" + MVV, false, function () { subt.innerHTML = st.q; buttons(); }, CAPS[st.v]);
   setTimeout(buttons, 1500);  // les boutons arrivent vite, la vidéo continue
   preload(n === 4 ? 5 : n + 1);
 }
+function sndOn() {
+  SND = true; document.getElementById("sndb").classList.remove("show");
+  var v = document.getElementById("awaVid");
+  if (v.src) { v.muted = false; v.currentTime = 0; v.play().catch(function () {}); }
+}
+document.getElementById("sndb").onclick = sndOn;
 function commander() {
-  document.getElementById("drb").classList.remove("sales");
-  vid("https://willshop-app.vercel.app/media/awa-full.mp4", true);
+  // étapes pratiques : image fixe de la nouvelle Awa avec le kit (plus l'ancienne vidéo)
+  var v = document.getElementById("awaVid");
+  v.onended = v.onerror = v.onloadedmetadata = v.ontimeupdate = null; clearTimeout(vEnd);
+  v.pause(); v.removeAttribute("src"); v.load(); v.setAttribute("poster", MV + "awa-kit.jpg");
+  document.getElementById("sndb").classList.remove("show");
   px("TunnelDemarre", {}, true);
   track("Veut le produit", { veut: "Oui" });
   prog(58);
   zone();
 }
-// Écran « appel entrant » : le toucher sur « Décrocher » permet de lancer les vidéos avec le son
-document.getElementById("pick").onclick = function () {
-  SND = true;
-  document.getElementById("call").style.display = "none";
-  px("Decroche", {}, true);
-  sales(1);
-};
 preload(1);
 document.getElementById("drb").classList.add("on");document.body.classList.add("drb-on");
 start();
