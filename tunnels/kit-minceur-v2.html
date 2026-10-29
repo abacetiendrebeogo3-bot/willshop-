@@ -594,6 +594,7 @@ scroll();
 
 /* ---------- Kit Minceur v2 : page de vente en 6 étapes vidéo ---------- */
 var MV = "https://willshop-app.vercel.app/media/kit-v2/";
+var MVV = 1; // à augmenter quand une vidéo est refaite (les vidéos sont gardées en cache 1 an)
 var SALES = {
   1: { v: "etape1", q: "Ton ventre gonfle, tes habits te serrent… <b>C’est ton cas ?</b>", o: ["Oui, c’est moi 😔", "Un peu"] },
   2: { v: "etape2", q: "Tisanes, régimes… <b>tu as déjà tout essayé ?</b>", o: ["Oui, plusieurs fois", "Non, jamais"] },
@@ -607,7 +608,7 @@ function vid(src, loop, cb) {
   var v = document.getElementById("awaVid");
   v.onended = null; clearTimeout(vEnd);
   v.loop = !!loop; v.muted = !SND || !!loop;
-  v.setAttribute("poster", src.replace(".mp4", ".jpg").replace("awa-full.jpg", "awa-full-poster.webp"));
+  v.setAttribute("poster", src.replace(/\.mp4(\?.*)?$/, ".jpg").replace("awa-full.jpg", "awa-full-poster.webp"));
   if (!window.VID_OK) { if (cb) cb(); return; }
   v.src = src;
   var p = v.play();
@@ -646,7 +647,7 @@ function sales(n) {
         sales(n + 1);
       });
     }
-    if (st.v) vid(MV + st.v + ".mp4", false, buttons);
+    if (st.v) vid(MV + st.v + ".mp4?v=" + MVV, false, buttons);
     else { vid("https://willshop-app.vercel.app/media/awa-full.mp4", true); setTimeout(buttons, 1200); }
   });
 }
