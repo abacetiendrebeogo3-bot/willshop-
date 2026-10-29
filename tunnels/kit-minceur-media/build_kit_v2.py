@@ -48,10 +48,22 @@ STEPS = {
   ("4a", 3.5, 7.0, 1, [], [(3.5, 7.0, "VENTRE PLAT", GRN, TOP)]),
   ("4b", 2.0, 5.5, 1, [], [(2.0, 5.5, "LÉGER", GRN, TOP)]),
  ],
+ "etape6": [
+  ("A6", 0, 8.04, 1, [(0.80, 1.80, "Avant, c'était *8 000 F*."), (2.75, 4.42, "Aujourd'hui, seulement *6 500 F*."),
+                      (5.19, 7.46, "Et la livraison, *1 000 F*, partout où tu es.")],
+                     [(0.80, 2.75, "~8 000 F", WHT, LOW), (2.75, 5.19, "6 500 F", GRN, LOW), (5.19, 8.04, "🛵 LIVRAISON 1 000 F", YEL, LOW)]),
+  ("A6b", 0, 8.04, 1, [(0.12, 0.87, "Hors de *Ouaga* ?"), (1.18, 2.25, "On t'expédie par *STAF*,"), (2.50, 3.60, "*TSR*, *Rahimo*,"),
+                       (3.75, 4.98, "ou la compagnie de *ton choix*."), (5.63, 6.95, "Frais d'expédition : *1 000 F*,"),
+                       (7.12, 8.04, "partout au *Burkina*.")],
+                      [(1.18, 8.04, "🚌 EXPÉDITION 1 000 F", YEL, LOW), (7.12, 8.04, "PARTOUT AU BURKINA", GRN, TOP)]),
+  ("6a", 3.5, 8.04, 1, [], [(3.5, 8.04, "TOTAL 7 500 F", YEL, TOP), (4.3, 8.04, "⏳ PROMO CETTE SEMAINE · STOCK LIMITÉ", RED, 0.20)]),
+ ],
 }
 
 def label_png(text, color, path):
     """Étiquette arrondie (texte + émojis en couleur) ou émoji seul en grand."""
+    strike = text.startswith("~")  # « ~texte » = prix barré
+    text = text.lstrip("~")
     f = ImageFont.truetype(FONT, 46)
     fe = ImageFont.truetype(EMOJI, 109)
     parts = []  # (texte, est_emoji)
@@ -93,6 +105,8 @@ def label_png(text, color, path):
     for i in imgs:
         canvas.alpha_composite(i, (x, pad[1] + (ch - i.height) // 2))
         x += i.width + gap
+    if strike:
+        d.line((pad[0] - 6, canvas.height // 2 - 4, canvas.width - pad[0] - 2, canvas.height // 2 - 4), fill="#E53935", width=7)
     if canvas.width > W - 30:  # trop large : on réduit
         r = (W - 30) / canvas.width
         canvas = canvas.resize((int(canvas.width * r), int(canvas.height * r)), Image.LANCZOS)
@@ -102,6 +116,8 @@ def ts(t):
     return "%d:%02d:%05.2f" % (int(t // 3600), int(t % 3600 // 60), t % 60)
 
 def ass_text(txt):
+    import re
+    txt = re.sub(r"(\d) (\d{3}) F", r"\1\\h\2\\hF", txt)  # « 1 000 F » jamais coupé
     out, green = "", False
     for part in txt.split("*"):
         out += (r"{\c&H2AC322&}" if green else r"{\c&HFFFFFF&}") + part
@@ -120,7 +136,12 @@ def run(*a):
     subprocess.run(["ffmpeg", "-v", "error", "-y", *a], check=True)
 
 CAPTIONS = {}
+ONLY = sys.argv[2:]  # ex. : etape6 (par défaut, toutes les étapes)
+CAP = os.path.join(OUT, "captions.json")
+CAPTIONS = json.load(open(CAP)) if ONLY and os.path.exists(CAP) else {}
 for step, shots in STEPS.items():
+    if ONLY and step not in ONLY:
+        continue
     parts, caps, t_off = [], [], 0.0
     for n, (clip, a, b, speed, subs, labels) in enumerate(shots):
         src = os.path.join(SRC, clip + ".mp4")
@@ -163,4 +184,4 @@ for step, shots in STEPS.items():
     CAPTIONS[step] = caps
     print(step, "%.1f s" % t_off, os.path.getsize(out) // 1024, "Ko")
 
-json.dump(CAPTIONS, open(os.path.join(OUT, "captions.json"), "w"), ensure_ascii=False, indent=1)
+json.dump(CAPTIONS, open(CAP, "w"), ensure_ascii=False, indent=1)
