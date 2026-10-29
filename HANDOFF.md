@@ -74,7 +74,7 @@
 - **Rôles** : `ceo` (Direction), `sales` (Commerciale), `driver` (Livreur). Les onglets sont définis dans `const ROLES`.
 - **Session** : `localStorage` (`ws_name`, `ws_pin`, `ws_profile`, `ws_cache`). L'app s'ouvre avec les dernières données en cache, puis se met à jour en arrière-plan.
 - **Logique des actions du jour** : `taskFor()`, `salesBuckets()`, `SALES_STEPS`, `TODO_GROUPS`. Les relances suivent `STEPS` (J+1, J+3, J+7, J+14) et les modèles `TEMPLATES`.
-- **Accueil Direction** : `renderHome()`. Commandes : `renderOrders()` / `renderTodo()`. Routine de la commerciale : `renderDay()`.
+- **Accueil Direction** : `renderHome()`. Bloc « Tunnel Kit Minceur aujourd'hui » (29/10) : barres par étape du parcours v2 (`FUNNEL` : visiteurs/vidéo 1 → vidéo 2 → 3 → 4 → offre ou « Commander » → ville → quartier → jour → numéro → commande), nombre de partants à chaque étape, plus gros décrochage en rouge. `funnel(jour, /minceur/i)` ne compte que le Kit Minceur ; une session compte à son étape la plus avancée (ordre `STEPS_ORDER`, même ordre que l'enregistreur). Commandes : `renderOrders()` / `renderTodo()`. Routine de la commerciale : `renderDay()`.
 - **Après chaque modification**, augmenter le numéro de version dans `sw.js` (`willshop-vN`) pour que les téléphones prennent la nouvelle version.
 - **Mode simple** pour les vieux téléphones : `?simple=1` (sans manifest).
 - **Présentation en bulles (19/10)** : `todoBubbles()` (étapes en bulles, Commandes « À faire » + accueils Direction et Commerciale), `orderCard()` = carte simple qui ouvre la feuille d'actions `sheetHtml()` / `bindSheet()` (état `sh`). Couleurs : classes `k-red`, `k-green`, etc.

@@ -529,6 +529,11 @@ nav.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--
 .ctable td{text-align:right;padding:7px 6px;border-top:1px solid var(--line);white-space:nowrap}.ctable tr.cur td{background:var(--bx-soft);font-weight:700}
 .ctable .ok{color:var(--ok);font-weight:700}.ctable .bad{color:var(--bad);font-weight:700}.ctable .faint{color:var(--faint)}
 nav.tabs .in.n7 button{font-size:10px;letter-spacing:-.1px}
+.tfun{gap:9px}.tf{display:flex;flex-direction:column;gap:4px}
+.tf-top{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}.tf-top b{font:800 16px var(--sans);font-variant-numeric:tabular-nums}
+.tf-bar{height:8px;border-radius:9px;background:var(--sunk);overflow:hidden}.tf-bar i{display:block;height:100%;background:var(--bx-fill);border-radius:9px}
+.tf em{font-style:normal;font-size:11.5px;color:var(--mut)}
+.tf.worst .tf-bar i{background:var(--bad)}.tf.worst em{color:var(--bad);font-weight:700}.tf.worst .tf-top span{font-weight:700}
 </style>
 </head>
 <body>
@@ -574,7 +579,7 @@ const TEAM_APP = "";
 const MOTIFS = ["Client absent / injoignable", "Adresse introuvable", "Refus du client", "Pas d'argent sur place"];
 const STEPS = [1, 3, 7, 14];
 const STEPS_ORDER = ["Arrivée", "Question", "Étape 1", "Étape 2", "Étape 3", "Étape 4", "Étape 5", "Étape 6", "Raccourci commande", "Veut le produit", "Ville", "Quartier", "Jour", "Numéro donné", "Offre vue", "Commande"];
-const FUNNEL = [["Arrivée", "Arrivés"], ["Étape 2", "Vidéo 2 vue"], ["Étape 3", "Vidéo 3 vue"], ["Étape 4", "Vidéo 4 vue"], ["Veut le produit", "Ont dit « Oui »"], ["Ville", "Ont choisi la ville"], ["Quartier", "Quartier donné"], ["Jour", "Jour choisi"], ["Numéro donné", "Numéro laissé"], ["Offre vue", "Ont vu l’offre"], ["Commande", "Ont commandé"]];
+const FUNNEL = [["Arrivée", "Visiteurs · vidéo 1 « miroir »"], ["Étape 2", "Vidéo 2 · « j'ai tout essayé »"], ["Étape 3", "Vidéo 3 · le déclic"], ["Étape 4", "Vidéo 4 · la solution"], ["Étape 6", "Offre vue ou « Commander »"], ["Ville", "Ville choisie"], ["Quartier", "Quartier donné"], ["Jour", "Jour choisi"], ["Numéro donné", "Numéro laissé"], ["Commande", "Ont commandé"]];
 const T_CONFIRM = "Bonjour 👋 c'est WillShop. Merci pour ta commande de {produit} ({prix}). On te livre {jour} à {lieu}, c'est bien ça ?";
 const TEMPLATES = {
   1:  "Bonjour 👋 c'est WillShop. Ta commande de {produit} ({prix}) est toujours réservée pour toi. On te livre quand ?",
@@ -1011,11 +1016,11 @@ function alerts() {
     ...stockStats().filter(x => x.dispo <= x.seuil).map(x => ({ n: x.dispo, t: (x.dispo <= 0 ? "Rupture de stock : " : "Stock bas : ") + x.produit + " (disponibles)", lvl: x.dispo <= 0 ? "hot" : "warm", tab: "stock" }))
   ].filter(a => a.n);
 }
-function funnel(day = today()) {
+function funnel(day = today(), prod) {
   const t0 = startOfDay(day).getTime();
-  const list = visits.filter(v => v.date && startOfDay(v.date).getTime() === t0);
+  const list = visits.filter(v => v.date && startOfDay(v.date).getTime() === t0 && (!prod || prod.test(v.produit)));
   const reach = s => list.filter(v => STEPS_ORDER.indexOf(v.step) >= STEPS_ORDER.indexOf(s)).length;
-  return { total: list.length, steps: FUNNEL.map(([k, l]) => ({ l, n: k === "Arrivée" ? list.length : reach(k) })), questions: list.filter(v => v.step === "Question").length };
+  return { total: list.length, steps: FUNNEL.map(([k, l]) => ({ l, n: k === "Arrivée" ? list.length : reach(k) })), questions: list.filter(v => v.step === "Question").length, raccourci: list.filter(v => v.step === "Raccourci commande").length };
 }
 let clientFilter = "all"; // "all" | "fidele" | "fid_due" | "wa" | "tunnel" | "promesse"
 function clients() {
@@ -1408,7 +1413,7 @@ function renderReview() {
 function renderHome() {
   if (role === "sales") return renderSalesHome();
   if (reviewStep >= 0) return renderReview();
-  const s = stats(dirSourceFilter), al = alerts(), fu = funnel(), sb = salesBuckets();
+  const s = stats(dirSourceFilter), al = alerts(), fu = funnel(today(), /minceur/i), sb = salesBuckets();
   const chStats = channelStats(), ps = promiseStats();
   const max = Math.max(1, ...s.days.map(d => d.n));
   const h = new Date().getHours(), t0 = today();
@@ -1416,10 +1421,10 @@ function renderHome() {
   const toDeliver = orders.filter(o => isToDeliver(o) && (deliveryDate(o) || 0) <= t0).length;
   const pl = (n, w) => n + " " + w + (n > 1 ? "s" : "");
   // Tunnel : 4 étapes, taux d'une étape à l'autre
-  const st = fu.steps, pick = l => (st.find(x => x.l === l) || { n: 0 }).n;
-  const chain = [["Visiteurs", fu.total], ["Ont dit Oui", pick("Ont dit « Oui »")], ["Quartier", pick("Quartier donné")], ["Jour", pick("Jour choisi")], ["Numéro", pick("Numéro laissé")], ["Commandes", pick("Ont commandé")]];
-  let worst = null;
-  chain.forEach((c, i) => { if (i > 1) { const lost = chain[i - 1][1] - c[1]; if (!worst || lost > worst.lost) worst = { lost, from: chain[i - 1], to: c }; } });
+  // Tunnel Kit Minceur v2 : chaque étape, combien restent, où on perd le plus
+  const fsteps = fu.steps, fmax = Math.max(1, fu.total);
+  const lost = fsteps.map((x, i) => i ? fsteps[i - 1].n - x.n : 0);
+  const wi = lost.reduce((b, v, i) => v > lost[b] ? i : b, 1), worst = lost[wi] > 0 ? { lost: lost[wi], from: fsteps[wi - 1].l, to: fsteps[wi].l, pct: fsteps[wi - 1].n ? Math.round(lost[wi] / fsteps[wi - 1].n * 100) : 0 } : null;
   // Caisse : seulement les lignes utiles
   const c = caisse(), cashTotal = PAIEMENTS.reduce((t, m) => t + s.cash[m].today, 0);
   const cashLines = [...PAIEMENTS.filter(m => s.cash[m].today).map(m => [m, F(s.cash[m].today)]),
@@ -1543,10 +1548,10 @@ function renderHome() {
     </div>
 
     ${renderTeamFollow()}
-    <h2>Tunnel aujourd'hui</h2>
-    ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="chain">${chain.map((x, i) => `${i ? `<div class="arrow">›</div>` : ""}<div class="step"><b>${x[1]}</b><span>${x[0]}</span>${i ? `<em>${chain[i - 1][1] ? Math.round(x[1] / chain[i - 1][1] * 100) : 0} %</em>` : `<em>&nbsp;</em>`}</div>`).join("")}</div>
-      ${worst && worst.lost > 0 ? `<p class="verdict">On perd le plus de monde entre <b>${worst.from[0].toLowerCase()}</b> et <b>${worst.to[0].toLowerCase()}</b> : ${worst.lost} personne${worst.lost > 1 ? "s" : ""}.</p>` : ""}
-      ${fu.questions ? `<p class="meta" style="margin:4px 2px 0">${pl(fu.questions, "personne")} ont touché « J'ai une question ».</p>` : ""}` : empty("Pas encore de visite aujourd'hui.")}
+    <h2>Tunnel Kit Minceur aujourd'hui</h2>
+    ${!visitsLoaded ? empty("Lecture des visites…") : fu.total ? `<div class="card tfun">${fsteps.map((x, i) => `<div class="tf${i === wi && worst ? " worst" : ""}"><div class="tf-top"><span>${esc(x.l)}</span><b>${x.n}</b></div><div class="tf-bar"><i style="width:${Math.round(x.n / fmax * 100)}%"></i></div>${i && lost[i] > 0 ? `<em>− ${lost[i]} (${fsteps[i - 1].n ? Math.round(lost[i] / fsteps[i - 1].n * 100) : 0} % partis)</em>` : ""}</div>`).join("")}</div>
+      ${worst ? `<p class="verdict">Plus gros décrochage : <b>${worst.lost} personne${worst.lost > 1 ? "s" : ""} (${worst.pct} %)</b> partent après « ${esc(worst.from)} », en rouge ci-dessus.</p>` : ""}
+      ${fu.raccourci || fu.questions ? `<p class="meta" style="margin:4px 2px 0">${fu.raccourci ? pl(fu.raccourci, "personne") + " " + (fu.raccourci > 1 ? "ont" : "a") + " touché « Commander directement » puis " + (fu.raccourci > 1 ? "sont partis" : "est partie") + " avant la ville" : ""}${fu.raccourci && fu.questions ? " · " : ""}${fu.questions ? pl(fu.questions, "personne") + " " + (fu.questions > 1 ? "ont" : "a") + " touché « J'ai une question »" : ""}.</p>` : ""}` : empty("Pas encore de visite sur le tunnel Kit Minceur aujourd'hui.")}
 
     </div><div class="dcol">
     <h2 id="caisse">Caisse</h2>
