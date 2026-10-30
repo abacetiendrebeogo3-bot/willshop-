@@ -1,7 +1,7 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Essai · Kit Minceur</title></head><body style="margin:0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://willshop-app.vercel.app" crossorigin>
-<link rel="preload" as="image" href="https://willshop-app.vercel.app/media/kit-v2/awa-kit.jpg">
+<link rel="preload" as="image" href="https://willshop-app.vercel.app/media/kit-v2/kit-question.jpg">
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
 #drb,#zoom{--bg:#F6F4EE;--ink:#13221A;--mut:#56655B;--green:#1C6B37;--soft:#E7F1E9;--line:#E3E0D7;--gold:#C9A227;--red:#B42335}
@@ -33,6 +33,14 @@ body.drb-on{margin:0;height:100%;background:#E8E5DC;color:var(--ink);font-family
 #drb .opt{flex:1 1 40%;min-height:54px;border:1.5px solid var(--green);background:#fff;color:var(--green);border-radius:14px;font:700 16px 'DM Sans',sans-serif;cursor:pointer;padding:8px 12px;animation:rise .35s cubic-bezier(.2,.8,.2,1) both;transition:background .15s,transform .1s}
 #drb .opt:hover{background:var(--soft)}#drb .opt:active{transform:scale(.97)}
 #drb .opt.main{background:var(--green);color:#fff}
+#drb #dock.solo .opt{flex:1 1 100%;min-height:62px;font-size:19px}
+#drb .introsub{display:block;margin-top:6px;font-size:14px;font-weight:600;color:#FFD84D}
+#drb #dock.yn button.opt:nth-of-type(1){background:#22C32A!important;border:2px solid #149A1B!important;color:#fff!important;box-shadow:0 4px 0 #0F7A15;min-height:66px;font-size:22px;font-weight:800;letter-spacing:.02em}
+#drb #dock.yn button.opt:nth-of-type(2){flex:1 1 100%;background:none!important;border:0!important;box-shadow:none!important;color:#56655B!important;text-decoration:underline;font-size:14px;font-weight:500;min-height:0;padding:4px;animation:none!important}
+#drb.intro .bgblur{background-image:url(https://willshop-app.vercel.app/media/kit-v2/kit-question-bg.jpg)!important}
+#drb.intro .promo,#drb.intro .live{display:none}
+#drb.avon .avis{display:block!important}
+#drb.avon.compact .avis{display:none!important}
 #drb .days .opt{flex:1 1 22%;font-size:14px;min-height:50px}
 #drb .form{width:100%;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:rise .4s both}
 #drb .fld{width:100%;height:52px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font:500 16px 'DM Sans',sans-serif;background:#FBFAF7;color:var(--ink);outline:none}
@@ -212,7 +220,7 @@ body.drb-on{overflow:hidden}
 </style>
 <div id="drb"><div class="app">
 <header class="vc">
-<video id="awaVid" muted loop playsinline preload="none" poster="https://willshop-app.vercel.app/media/kit-v2/awa-kit.jpg"></video>
+<video id="awaVid" muted loop playsinline preload="none" poster="https://willshop-app.vercel.app/media/kit-v2/kit-question.jpg"></video>
 <div class="bgblur"></div>
 <span class="live"><i></i>EN LIGNE</span>
 <div class="nm"><b>Awa</b>Conseillère WillShop</div>
@@ -614,8 +622,8 @@ var SALES = {
   1: { v: "etape1", q: "Ton ventre gonfle, tes habits te serrent… <b>C’est ton cas ?</b>", o: ["Oui, c’est mon cas 😔", "Un peu"] },
   2: { v: "etape2", q: "Tisanes, régimes… <b>tu as déjà tout essayé ?</b>", o: ["Oui, plusieurs fois", "Non, jamais"] },
   3: { v: "etape3", q: "Ce n’est pas ta faute. <b>Il faut d’abord vider ton ventre.</b>", o: ["Et comment on fait ?"] },
-  4: { v: "etape4", q: "Le <b>Kit Minceur</b> : thé le matin, gélule matin et soir, <b>28 jours</b>.", o: ["Voir les avis", "Je le veux"] },
-  5: { v: "etape5", q: "Des femmes et des hommes, <b>ici à Ouaga</b>.", o: ["Je le veux"] },
+  4: { v: "etape4", q: "Thé le matin, gélule matin et soir, <b>28 jours</b>. <s>8 000 F</s> <b>6 500 F</b> · tu paies à la livraison.", o: ["Oui, je le veux 👍"] },
+  5: { v: "etape5", q: "Des femmes et des hommes, <b>ici à Ouaga</b>. <b>6 500 F</b> · tu paies à la livraison.", o: ["Finalement, oui 👍", "J’ai une question"] },
   6: { v: "etape6", q: "<s>8 000 F</s> <b>6 500 F</b> + 1 000 F de livraison. Ouaga : paiement à la livraison · Autres villes : Mobile Money avant l’envoi.", o: ["Commander"] }
 };
 var SND = false, vEnd = null, subt = document.getElementById("subt");
@@ -679,7 +687,7 @@ function preload(n) {
 }
 function sales(n) {
   var st = SALES[n], drb = document.getElementById("drb");
-  drb.classList.add("sales");
+  drb.classList.add("sales"); drb.classList.remove("intro"); drb.classList.toggle("avon", n === 4);  // avis WhatsApp qui défilent
   prog(n * 9);
   track("Étape " + n); px("EtapeVente", { etape: n }, true);
   dock.innerHTML = "";
@@ -690,42 +698,40 @@ function sales(n) {
     ask(st.o, function (a) {
       SND = true; document.getElementById("sndb").classList.remove("show");  // la réponse active le son pour la suite
       if (n === 6) return commander();
-      if (/Je le veux/.test(a)) return sales(6);
-      sales(n + 1);
+      if (/question/i.test(a)) { cancelAnimationFrame(window.capRaf); return other(); }
+      if (/je le veux|oui/i.test(a)) return commander();  // 30/10 : « oui » → commande directe (ville, quartier…)
+      sales(n === 1 ? 3 : n + 1);  // la vidéo 2 « tout essayé » est sautée (29/10)
     });
     var l = document.createElement("div"); l.className = "links";
-    if (n < 6) l.innerHTML = '<button type="button" class="fast">⚡ Commander directement · 6 500 F</button>';
-    l.innerHTML += '<button type="button" class="qq">💬 J’ai une question</button>';
+    if (n < 4) l.innerHTML = '<button type="button" class="fast">⚡ Commander directement · 6 500 F</button>';
+    if (n !== 5) l.innerHTML += '<button type="button" class="qq">💬 J’ai une question</button>';
     dock.appendChild(l);
     var f = l.querySelector(".fast");
     if (f) f.onclick = function () { SND = true; me("Je veux commander"); track("Raccourci commande", { veut: "Oui" }); px("RaccourciCommande", { etape: n }, true); commander(); };
-    l.querySelector(".qq").onclick = function () { me("J’ai une question"); cancelAnimationFrame(window.capRaf); other(); };
+    var qq = l.querySelector(".qq"); if (qq) qq.onclick = function () { me("J’ai une question"); cancelAnimationFrame(window.capRaf); other(); };
   }
   document.getElementById("sndb").classList.toggle("show", !SND && !!window.VID_OK);
   vid(MV + st.v + ".mp4?v=" + MVV, false, function () { subt.innerHTML = st.q; buttons(); }, CAPS[st.v]);
   setTimeout(buttons, 1500);  // les boutons arrivent vite, la vidéo continue
-  preload(n === 6 ? "p1" : n === 4 ? 5 : n + 1);
+  preload(n >= 4 ? "p1" : n === 1 ? 3 : n + 1);
 }
-/* Étape 0 : photo fixe d'Awa + une seule question, sans son. Le toucher sur la réponse active le son pour la vidéo 1. */
+/* Étape 0 (30/10) : visuel du kit avec la question écrite dessus + gros bouton OUI / lien « Non merci ».
+   OUI → solution (vidéo 4) avec les avis qui défilent → commande. Non → avis (vidéo 5) → « Finalement, oui ». */
 function intro() {
   var v = document.getElementById("awaVid"), drb = document.getElementById("drb");
-  drb.classList.add("sales");
-  v.pause(); v.removeAttribute("src"); v.setAttribute("poster", MV + "awa-kit.jpg");
+  drb.classList.add("sales", "intro"); drb.classList.remove("avon");
+  v.pause(); v.removeAttribute("src"); v.setAttribute("poster", MV + "kit-question.jpg");
   document.getElementById("sndb").classList.remove("show");
   prog(4);
-  subt.innerHTML = "Salut 👋 c’est Awa. <b>Tu veux découvrir le Kit Minceur 28&nbsp;jours&nbsp;?</b>";
-  ask(["Oui 👍", "Non merci"], function (a) {
+  subt.innerHTML = '<span class="introsub" style="margin-top:0">6 500 F · livré chez toi · tu paies à la livraison</span>';
+  ask(["OUI 👍", "Non merci"], function (a) {
     SND = true;
-    if (/^Oui/.test(a)) { px("IntroOui", {}, true); return sales(1); }
-    px("IntroNon", {}, true);
-    subt.innerHTML = "Pas de souci 🙏 <b>Regarde quand même, c’est rapide</b>, ou pose-moi ta question.";
-    ask(["D’accord, je regarde", "J’ai une question"], function (b) {
-      if (/question/i.test(b)) return other();
-      sales(1);
-    });
-  });
-  // la vidéo 1 se charge pendant que la personne lit la question
-  setTimeout(function () { if (!window.VID_OK || PRE.etape1) return; PRE.etape1 = 1; try { var x = document.createElement("video"); x.preload = "auto"; x.muted = true; x.src = MV + "etape1.mp4?v=" + MVV; } catch (e) {} }, 800);
+    if (/oui/i.test(a)) { px("IntroOui", {}, true); return sales(4); }
+    px("IntroNon", {}, true); track("Intro non");
+    sales(5);
+  }, "solo yn");
+  // la vidéo 4 se charge pendant que la personne regarde le visuel
+  setTimeout(function () { if (!window.VID_OK || PRE.etape4) return; PRE.etape4 = 1; try { var x = document.createElement("video"); x.preload = "auto"; x.muted = true; x.src = MV + "etape4.mp4?v=" + MVV; } catch (e) {} }, 800);
 }
 function sndOn() {
   SND = true; document.getElementById("sndb").classList.remove("show");
@@ -746,6 +752,7 @@ function commander() {
   cancelAnimationFrame(window.capRaf);
   v.pause(); v.removeAttribute("src"); v.load(); v.setAttribute("poster", MV + "awa-kit.jpg");
   document.getElementById("sndb").classList.remove("show");
+  document.getElementById("drb").classList.remove("intro"); document.getElementById("drb").classList.add("avon");
   px("TunnelDemarre", {}, true);
   track("Veut le produit", { veut: "Oui" });
   prog(58);
