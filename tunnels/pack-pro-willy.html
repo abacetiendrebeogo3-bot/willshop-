@@ -260,8 +260,11 @@ body.wat-on{overflow:hidden!important}
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
   /* ===================== PARCOURS ===================== */
+  if (/[?&](reset|test)/.test(location.search)) { S = {}; save(); }
+  var arrived = false;
   function start() {
-    prog(6); step("Arrivée"); px("ViewContent", { content_name: PROD });
+    prog(6);
+    if (!arrived) { arrived = true; step("Arrivée"); px("ViewContent", { content_name: PROD }); }
     if (S.nom && S.clicWa) return retour();
     bot(["Bonjour 👋 Moi c'est <b>Aïcha</b>, l'assistante de <b>Willy Tiendré</b>.",
       "Tu as vu le <b>Pack Pro à 10 000 F</b> ? Je vais te montrer en 1 minute ce qu'on peut faire pour toi.",
@@ -410,9 +413,10 @@ body.wat-on{overflow:hidden!important}
   function retour() {
     prog(90);
     bot(["Re-bonjour <b>" + esc(S.nom) + "</b> 👋", "Tu as pu envoyer ton message à Willy sur WhatsApp ?"], function () {
-      ask([{ t: "Renvoyer mon message", c: "main" }, { t: "Revoir l'offre" }, { t: "J'ai une question", c: "soft" }], function (a, i) {
+      ask([{ t: "Renvoyer mon message", c: "main" }, { t: "Revoir l'offre" }, { t: "🔄 Recommencer depuis le début" }, { t: "J'ai une question", c: "soft" }], function (a, i) {
         if (i === 0) return bot(["Voilà 👇"], cta);
         if (i === 1) return offre();
+        if (i === 2) { S = {}; save(); list.innerHTML = ""; lastWho = ""; return start(); }
         question();
       });
     });
