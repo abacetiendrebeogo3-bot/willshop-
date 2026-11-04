@@ -48,7 +48,7 @@ js='''<script>
   };
   var AV = "__AV__", PROD = "Pack Pro 10 000";
   /* Suivi seulement sur la vraie page (pas en aperçu, pas avec ?test) */
-  var LIVE = /systeme\\.io$/.test(location.hostname) && !/[?&]test/.test(location.search);
+  var LIVE = (/systeme\\.io$/.test(location.hostname) || (location.hostname === "willshop-app.vercel.app" && !/^\\/essai\\//.test(location.pathname))) && !/[?&]test/.test(location.search);
   /* ==================================================== */
   var root = document.getElementById("wa-tunnel"); if (!root) return;
   document.body.classList.add("wat-on");
@@ -83,4 +83,6 @@ assert 'src=""' not in out
 open(os.path.join(R,'tunnels/pack-pro-willy.html'),'w').write(out)
 essai='<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Essai · Pack Pro</title></head><body style="margin:0">\n'+out+'</body></html>\n'
 open(os.path.join(R,'essai/pack-pro.html'),'w').write(essai)
+os.makedirs(os.path.join(R,'pack-pro'),exist_ok=True)
+open(os.path.join(R,'pack-pro/index.html'),'w').write(essai.replace('<title>Essai · Pack Pro</title>','<title>Pack Pro 10 000 F · Willy Tiendré</title>'))
 print('pack-pro-willy.html', len(out), 'caractères')

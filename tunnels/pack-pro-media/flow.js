@@ -3,19 +3,19 @@
     { t: "👗 Boutique / vêtements", k: "Boutique", phr: "une boutique de vêtements",
       reac: "Ah, les habits ! Ça part vite quand c'est bien montré 👌",
       aff: "affiche-faso-style.jpg", affCap: "Affiche pour <b>Faso Style</b> (boutique de vêtements)",
-      vid: "spot-poulet-braise.mp4", vidPoster: "spot-poulet-braise.jpg", vidCap: "Spot pub pour un maquis. Pour toi, ce sera tes habits 👗" },
+      vid: "spot-produit", vidCap: "Spot pub pour un <b>produit</b>. Pour toi, ce sera tes habits 👗" },
     { t: "🍗 Restaurant / maquis", k: "Maquis", phr: "un restaurant / maquis",
       reac: "Ah, un maquis ! Les gens mangent avec les yeux d'abord 😄",
       aff: "affiche-maquis-baobab.jpg", affCap: "Affiche pour le <b>Maquis Le Baobab</b>",
-      vid: "spot-poulet-braise.mp4", vidPoster: "spot-poulet-braise.jpg", vidCap: "Spot pub <b>poulet braisé</b> 🍗" },
+      vid: "spot-histoire", vidCap: "Spot pub en <b>mini-histoire</b>. Pour toi, ce sera ton poulet braisé 🍗" },
     { t: "💇🏾‍♀️ Salon / beauté", k: "Salon", phr: "un salon de beauté",
       reac: "Un salon, super ! La beauté, ça se voit d'abord 💅🏾",
       aff: "affiche-belle-afro.jpg", affCap: "Affiche pour le <b>Salon Belle Afro</b>",
-      vid: "ugc-salon-coiffure.mp4", vidPoster: "ugc-salon-coiffure.jpg", vidCap: "Vidéo UGC pour un <b>salon de coiffure</b> : une cliente parle du salon, comme une vraie 😉" },
+      vid: "spot-produit", vidCap: "Spot pub pour un <b>produit de beauté</b> 💚" },
     { t: "🛍️ Autre commerce", k: "Autre", phr: "un commerce",
       reac: "Très bien, c'est noté 👍",
       aff: "affiche-faso-style.jpg", affCap: "Affiche pour <b>Faso Style</b>",
-      vid: "spot-poulet-braise.mp4", vidPoster: "spot-poulet-braise.jpg", vidCap: "Spot pub pour un maquis. Pour toi, ce sera tes produits 🛍️" }
+      vid: "spot-tbm", vidCap: "Spot pub pour <b>TBM Inov Afrika</b> (entreprise d'étanchéité) 🏗️" }
   ];
   var SOUCI = [
     { t: "😟 Pas assez de clients", k: "Clients", r: ["Je comprends. Souvent, ce n'est pas ton produit le problème. C'est que les gens ne te voient pas.", "Avec une vidéo pub et de belles affiches, on te voit partout : Facebook, TikTok, statuts WhatsApp 📲"] },
@@ -82,9 +82,14 @@
   function preuve() {
     prog(38); step("Preuve vue");
     var c = COM[S.com];
-    var vc = videoCard(M(c.vid), M(c.vidPoster), { caption: c.vidCap, onStart: function () { step("Vidéo lancée"); px("VideoExemple", {}, true); } }), va = vc.after;
-    vc.after = function (el) { va(el); el.querySelector("video").addEventListener("error", function () { el.querySelector(".card").innerHTML = '<div class="ph"><span>🎬</span>' + c.vidCap + "</div>"; }); };
-    bot([imgCard(c.aff, c.affCap), vc,
+    function vcard(f, capt, tag) {
+      var vc = videoCard(M(f + ".mp4"), M(f + ".jpg"), { caption: capt, onStart: function () { step("Vidéo lancée"); px("VideoExemple", { video: tag }, true); } }), va = vc.after;
+      vc.after = function (el) { va(el); el.querySelector("video").addEventListener("error", function () { el.querySelector(".card").innerHTML = '<div class="ph"><span>🎬</span>' + capt + "</div>"; }); };
+      return vc;
+    }
+    bot([imgCard(c.aff, c.affCap), vcard(c.vid, c.vidCap, "spot"),
+      "Et voici une <b>vidéo UGC</b> : une personne qui parle face caméra, comme une vraie cliente 👇",
+      vcard("ugc-temoignage", "Vidéo UGC, témoignage pour un <b>masque de beauté</b> 🤳🏾", "ugc"),
       "Tout ça, c'est fait et livré en <b>48 h</b> ⏱️"], function () {
       ask([{ t: "Waouh ! C'est combien ? 👀", c: "main" }, { t: "Voir aussi une page web 🌐" }], function (a, i) {
         if (!i) return offre();
