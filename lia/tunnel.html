@@ -121,7 +121,7 @@ var CFG={
  AVATAR:"",            // lien d'une photo de Wilfried (sinon « WT »)
  VIDEO_INTRO:"",      // lien .mp4 de la vidéo face caméra (étape 1)
  VIDEO_POSTER:"",      // image d'aperçu de cette vidéo (facultatif)
- CLIPS:{objectif:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c1.mp4",facile:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c3.mp4",mamie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c4.mp4",tel:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c6.mp4",vie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c7b.mp4",lecon:"clips/c5.mp4",plu:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c8b.mp4"},
+ CLIPS:{objectif:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c1.mp4",facile:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c3.mp4",mamie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c4.mp4",tel:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c6.mp4",vie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c7b.mp4",lecon:"",plu:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c8b.mp4"},
  LECON:"fGbgYJsxEuk",
  LECON_MP4:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/lecon1.mp4",   // id YouTube de la leçon gratuite
  DEMO_MEDIA:"",        // lien .mp4 ou image : extrait de la formation (étape 3)
@@ -216,9 +216,9 @@ async function s5(){log('4_lecon');
  var fl=document.getElementById('lqFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
  V.src=CFG.LECON_MP4;V.dataset.k='lecon1';prog.style.width='0';V.muted=false;V.play().catch(function(){V.muted=true;V.play().catch(function(){});snd.hidden=false});
  V.ontimeupdate=function(){prog.style.width=(V.currentTime/(V.duration||1)*100)+'%'};
- await say(['🎁 Voici la <b>vidéo 1 de la formation</b>, offerte. Regarde-la 👆','Si tu prends la formation, tu as <b>toute la suite</b> 😉']);
- var shown=false;function next(){if(shown)return;shown=true;buttons([{label:'✅ J\'ai regardé, je veux la suite',go:function(){V.ontimeupdate=null;setWide(false);prime('plu');s5b()}}],'Quand tu as fini, appuie ici 👇')}
- V.onended=function(){V.ontimeupdate=null;clearBar();setWide(false);prime('plu');s5b()};setTimeout(next,20000)}
+ var shown=false,gone=false;function next(){if(shown||gone)return;shown=true;buttons([{label:'✅ J\'ai regardé, je veux la suite',go:function(){gone=true;V.ontimeupdate=null;setWide(false);prime('plu');s5b()}}],'Quand tu as fini, appuie ici 👇')}
+ V.onended=function(){if(gone)return;gone=true;V.ontimeupdate=null;clearBar();setWide(false);prime('plu');s5b()};setTimeout(next,20000);
+ await say(['🎁 Voici la <b>vidéo 1 de la formation</b>, offerte. Regarde-la 👆','Si tu prends la formation, tu as <b>toute la suite</b> 😉'])}
 
 /* ---------- ÉTAPE 6 : ça t'a plu → offre + prix ---------- */
 async function s5b(){log('5_offre');
