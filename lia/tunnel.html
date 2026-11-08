@@ -121,9 +121,9 @@ var CFG={
  AVATAR:"",            // lien d'une photo de Wilfried (sinon « WT »)
  VIDEO_INTRO:"",      // lien .mp4 de la vidéo face caméra (étape 1)
  VIDEO_POSTER:"",      // image d'aperçu de cette vidéo (facultatif)
- CLIPS:{objectif:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c1.mp4",facile:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c3.mp4",mamie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c4.mp4",tel:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c6.mp4",vie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c7b.mp4",lecon:"clips/c5.mp4",plu:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c8.mp4"},
+ CLIPS:{objectif:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c1.mp4",facile:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c3.mp4",mamie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c4.mp4",tel:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c6.mp4",vie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c7b.mp4",lecon:"clips/c5.mp4",plu:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c8b.mp4"},
  LECON:"fGbgYJsxEuk",
- LECON_MP4:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/lecon1.mp4",   // id YouTube de la leçon gratuite
+ LECON_MP4:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/lecon1.mp4",   // id YouTube de la leçon gratuite
  DEMO_MEDIA:"",        // lien .mp4 ou image : extrait de la formation (étape 3)
  PROOFS:[],            // liens d'images : captures clients/élèves, ex. ["https://.../1.jpg","https://.../2.jpg"]
  SHEET_URL:""          // facultatif : URL Apps Script pour enregistrer les prospects
@@ -155,7 +155,7 @@ function media(src,poster,sq){
  return '<div class="lq-media lq-vid"><video src="'+src+'"'+(poster?' poster="'+poster+'"':'')+' playsinline controls preload="metadata"></video></div>'}
 
 /* ---------- Scène vidéo en haut + sous-titres ---------- */
-var CAPS={"objectif": {"t": "Super ! Dis-moi, c'est pour gagner de l'argent ? Faire la pub de tes produits ? Ou créer du contenu ?", "s": [[0.26, 0.91], [1.37, 1.79], [2.24, 3.2], [4.04, 5.32], [6.2, 7.13]]}, "facile": {"t": "C'est simple, ton téléphone suffit. Même une grand-mère peut le faire. Regarde.", "s": [[2.09, 2.74], [3.32, 4.35], [5.32, 6.62], [7.1, 7.48]]}, "mamie": {"t": "Hé, si moi j'y arrive, toi aussi tu peux. Tu veux voir la première vidéo ?", "s": [[0.34, 1.01], [1.4, 1.83], [2.49, 3.45], [3.71, 4.48], [5.0, 6.37]]}, "tel": {"t": "Ta formation est sur ton téléphone. Huit vidéos courtes, pas à pas, avec un exercice après chaque vidéo.", "s": [[0.0, 2.1], [2.71, 3.85], [4.41, 4.87], [5.29, 7.45]]}, "vie": {"t": "Tu y as accès à vie, et on t'accompagne dans le groupe WhatsApp.", "s": [[0.7, 1.98], [2.57, 4.48]]}, "lecon": {"t": "Voilà ta première leçon. Regarde-la jusqu'au bout. D'accord ?", "s": [[1.99, 4.07], [4.33, 5.56], [5.97, 6.38]]}, "plu": {"t": "Alors, ça t'a plu, n'est-ce pas ? La suite t'attend dans la formation complète. Tu prends ta place ?", "s": [[2.63, 3.55], [4.13, 6.11], [6.42, 7.35]]}};
+var CAPS={"objectif": {"t": "Super ! Dis-moi, c'est pour gagner de l'argent ? Faire la pub de tes produits ? Ou créer du contenu ?", "s": [[0.26, 0.91], [1.37, 1.79], [2.24, 3.2], [4.04, 5.32], [6.2, 7.13]]}, "facile": {"t": "C'est simple, ton téléphone suffit. Même une grand-mère peut le faire. Regarde.", "s": [[2.09, 2.74], [3.32, 4.35], [5.32, 6.62], [7.1, 7.48]]}, "mamie": {"t": "Hé, si moi j'y arrive, toi aussi tu peux. Tu veux voir la première vidéo ?", "s": [[0.34, 1.01], [1.4, 1.83], [2.49, 3.45], [3.71, 4.48], [5.0, 6.37]]}, "tel": {"t": "Ta formation est sur ton téléphone. Huit vidéos courtes, pas à pas, avec un exercice après chaque vidéo.", "s": [[0.0, 2.1], [2.71, 3.85], [4.41, 4.87], [5.29, 7.45]]}, "vie": {"t": "Tu y as accès à vie, et on t'accompagne dans le groupe WhatsApp.", "s": [[0.7, 1.98], [2.57, 4.48]]}, "lecon": {"t": "Voilà ta première leçon. Regarde-la jusqu'au bout. D'accord ?", "s": [[1.99, 4.07], [4.33, 5.56], [5.97, 6.38]]}, "plu": {"t": "Alors, ça t'a plu, n'est-ce pas ? La suite t'attend dans la formation complète.", "s": [[2.63, 3.55], [4.13, 6.11]]}};
 var stage=document.getElementById('lqStage'),V=document.getElementById('lqV'),capEl=document.getElementById('lqCap'),prog=document.getElementById('lqProg'),snd=document.getElementById('lqSnd');
 var CUR=null,RAF=0;
 function words(c){var w=c.t.split(/\s+/),tot=0,segs=c.s,S=segs.reduce(function(x,s){return x+s[1]-s[0]},0);
@@ -217,15 +217,13 @@ async function s5(){log('4_lecon');
  V.src=CFG.LECON_MP4;V.dataset.k='lecon1';prog.style.width='0';V.muted=false;V.play().catch(function(){V.muted=true;V.play().catch(function(){});snd.hidden=false});
  V.ontimeupdate=function(){prog.style.width=(V.currentTime/(V.duration||1)*100)+'%'};
  await say(['🎁 Voici la <b>vidéo 1 de la formation</b>, offerte. Regarde-la 👆','Si tu prends la formation, tu as <b>toute la suite</b> 😉']);
- var shown=false;function next(){if(shown)return;shown=true;buttons([{label:'✅ J\'ai regardé, je veux la suite',go:function(){V.ontimeupdate=null;setWide(false);prime('tel');s5b()}}],'Quand tu as fini, appuie ici 👇')}
- V.onended=next;setTimeout(next,20000)}
+ var shown=false;function next(){if(shown)return;shown=true;buttons([{label:'✅ J\'ai regardé, je veux la suite',go:function(){V.ontimeupdate=null;setWide(false);prime('plu');s5b()}}],'Quand tu as fini, appuie ici 👇')}
+ V.onended=function(){V.ontimeupdate=null;clearBar();setWide(false);prime('plu');s5b()};setTimeout(next,20000)}
 
 /* ---------- ÉTAPE 6 : ça t'a plu → offre + prix ---------- */
 async function s5b(){log('5_offre');
  document.querySelectorAll('#lqChat iframe').forEach(function(f){f.src=f.src.replace('&autoplay=1','')});
- await playClip('tel','4/4');
- await playClip('vie','4/4');
- await playClip('plu','4/4');
+ await playClip('plu','');
  await typing(800);
  var items=[['🎬 Formation vidéos pub IA','15 000 F'],['🖼️ Formation affiches pub IA','10 000 F'],['🎁 Bonus : pub Facebook + TikTok','10 000 F'],['🎁 Bonus : kit « Trouver mes clients »','5 000 F'],['🎁 Bonus : prompts prêts à copier','3 000 F'],['🎁 Bonus : guide PDF complet','2 000 F'],['💬 Groupe WhatsApp d\'entraide','offert']];
  var b=bubble('<ul class="lq-offer" id="lqOff"></ul><div class="lq-tot" id="lqTot" style="opacity:0"><span>Valeur totale</span><span>45 000 F</span></div>');
