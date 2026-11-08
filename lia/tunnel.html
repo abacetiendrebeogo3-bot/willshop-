@@ -1,0 +1,308 @@
+<!-- ===== Tunnel « L'IA qui paie » — Will Academy — à coller dans un bloc Code HTML Systeme.io ===== -->
+<div id="lqp-root">
+<style>
+#lqp-root{--wa-dark:#075e54;--wa-green:#25d366;--wa-bg:#efeae2;--me:#d9fdd3;--yel:#ffd21e;--red:#ff2e2e;--ink:#111b21;--mut:#667781;
+ position:fixed;inset:0;z-index:99999;background:#0b141a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);display:flex;justify-content:center}
+:where(#lqp-root *){box-sizing:border-box;margin:0;padding:0}
+.lq-app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;background:var(--wa-bg);position:relative}
+.lq-top{background:var(--wa-dark);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 12px;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.lq-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#0b4a36,#22c32a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#ffd21e;font-size:15px;flex:none;overflow:hidden}
+.lq-av img{width:100%;height:100%;object-fit:cover}
+.lq-name{font-weight:700;font-size:16px;line-height:1.2}
+.lq-st{font-size:12.5px;opacity:.85}
+.lq-chat{flex:1;overflow-y:auto;padding:12px 10px 8px;scroll-behavior:smooth;
+ background-color:var(--wa-bg);background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:18px 18px}
+.lq-day{text-align:center;margin:2px 0 10px}.lq-day span{background:#fff;color:var(--mut);font-size:12px;padding:5px 10px;border-radius:8px;box-shadow:0 1px .5px rgba(0,0,0,.13)}
+.lq-b{max-width:86%;background:#fff;border-radius:0 10px 10px 10px;padding:7px 9px 6px;margin:3px 0 8px;font-size:15.5px;line-height:1.38;box-shadow:0 1px .5px rgba(0,0,0,.13);position:relative;animation:lqIn .28s ease-out}
+.lq-b.me{background:var(--me);margin-left:auto;border-radius:10px 0 10px 10px}
+.lq-b .t{display:block;text-align:right;font-size:11px;color:var(--mut);margin-top:2px}
+.lq-b.me .t:after{content:" ✓✓";color:#53bdeb}
+.lq-b b{font-weight:700}.lq-b .hl{background:var(--yel);padding:0 4px;border-radius:4px;font-weight:800}
+@keyframes lqIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.lq-typing{display:inline-flex;gap:4px;padding:12px 14px}.lq-typing i{width:7px;height:7px;border-radius:50%;background:#9aa5ab;animation:lqDot 1s infinite}
+.lq-typing i:nth-child(2){animation-delay:.15s}.lq-typing i:nth-child(3){animation-delay:.3s}
+@keyframes lqDot{0%,60%,100%{transform:none;opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+.lq-media{width:100%;border-radius:8px;overflow:hidden;background:#0b4a36;position:relative;margin-bottom:4px}
+.lq-media video,.lq-media img{display:block;width:100%;height:100%;object-fit:cover}
+.lq-ph{aspect-ratio:9/16;max-height:58vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;text-align:center;padding:16px;background:radial-gradient(circle at 50% 40%,#0b4a36,#04170f)}
+.lq-ph.sq{aspect-ratio:1/1}
+.lq-ph .pl{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center}
+.lq-ph small{opacity:.75;font-size:12.5px}
+.lq-vid{aspect-ratio:9/16;max-height:58vh}
+.lq-offer{list-style:none;margin:4px 0 2px}
+.lq-offer li{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed #e3e3e3;font-size:14.5px;animation:lqIn .3s ease-out both}
+.lq-offer li span:last-child{color:var(--mut);white-space:nowrap;font-weight:600}
+.lq-tot{display:flex;justify-content:space-between;font-weight:800;padding-top:7px;font-size:15px}
+.lq-old{text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px;color:var(--mut)}
+.lq-price{display:inline-block;background:var(--yel);font-weight:900;font-size:30px;padding:2px 12px 4px;border-radius:10px;letter-spacing:-.5px;animation:lqPop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes lqPop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+.lq-proofs{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+.lq-proofs>*{flex:0 0 70%;scroll-snap-align:start;border-radius:8px;overflow:hidden}
+.lq-proofs img{width:100%;display:block}
+.lq-guar{display:flex;gap:9px;align-items:flex-start;background:#eaf8ee;border-radius:8px;padding:9px;margin-top:4px;font-size:14.5px}
+.lq-bar{flex:none;padding:10px 10px calc(12px + env(safe-area-inset-bottom));background:#f0f2f5;border-top:1px solid #e2e2e2;min-height:20px}
+.lq-hint{text-align:center;font-size:12.5px;color:var(--mut);margin-bottom:7px}
+.lq-btns{display:flex;flex-direction:column;gap:8px}
+.lq-btn{border:none;border-radius:24px;padding:14px 16px;font-size:16px;font-weight:700;cursor:pointer;background:var(--wa-green);color:#fff;box-shadow:0 2px 0 rgba(0,0,0,.12);animation:lqBtn .35s cubic-bezier(.3,1.5,.5,1) both;font-family:inherit;width:100%}
+.lq-btn.alt{background:#fff;color:var(--wa-dark);border:2px solid var(--wa-green)}
+.lq-btn.red{background:var(--red);font-size:17px;padding:16px;animation:lqBtn .35s cubic-bezier(.3,1.5,.5,1) both,lqPulse 1.6s 0.5s infinite}
+.lq-btn:active{transform:scale(.97)}
+@keyframes lqBtn{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes lqPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,46,46,.55)}50%{box-shadow:0 0 0 10px rgba(255,46,46,0)}}
+.lq-faq{background:none;border:none;color:var(--wa-dark);font-size:13.5px;text-decoration:underline;margin-top:2px;cursor:pointer;font-family:inherit}
+.lq-flags{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px}
+.lq-flag{border:2px solid #dcdcdc;background:#fff;border-radius:10px;padding:6px 0 4px;font-size:22px;cursor:pointer;line-height:1.1;font-family:inherit}
+.lq-flag small{display:block;font-size:10.5px;color:var(--mut);font-weight:600}
+.lq-flag.on{border-color:var(--wa-green);background:#e9fbe9}
+.lq-in{width:100%;border:2px solid #dcdcdc;border-radius:22px;padding:12px 16px;font-size:16px;margin-bottom:8px;background:#fff;font-family:inherit;outline:none}
+.lq-in:focus{border-color:var(--wa-green)}
+.lq-err{color:var(--red);font-size:13px;text-align:center;margin-bottom:6px;min-height:1px}
+.lq-hero{background:radial-gradient(120% 90% at 30% 20%,#0b4a36,#06291e 60%,#020c08);color:#fff;border-radius:8px;padding:18px 14px;text-align:center;margin-bottom:4px}
+.lq-hero .tg{display:inline-block;background:var(--yel);color:#06291e;font-weight:800;font-size:11.5px;padding:4px 10px;border-radius:99px}
+.lq-hero .h{font-size:30px;font-weight:900;letter-spacing:-1px;margin:10px 0 6px;line-height:1.05}.lq-hero .h span{color:var(--yel)}
+.lq-hero .s{font-size:14px;opacity:.9}.lq-hero .ck{text-align:left;font-size:14px;margin:12px auto 0;display:inline-block;line-height:1.7}
+.lq-hero .pr{margin-top:10px}.lq-hero .pr b{background:var(--yel);color:#06291e;font-size:26px;font-weight:900;padding:2px 10px 3px;border-radius:9px;animation:lqPop .5s .3s both}
+.lq-hero .pr s{margin-left:8px;opacity:.7;text-decoration-color:var(--red);text-decoration-thickness:2px}
+.lq-clip{width:min(100%,calc(56vh*9/16));aspect-ratio:9/16;background:#000;cursor:pointer}
+.lq-clip video{position:absolute;inset:0}
+.lq-clip .snd{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;font-size:13px;font-weight:700;padding:7px 12px;border-radius:99px;white-space:nowrap}
+.lq-yt{aspect-ratio:16/9}
+.lq-stage{position:relative;flex:none;height:min(60vh,calc(min(100vw,480px)*16/9));height:min(60dvh,calc(min(100vw,480px)*16/9));background:#000;overflow:hidden;animation:lqStIn .45s cubic-bezier(.2,1.2,.4,1)}
+.lq-stage[hidden]{display:none}
+.lq-stage{transition:height .35s ease}
+.lq-stage.compact{height:30vh;height:30dvh}
+.lq-stage.compact .lq-cap{display:none}
+@media (max-width:400px){.lq-btn{padding:12px 14px;font-size:15px}.lq-btn.red{padding:14px;font-size:16px}.lq-btns{gap:7px}.lq-bar{padding-top:8px}.lq-hint{margin-bottom:5px}.lq-b{font-size:15px}.lq-hero{padding:14px 12px}.lq-hero .h{font-size:26px}.lq-cap{font-size:22px}}
+.lq-stage.wide,.lq-stage.wide.compact{height:calc(min(100vw,480px)*9/16)}
+.lq-stage.wide video{object-fit:contain}
+.lq-stage.wide:after{display:none}
+@keyframes lqStIn{from{height:0;opacity:0}to{opacity:1}}
+.lq-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
+.lq-stage:after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,rgba(0,0,0,.65));pointer-events:none}
+.lq-cap{position:absolute;left:12px;right:12px;bottom:22px;z-index:2;text-align:center;font-weight:900;font-size:24px;line-height:1.18;color:#fff;letter-spacing:-.3px;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.8);-webkit-text-stroke:1px rgba(0,0,0,.6);text-wrap:balance}
+.lq-cap span{display:inline-block;margin:0 3px;animation:lqW .22s cubic-bezier(.3,1.6,.5,1) both}
+.lq-cap span.on{color:var(--yel);transform:scale(1.08);margin:0 .3em}
+@keyframes lqW{from{transform:translateY(10px) scale(.6);opacity:0}to{opacity:1}}
+.lq-cd{flex:none;background:var(--red);color:#fff;text-align:center;font-size:13.5px;font-weight:700;padding:6px 10px}
+.lq-cd b{font-variant-numeric:tabular-nums;background:rgba(0,0,0,.25);padding:1px 7px;border-radius:6px;margin-left:3px}
+.lq-start{position:absolute;inset:0;z-index:5;border:none;background:rgba(0,0,0,.35);color:#fff;font:700 16px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.lq-start span{width:74px;height:74px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:30px;padding-left:5px;animation:lqPulse 1.6s infinite}
+.lq-start[hidden]{display:none}
+@media (max-height:620px){.lq-stage{height:48vh}.lq-cap{font-size:20px}}
+.lq-step{position:absolute;top:10px;left:10px;z-index:2;background:var(--yel);color:#06291e;font-weight:800;font-size:12px;padding:4px 10px;border-radius:99px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.lq-step:empty{display:none}
+.lq-snd{position:absolute;top:10px;right:10px;z-index:3;background:rgba(0,0,0,.7);color:#fff;font-size:13px;font-weight:700;padding:7px 12px;border-radius:99px;animation:lqPulse 1.6s infinite}
+.lq-snd[hidden]{display:none}
+.lq-prog{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25);z-index:2}
+.lq-prog i{display:block;height:100%;width:0;background:var(--wa-green)}
+.lq-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
+.lq-flash.go{animation:lqFl .35s ease-out}
+@keyframes lqFl{0%{opacity:.7}100%{opacity:0}}
+.lq-recap{font-size:14.5px}.lq-recap div{display:flex;justify-content:space-between;padding:4px 0}
+</style>
+
+<div class="lq-app">
+ <div class="lq-top">
+  <div class="lq-av" id="lqAv">WT</div>
+  <div style="flex:1;min-width:0"><div class="lq-name">Wilfried · Will Academy</div><div class="lq-st" id="lqSt">en ligne</div></div>
+ </div>
+ <div class="lq-cd" id="lqCd">⏳ Cette page disparaît dans <b id="lqCdT">24:00:00</b></div>
+ <div class="lq-stage" id="lqStage" hidden><video id="lqV" playsinline preload="auto"></video><div class="lq-step" id="lqStep"></div><div class="lq-cap" id="lqCap"></div><div class="lq-snd" id="lqSnd" hidden>🔊 Touche pour le son</div><div class="lq-prog"><i id="lqProg"></i></div><div class="lq-flash" id="lqFlash"></div><button class="lq-start" id="lqStart" hidden><span>▶</span>Appuie pour commencer</button></div>
+ <div class="lq-chat" id="lqChat"><div class="lq-day"><span>Aujourd'hui</span></div></div>
+ <div class="lq-bar" id="lqBar"></div>
+</div>
+
+<script>
+(function(){
+/* ================== RÉGLAGES (à modifier ici) ================== */
+var CFG={
+ PAY_URL:"https://will-academy-2.mymaketou.shop/products/lia-qui-paie/checkout",
+ PRICE:"3 500 F",
+ AVATAR:"",            // lien d'une photo de Wilfried (sinon « WT »)
+ VIDEO_INTRO:"",      // lien .mp4 de la vidéo face caméra (étape 1)
+ VIDEO_POSTER:"",      // image d'aperçu de cette vidéo (facultatif)
+ CLIPS:{objectif:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c1.mp4",facile:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c3.mp4",mamie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c4.mp4",tel:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c6.mp4",vie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c7b.mp4",lecon:"clips/c5.mp4",plu:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/c8.mp4"},
+ LECON:"fGbgYJsxEuk",
+ LECON_MP4:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@f6bf63c46d1ba9302008ace31013cf31a265853a/lia/lecon1.mp4",   // id YouTube de la leçon gratuite
+ DEMO_MEDIA:"",        // lien .mp4 ou image : extrait de la formation (étape 3)
+ PROOFS:[],            // liens d'images : captures clients/élèves, ex. ["https://.../1.jpg","https://.../2.jpg"]
+ SHEET_URL:""          // facultatif : URL Apps Script pour enregistrer les prospects
+};
+/* =============================================================== */
+
+var chat=document.getElementById('lqChat'),bar=document.getElementById('lqBar'),st=document.getElementById('lqSt');
+if(CFG.AVATAR)document.getElementById('lqAv').innerHTML='<img src="'+CFG.AVATAR+'" alt="">';
+var lead={objectif:"",pays:"",prenom:"",whatsapp:"",parcours:"normal"};
+function now(){var d=new Date();return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+function scroll(){setTimeout(function(){chat.scrollTop=chat.scrollHeight},30)}
+function fb(ev,p){try{if(window.fbq)fbq('track',ev,p||{})}catch(e){}}
+function log(step){try{if(CFG.SHEET_URL){var b=Object.assign({etape:step,produit:"L'IA qui paie",date:new Date().toISOString()},lead);
+ navigator.sendBeacon?navigator.sendBeacon(CFG.SHEET_URL,JSON.stringify(b)):fetch(CFG.SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(b)})}}catch(e){}}
+function bubble(html,me){var d=document.createElement('div');d.className='lq-b'+(me?' me':'');d.innerHTML=html+'<span class="t">'+now()+'</span>';chat.appendChild(d);scroll();return d}
+function typing(ms){return new Promise(function(r){st.textContent='écrit…';var d=document.createElement('div');d.className='lq-b';d.innerHTML='<span class="lq-typing"><i></i><i></i><i></i></span>';chat.appendChild(d);scroll();
+ setTimeout(function(){d.remove();st.textContent='en ligne';r()},ms||900)})}
+async function say(list){for(var i=0;i<list.length;i++){await typing(Math.min(1500,500+list[i].replace(/<[^>]+>/g,'').length*12));bubble(list[i])}}
+function clearBar(){bar.innerHTML='';var s=document.getElementById('lqStage');if(s)s.classList.remove('compact')}
+function buttons(items,hint){clearBar();if(hint){var h=document.createElement('div');h.className='lq-hint';h.textContent=hint;bar.appendChild(h)}
+ var w=document.createElement('div');w.className='lq-btns';
+ items.forEach(function(it,i){var b=document.createElement(it.link?'button':'button');b.className='lq-btn'+(it.cls?' '+it.cls:'');b.style.animationDelay=(i*.08)+'s';b.innerHTML=it.label;
+  b.onclick=function(){clearBar();if(it.echo!==false)bubble(it.echo||it.label,true);it.go()};w.appendChild(b)});
+ bar.appendChild(w);var s=document.getElementById('lqStage');if(s)s.classList.add('compact');scroll();setTimeout(scroll,400)}
+function media(src,poster,sq){
+ if(!src)return '<div class="lq-media"><div class="lq-ph'+(sq?' sq':'')+'"><div class="pl"><svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div><b>Vidéo à venir</b><small>Emplacement réservé</small></div></div>';
+ var yt=src.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);if(yt)return '<div class="lq-media lq-vid"><iframe src="https://www.youtube-nocookie.com/embed/'+yt[1]+'?rel=0&modestbranding=1&playsinline=1" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>';
+ if(/\.(jpe?g|png|webp|gif)(\?|$)/i.test(src))return '<div class="lq-media"><img src="'+src+'" alt=""></div>';
+ return '<div class="lq-media lq-vid"><video src="'+src+'"'+(poster?' poster="'+poster+'"':'')+' playsinline controls preload="metadata"></video></div>'}
+
+/* ---------- Scène vidéo en haut + sous-titres ---------- */
+var CAPS={"objectif": {"t": "Super ! Dis-moi, c'est pour gagner de l'argent ? Faire la pub de tes produits ? Ou créer du contenu ?", "s": [[0.26, 0.91], [1.37, 1.79], [2.24, 3.2], [4.04, 5.32], [6.2, 7.13]]}, "facile": {"t": "C'est simple, ton téléphone suffit. Même une grand-mère peut le faire. Regarde.", "s": [[2.09, 2.74], [3.32, 4.35], [5.32, 6.62], [7.1, 7.48]]}, "mamie": {"t": "Hé, si moi j'y arrive, toi aussi tu peux. Tu veux voir la première vidéo ?", "s": [[0.34, 1.01], [1.4, 1.83], [2.49, 3.45], [3.71, 4.48], [5.0, 6.37]]}, "tel": {"t": "Ta formation est sur ton téléphone. Huit vidéos courtes, pas à pas, avec un exercice après chaque vidéo.", "s": [[0.0, 2.1], [2.71, 3.85], [4.41, 4.87], [5.29, 7.45]]}, "vie": {"t": "Tu y as accès à vie, et on t'accompagne dans le groupe WhatsApp.", "s": [[0.7, 1.98], [2.57, 4.48]]}, "lecon": {"t": "Voilà ta première leçon. Regarde-la jusqu'au bout. D'accord ?", "s": [[1.99, 4.07], [4.33, 5.56], [5.97, 6.38]]}, "plu": {"t": "Alors, ça t'a plu, n'est-ce pas ? La suite t'attend dans la formation complète. Tu prends ta place ?", "s": [[2.63, 3.55], [4.13, 6.11], [6.42, 7.35]]}};
+var stage=document.getElementById('lqStage'),V=document.getElementById('lqV'),capEl=document.getElementById('lqCap'),prog=document.getElementById('lqProg'),snd=document.getElementById('lqSnd');
+var CUR=null,RAF=0;
+function words(c){var w=c.t.split(/\s+/),tot=0,segs=c.s,S=segs.reduce(function(x,s){return x+s[1]-s[0]},0);
+ var wt=w.map(function(x){return x.replace(/[^\wÀ-ÿ']/g,'').length+1}),W=wt.reduce(function(x,y){return x+y},0),acc=0;
+ return w.map(function(x,i){var t=acc/W*S;acc+=wt[i];var k=0;while(k<segs.length-1&&t>segs[k][1]-segs[k][0]){t-=segs[k][1]-segs[k][0];k++}return {w:x,t:segs[k][0]+t,end:/[.?!,]$/.test(x)}})}
+function chunks(ws){var out=[],c=[];ws.forEach(function(o,i){c.push(o);if(o.end&&/[.?!]$/.test(o.w)||c.length>=4||(o.end&&c.length>=2)){out.push(c);c=[]}});if(c.length)out.push(c);return out}
+function srcOf(k){return CFG.CLIPS[k]}
+function prime(k){document.getElementById('lqStart').hidden=true;V.src=srcOf(k);V.dataset.k=k;V.muted=false;var p=V.play();if(p&&p.catch)p.catch(function(){V.muted=true;V.play().catch(function(){});snd.hidden=false})}
+var tapStage=function(){if(V.muted){V.muted=false;V.currentTime=0;V.play();snd.hidden=true}else if(V.paused)V.play();else V.pause()};stage.onclick=tapStage;
+function showStage(step){if(stage.hidden){stage.hidden=false;scroll();setTimeout(scroll,500)}document.getElementById('lqStep').textContent=step||''}
+function hideStage(){V.pause();stage.hidden=true}
+function setWide(on){stage.classList.toggle('wide',on);V.controls=on;stage.onclick=on?null:tapStage}
+function playClip(k,step){return new Promise(function(res){
+ showStage(step);var fl=document.getElementById('lqFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
+ var c=CAPS[k],ch=chunks(words(c)),done=false,last='';
+ function fin(){if(done)return;done=true;cancelAnimationFrame(RAF);capEl.innerHTML='';prog.style.width='100%';res()}
+ if(V.dataset.k!==k){V.src=srcOf(k);V.dataset.k=k;V.muted=snd.hidden?false:true;V.play().catch(function(){V.muted=true;V.play().catch(function(){});snd.hidden=false})}
+ else if(V.ended){V.currentTime=0;V.play()}
+ V.onended=fin;var guard=setTimeout(fin,12000);V.onplaying=function(){clearTimeout(guard);guard=setTimeout(fin,(V.duration||8)*1000+2500)};
+ function tick(){var t=V.currentTime;prog.style.width=(t/(V.duration||8)*100)+'%';
+  var ci=-1,wi=-1;ch.forEach(function(g,gi){g.forEach(function(o,oi){if(o.t<=t){ci=gi;wi=oi}})});
+  var g=ch[ci],lastW=g&&g[g.length-1],key=ci+':'+wi;
+  if(ci>=0&&t>c.s[c.s.length-1][1]+0.6)key='x';
+  if(key!==last){last=key;if(key==='x'||ci<0){capEl.innerHTML=''}else{capEl.innerHTML=g.slice(0,wi+1).map(function(o,i){return '<span'+(i===wi?' class="on"':'')+'>'+o.w+'</span>'}).join(' ')}}
+  if(!done)RAF=requestAnimationFrame(tick)}
+ RAF=requestAnimationFrame(tick)})}
+
+/* ---------- ÉTAPE 1 : accueil ---------- */
+async function s1(){fb('ViewContent',{content_name:"L'IA qui paie"});log('1_arrivee');
+ await typing(700);
+ bubble('<div class="lq-hero"><span class="tg">🎓 FORMATION EN VIDÉO</span><div class="h">L\'IA qui <span>paie</span></div><div class="s">Crée des vidéos et des affiches pub avec l\'IA, depuis ton téléphone</div><div class="ck">✅ Vidéos pub avec l\'IA<br>✅ Affiches pub avec l\'IA<br>✅ Bonus : pub Facebook + TikTok</div><div class="pr"><b>'+CFG.PRICE+'</b><s>45 000 F</s></div></div>');
+ await say(['Tu veux apprendre à créer des vidéos et des affiches pub avec l\'IA ? 😊']);
+ buttons([
+  {label:'✅ Oui, je veux !',go:function(){prime('objectif');s2()}},
+  {label:'Je prends direct · '+CFG.PRICE,cls:'alt',go:function(){lead.parcours='rapide';s6()}}
+ ],'👇 À toi de choisir')}
+
+/* ---------- ÉTAPE 2 : objectif ---------- */
+async function s2(){log('2_objectif');
+ await playClip('objectif','1/4');
+ await say(['Tu veux apprendre ça pour quoi ? 👇']);
+ function pick(k){return function(){lead.objectif=k;prime('facile');s3()}}
+ buttons([
+  {label:'💰 Gagner de l\'argent',go:pick('argent')},
+  {label:'🏪 Faire la pub de mes produits',go:pick('pub')},
+  {label:'🎬 Créer du contenu',go:pick('contenu')}
+ ])}
+
+/* ---------- ÉTAPE 3 : c'est facile (grand-mère) ---------- */
+async function s3(){log('3_facile');
+ await playClip('facile','2/4');
+ await playClip('mamie','2/4');
+ s5()}
+
+/* ---------- ÉTAPE 4 : vidéo 1 de la formation (offerte) ---------- */
+async function s5(){log('4_lecon');
+ setWide(true);showStage('🎁 Vidéo 1 · offerte');
+ var fl=document.getElementById('lqFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
+ V.src=CFG.LECON_MP4;V.dataset.k='lecon1';prog.style.width='0';V.muted=false;V.play().catch(function(){V.muted=true;V.play().catch(function(){});snd.hidden=false});
+ V.ontimeupdate=function(){prog.style.width=(V.currentTime/(V.duration||1)*100)+'%'};
+ await say(['🎁 Voici la <b>vidéo 1 de la formation</b>, offerte. Regarde-la 👆','Si tu prends la formation, tu as <b>toute la suite</b> 😉']);
+ var shown=false;function next(){if(shown)return;shown=true;buttons([{label:'✅ J\'ai regardé, je veux la suite',go:function(){V.ontimeupdate=null;setWide(false);prime('tel');s5b()}}],'Quand tu as fini, appuie ici 👇')}
+ V.onended=next;setTimeout(next,20000)}
+
+/* ---------- ÉTAPE 6 : ça t'a plu → offre + prix ---------- */
+async function s5b(){log('5_offre');
+ document.querySelectorAll('#lqChat iframe').forEach(function(f){f.src=f.src.replace('&autoplay=1','')});
+ await playClip('tel','4/4');
+ await playClip('vie','4/4');
+ await playClip('plu','4/4');
+ await typing(800);
+ var items=[['🎬 Formation vidéos pub IA','15 000 F'],['🖼️ Formation affiches pub IA','10 000 F'],['🎁 Bonus : pub Facebook + TikTok','10 000 F'],['🎁 Bonus : kit « Trouver mes clients »','5 000 F'],['🎁 Bonus : prompts prêts à copier','3 000 F'],['🎁 Bonus : guide PDF complet','2 000 F'],['💬 Groupe WhatsApp d\'entraide','offert']];
+ var b=bubble('<ul class="lq-offer" id="lqOff"></ul><div class="lq-tot" id="lqTot" style="opacity:0"><span>Valeur totale</span><span>45 000 F</span></div>');
+ var ul=b.querySelector('#lqOff');
+ for(var i=0;i<items.length;i++){await new Promise(function(r){setTimeout(r,300)});var li=document.createElement('li');li.innerHTML='<span>'+items[i][0]+'</span><span>'+items[i][1]+'</span>';ul.appendChild(li);scroll()}
+ await new Promise(function(r){setTimeout(r,400)});b.querySelector('#lqTot').style.opacity=1;scroll();
+ await typing(1000);bubble('Aujourd\'hui, c\'est seulement 👇<br><span class="lq-price">'+CFG.PRICE+'</span> <span class="lq-old">45 000 F</span>');
+ await typing(800);
+ bubble('<div class="lq-guar"><span style="font-size:22px">🛡️</span><div>Si tu n\'arrives pas à faire ta première vidéo, <b>tu es remboursé.</b> Tu ne risques rien.</div></div><div style="margin-top:6px">⚡ <b>Accès immédiat</b> juste après le paiement.</div>');
+ showS5Buttons()}
+function showS5Buttons(){buttons([
+  {label:'Je prends ma place · '+CFG.PRICE,cls:'red',go:s6},
+  {label:'J\'ai une question',cls:'alt',echo:'J\'ai une question',go:faq}
+ ])}
+async function faq(){
+ var q={
+  a:['Il faut un ordinateur ?','Non 🙂 Tout se fait sur ton <b>téléphone</b>. Il faut juste une connexion internet.'],
+  b:['Comment je reçois la formation ?','Juste après le paiement, tu arrives directement sur <b>ton espace</b> avec toutes les vidéos. Pas besoin de mot de passe.'],
+  c:['Les outils sont payants ?','Les outils utilisés ont une <b>version gratuite</b>. Je te montre comment les utiliser sans dépenser.'],
+  d:['Je débute, je vais y arriver ?','Oui. La formation part de <b>zéro</b>, pas à pas. Et si tu bloques, le groupe WhatsApp est là pour t\'aider.']};
+ await say(['Pose-moi ta question 👇']);
+ function ask(k){return function(){say([q[k][1]]).then(showS5Buttons)}}
+ buttons([{label:q.a[0],cls:'alt',go:ask('a')},{label:q.b[0],cls:'alt',go:ask('b')},{label:q.c[0],cls:'alt',go:ask('c')},{label:q.d[0],cls:'alt',go:ask('d')}])}
+
+/* ---------- ÉTAPE 6 : pays → prénom + WhatsApp → récap → paiement ---------- */
+var PAYS=[['🇧🇫','Burkina','226','70 12 34 56'],['🇨🇮','Côte d\'Iv.','225','07 12 34 56 78'],['🇸🇳','Sénégal','221','77 123 45 67'],['🇧🇯','Bénin','229','01 97 12 34 56'],['🇹🇬','Togo','228','90 12 34 56'],['🇲🇱','Mali','223','76 12 34 56'],['🇳🇪','Niger','227','90 12 34 56'],['🇨🇲','Cameroun','237','6 71 23 45 67'],['🇬🇦','Gabon','241','07 12 34 56'],['🌍','Autre','','+ indicatif et numéro']];
+var PI=-1;
+async function s6(){log('7_infos');fb('Lead');hideStage();
+ await say([(lead.parcours==='rapide'?'Super choix 🔥':'Parfait 🔥')+' Je prépare ton accès. Tu es dans quel pays ? 👇']);
+ clearBar();
+ var f=document.createElement('div');
+ f.innerHTML='<div class="lq-flags">'+PAYS.map(function(p,i){return '<button class="lq-flag" data-i="'+i+'">'+p[0]+'<small>'+p[1]+'</small></button>'}).join('')+'</div>';
+ bar.appendChild(f);scroll();
+ f.querySelectorAll('.lq-flag').forEach(function(b){b.onclick=function(){PI=+b.dataset.i;lead.pays=PAYS[PI][1];clearBar();bubble(PAYS[PI][0]+' '+PAYS[PI][1].replace('Côte d\'Iv.','Côte d\'Ivoire'),true);s6b()}})}
+async function s6b(){
+ await say(['Super 👍 Ton prénom et ton numéro WhatsApp, pour t\'envoyer ton accès et t\'ajouter au groupe 👇']);
+ clearBar();var P=PAYS[PI];
+ var f=document.createElement('div');
+ f.innerHTML='<input class="lq-in" id="lqN" placeholder="Ton prénom" autocomplete="given-name" enterkeyhint="next">'+
+  '<div style="display:flex;gap:6px">'+(P[2]?'<div class="lq-in" style="flex:none;width:auto;font-weight:700;color:#075e54;background:#e9fbe9;border-color:#25d366">'+P[0]+' +'+P[2]+'</div>':'')+
+  '<input class="lq-in" id="lqW" placeholder="'+P[3]+'" inputmode="tel" autocomplete="tel" enterkeyhint="done" style="flex:1;min-width:0"></div>'+
+  '<div class="lq-err" id="lqE"></div><button class="lq-btn" id="lqGo">Continuer ➜</button>';
+ bar.appendChild(f);scroll();
+ ['lqN','lqW'].forEach(function(id){var el=document.getElementById(id);el.addEventListener('focus',function(){setTimeout(function(){fitVV();el.scrollIntoView({block:'center'});scroll()},350)});el.addEventListener('input',function(){document.getElementById('lqE').textContent=''})});
+ document.getElementById('lqN').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();document.getElementById('lqW').focus()}});
+ document.getElementById('lqW').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();document.getElementById('lqGo').click()}});
+ document.getElementById('lqGo').onclick=function(){
+  var n=document.getElementById('lqN').value.trim(),raw=document.getElementById('lqW').value.trim(),e=document.getElementById('lqE');
+  var d=raw.replace(/\D/g,'');
+  if(n.length<2){e.textContent='Écris ton prénom 🙂';return}
+  if(P[2]){ if(raw.charAt(0)==='+'||d.indexOf('00'+P[2])===0){d=d.replace(/^00/,'');if(d.indexOf(P[2])===0)d=d.slice(P[2].length)}
+   if(d.length<7||d.length>12){e.textContent='Vérifie ton numéro WhatsApp 🙏';return}
+   lead.whatsapp='+'+P[2]+d }
+  else { if(d.length<8||d.length>15){e.textContent='Écris ton numéro avec l\'indicatif du pays 🙏';return} lead.whatsapp='+'+d.replace(/^00/,'') }
+  lead.prenom=n;clearBar();document.activeElement&&document.activeElement.blur();
+  bubble(n+' · '+lead.whatsapp,true);s7()}}
+async function s7(){log('8_recap');
+ await say(['Merci '+lead.prenom+' 🙏 Voici ton récap 👇']);
+ await typing(800);
+ bubble('<div class="lq-recap"><b>📦 L\'IA qui paie</b><div><span>Formation + 5 bonus</span><span class="lq-old">45 000 F</span></div><div><span><b>Tu paies aujourd\'hui</b></span><span class="lq-price" style="font-size:22px">'+CFG.PRICE+'</span></div><div style="display:block;color:#1f7a3a;font-weight:600;padding-top:6px">✅ Accès immédiat<br>✅ Remboursé si ça ne marche pas pour toi<br>✅ Paiement Mobile Money sécurisé</div></div>');
+ clearBar();
+ var h=document.createElement('div');h.className='lq-hint';h.textContent='👇 Dernière étape';bar.appendChild(h);
+ var a=document.createElement('a');a.className='lq-btn red';a.href=CFG.PAY_URL;
+ a.style.cssText='display:block;text-align:center;text-decoration:none';a.innerHTML='🔴 Je paie '+CFG.PRICE+' et j\'accède';
+ a.onclick=function(){log('9_paiement');fb('InitiateCheckout',{value:3500,currency:'XOF'});};
+ bar.appendChild(a);
+ var k=document.createElement('a');k.href=CFG.PAY_URL;k.target='_blank';k.rel='noopener';k.textContent='La page ne s\'ouvre pas ? Clique ici';
+ k.style.cssText='display:block;text-align:center;font-size:13px;color:#075e54;margin-top:8px';bar.appendChild(k);scroll()}
+
+function fitVV(){var r=document.getElementById('lqp-root');if(!window.visualViewport||!r)return;var v=window.visualViewport;r.style.height=v.height+'px';r.style.top=v.offsetTop+'px';r.style.bottom='auto'}
+if(window.visualViewport){visualViewport.addEventListener('resize',function(){fitVV();scroll()});visualViewport.addEventListener('scroll',fitVV)}
+(function(){var K='lqp_deadline',d=0;try{d=+localStorage.getItem(K)||0}catch(e){}
+ if(!d||d<Date.now()){d=Date.now()+24*3600*1000;try{localStorage.setItem(K,d)}catch(e){}}
+ var el=document.getElementById('lqCdT');function p(n){return ('0'+n).slice(-2)}
+ function t(){var s=Math.max(0,Math.floor((d-Date.now())/1000));el.textContent=p(Math.floor(s/3600))+':'+p(Math.floor(s/60)%60)+':'+p(s%60)}
+ t();setInterval(t,1000)})();
+s1();
+})();
+</script>
+</div>
