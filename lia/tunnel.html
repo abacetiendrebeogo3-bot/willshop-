@@ -4,7 +4,14 @@
 #lqp-root{--wa-dark:#075e54;--wa-green:#25d366;--wa-bg:#efeae2;--me:#d9fdd3;--yel:#ffd21e;--red:#ff2e2e;--ink:#111b21;--mut:#667781;
  position:fixed;inset:0;z-index:99999;background:#0b141a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);display:flex;justify-content:center}
 :where(#lqp-root *){box-sizing:border-box;margin:0;padding:0}
-.lq-app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;background:var(--wa-bg);position:relative}
+.lq-app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;background:var(--wa-bg);position:relative;z-index:1}
+#lqp-root:before{content:"";position:absolute;inset:-30px;background:url(https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/bg.jpg) center/cover;filter:blur(18px) brightness(.45) saturate(1.2);transform:scale(1.1)}
+#lqp-root:after{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%,rgba(37,211,102,.18),transparent 60%),radial-gradient(90% 60% at 50% 110%,rgba(255,210,30,.14),transparent 60%)}
+#lqp-root{padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))}
+.lq-app{border-radius:22px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 25px 60px rgba(0,0,0,.6),0 8px 20px rgba(0,0,0,.4)}
+@media (min-width:560px){#lqp-root{padding:3vh 0;align-items:center}.lq-app{max-width:400px;height:94vh;max-height:860px;border:11px solid #0d0d0d;border-radius:46px;box-shadow:0 0 0 2px #2a2a2a,0 40px 90px rgba(0,0,0,.7)}.lq-app .lq-top{padding-top:16px}}
+.lq-stage.load:before{content:"";position:absolute;left:50%;top:45%;width:44px;height:44px;margin:-22px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;z-index:3;animation:lqSpin .8s linear infinite}
+@keyframes lqSpin{to{transform:rotate(360deg)}}
 .lq-top{background:var(--wa-dark);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 12px;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .lq-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#0b4a36,#22c32a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#ffd21e;font-size:15px;flex:none;overflow:hidden}
 .lq-av img{width:100%;height:100%;object-fit:cover}
@@ -67,13 +74,13 @@
 .lq-clip video{position:absolute;inset:0}
 .lq-clip .snd{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;font-size:13px;font-weight:700;padding:7px 12px;border-radius:99px;white-space:nowrap}
 .lq-yt{aspect-ratio:16/9}
-.lq-stage{position:relative;flex:none;height:min(60vh,calc(min(100vw,480px)*16/9));height:min(60dvh,calc(min(100vw,480px)*16/9));background:#000;overflow:hidden;animation:lqStIn .45s cubic-bezier(.2,1.2,.4,1)}
+.lq-stage{position:relative;flex:none;height:min(56vh,calc(min(100vw,480px)*16/9));height:min(56dvh,calc(min(100vw,480px)*16/9));background:#000;overflow:hidden;animation:lqStIn .45s cubic-bezier(.2,1.2,.4,1)}
 .lq-stage[hidden]{display:none}
 .lq-stage{transition:height .35s ease}
 .lq-stage.compact{height:30vh;height:30dvh}
 .lq-stage.compact .lq-cap{display:none}
 @media (max-width:400px){.lq-btn{padding:12px 14px;font-size:15px}.lq-btn.red{padding:14px;font-size:16px}.lq-btns{gap:7px}.lq-bar{padding-top:8px}.lq-hint{margin-bottom:5px}.lq-b{font-size:15px}.lq-hero{padding:14px 12px}.lq-hero .h{font-size:26px}.lq-cap{font-size:22px}}
-.lq-stage.wide,.lq-stage.wide.compact{height:calc(min(100vw,480px)*9/16)}
+.lq-stage.wide,.lq-stage.wide.compact{height:auto;aspect-ratio:16/9}
 .lq-stage.wide video{object-fit:contain}
 .lq-stage.wide:after{display:none}
 @keyframes lqStIn{from{height:0;opacity:0}to{opacity:1}}
@@ -86,6 +93,7 @@
 .lq-cd{flex:none;background:var(--red);color:#fff;text-align:center;font-size:13.5px;font-weight:700;padding:6px 10px}
 .lq-cd b{font-variant-numeric:tabular-nums;background:rgba(0,0,0,.25);padding:1px 7px;border-radius:6px;margin-left:3px}
 .lq-start{position:absolute;inset:0;z-index:5;border:none;background:rgba(0,0,0,.35);color:#fff;font:700 16px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.lq-start b{font-size:16px;text-shadow:0 1px 4px #000}
 .lq-start span{width:74px;height:74px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:30px;padding-left:5px;animation:lqPulse 1.6s infinite}
 .lq-start[hidden]{display:none}
 @media (max-height:620px){.lq-stage{height:48vh}.lq-cap{font-size:20px}}
@@ -107,7 +115,7 @@
   <div style="flex:1;min-width:0"><div class="lq-name">Wilfried · Will Academy</div><div class="lq-st" id="lqSt">en ligne</div></div>
  </div>
  <div class="lq-cd" id="lqCd">⏳ Cette page disparaît dans <b id="lqCdT">24:00:00</b></div>
- <div class="lq-stage" id="lqStage" hidden><video id="lqV" playsinline preload="auto"></video><div class="lq-step" id="lqStep"></div><div class="lq-cap" id="lqCap"></div><div class="lq-snd" id="lqSnd" hidden>🔊 Touche pour le son</div><div class="lq-prog"><i id="lqProg"></i></div><div class="lq-flash" id="lqFlash"></div><button class="lq-start" id="lqStart" hidden><span>▶</span>Appuie pour commencer</button></div>
+ <div class="lq-stage" id="lqStage" hidden><video id="lqV" playsinline preload="auto"></video><div class="lq-step" id="lqStep"></div><div class="lq-cap" id="lqCap"></div><div class="lq-snd" id="lqSnd" hidden>🔊 Touche pour le son</div><div class="lq-prog"><i id="lqProg"></i></div><div class="lq-flash" id="lqFlash"></div><button class="lq-start" id="lqStart" hidden><span>▶</span><b>Touche pour voir la vidéo</b></button></div>
  <div class="lq-chat" id="lqChat"><div class="lq-day"><span>Aujourd'hui</span></div></div>
  <div class="lq-bar" id="lqBar"></div>
 </div>
@@ -121,9 +129,9 @@ var CFG={
  AVATAR:"",            // lien d'une photo de Wilfried (sinon « WT »)
  VIDEO_INTRO:"",      // lien .mp4 de la vidéo face caméra (étape 1)
  VIDEO_POSTER:"",      // image d'aperçu de cette vidéo (facultatif)
- CLIPS:{objectif:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c1.mp4",facile:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c3.mp4",mamie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c4.mp4",tel:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c6.mp4",vie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c7b.mp4",lecon:"",plu:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/c8b.mp4"},
+ CLIPS:{objectif:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/c1.mp4",facile:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/c3.mp4",mamie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/c4.mp4",tel:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/c6.mp4",vie:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/c7b.mp4",lecon:"",plu:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/c8b.mp4"},
  LECON:"fGbgYJsxEuk",
- LECON_MP4:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@0ef939c962defa5e3e94ed01f4d5a47a4a7f1e60/lia/lecon1.mp4",   // id YouTube de la leçon gratuite
+ LECON_MP4:"https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/lecon1.mp4",   // id YouTube de la leçon gratuite
  DEMO_MEDIA:"",        // lien .mp4 ou image : extrait de la formation (étape 3)
  PROOFS:[],            // liens d'images : captures clients/élèves, ex. ["https://.../1.jpg","https://.../2.jpg"]
  SHEET_URL:""          // facultatif : URL Apps Script pour enregistrer les prospects
@@ -163,8 +171,17 @@ function words(c){var w=c.t.split(/\s+/),tot=0,segs=c.s,S=segs.reduce(function(x
  return w.map(function(x,i){var t=acc/W*S;acc+=wt[i];var k=0;while(k<segs.length-1&&t>segs[k][1]-segs[k][0]){t-=segs[k][1]-segs[k][0];k++}return {w:x,t:segs[k][0]+t,end:/[.?!,]$/.test(x)}})}
 function chunks(ws){var out=[],c=[];ws.forEach(function(o,i){c.push(o);if(o.end&&/[.?!]$/.test(o.w)||c.length>=4||(o.end&&c.length>=2)){out.push(c);c=[]}});if(c.length)out.push(c);return out}
 function srcOf(k){return CFG.CLIPS[k]}
-function prime(k){document.getElementById('lqStart').hidden=true;V.src=srcOf(k);V.dataset.k=k;V.muted=false;var p=V.play();if(p&&p.catch)p.catch(function(){V.muted=true;V.play().catch(function(){});snd.hidden=false})}
-var tapStage=function(){if(V.muted){V.muted=false;V.currentTime=0;V.play();snd.hidden=true}else if(V.paused)V.play();else V.pause()};stage.onclick=tapStage;
+function poster(src){return src.replace(/\.mp4$/,'.jpg')}
+function startOv(on,txt){var s=document.getElementById('lqStart');s.hidden=!on;if(txt)s.querySelector('b').textContent=txt}
+function play(src){
+ if(src&&V.getAttribute('src')!==src){V.poster=poster(src);V.src=src}
+ V.muted=false;var p=V.play();
+ if(p&&p.catch)p.catch(function(e){if(e&&e.name==='AbortError')return;
+  V.muted=true;V.play().then(function(){startOv(true,'🔊 Touche pour le son')}).catch(function(){startOv(true,'▶ Touche pour voir la vidéo')})})}
+function prime(k){V.dataset.k=k;play(srcOf(k))}
+V.addEventListener('playing',function(){if(!V.muted)startOv(false)});
+V.addEventListener('waiting',function(){stage.classList.add('load')});V.addEventListener('playing',function(){stage.classList.remove('load')});
+var tapStage=function(){startOv(false);if(V.muted){V.muted=false;if(V.currentTime<3)V.currentTime=0;V.play()}else if(V.paused)V.play();else V.pause()};stage.onclick=tapStage;
 function showStage(step){if(stage.hidden){stage.hidden=false;scroll();setTimeout(scroll,500)}document.getElementById('lqStep').textContent=step||''}
 function hideStage(){V.pause();stage.hidden=true}
 function setWide(on){stage.classList.toggle('wide',on);V.controls=on;stage.onclick=on?null:tapStage}
@@ -172,9 +189,9 @@ function playClip(k,step){return new Promise(function(res){
  showStage(step);var fl=document.getElementById('lqFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
  var c=CAPS[k],ch=chunks(words(c)),done=false,last='';
  function fin(){if(done)return;done=true;cancelAnimationFrame(RAF);capEl.innerHTML='';prog.style.width='100%';res()}
- if(V.dataset.k!==k){V.src=srcOf(k);V.dataset.k=k;V.muted=snd.hidden?false:true;V.play().catch(function(){V.muted=true;V.play().catch(function(){});snd.hidden=false})}
- else if(V.ended){V.currentTime=0;V.play()}
- V.onended=fin;var guard=setTimeout(fin,12000);V.onplaying=function(){clearTimeout(guard);guard=setTimeout(fin,(V.duration||8)*1000+2500)};
+ if(V.dataset.k!==k){V.dataset.k=k;play(srcOf(k))}
+ else if(V.ended){V.currentTime=0;play()}
+ V.onended=fin;var guard=setTimeout(fin,30000);V.onplaying=function(){clearTimeout(guard);guard=setTimeout(fin,(V.duration||8)*1000+2500)};
  function tick(){var t=V.currentTime;prog.style.width=(t/(V.duration||8)*100)+'%';
   var ci=-1,wi=-1;ch.forEach(function(g,gi){g.forEach(function(o,oi){if(o.t<=t){ci=gi;wi=oi}})});
   var g=ch[ci],lastW=g&&g[g.length-1],key=ci+':'+wi;
@@ -185,6 +202,7 @@ function playClip(k,step){return new Promise(function(res){
 
 /* ---------- ÉTAPE 1 : accueil ---------- */
 async function s1(){fb('ViewContent',{content_name:"L'IA qui paie"});log('1_arrivee');
+ V.preload='auto';V.poster=poster(srcOf('objectif'));V.src=srcOf('objectif');
  await typing(700);
  bubble('<div class="lq-hero"><span class="tg">🎓 FORMATION EN VIDÉO</span><div class="h">L\'IA qui <span>paie</span></div><div class="s">Crée des vidéos et des affiches pub avec l\'IA, depuis ton téléphone</div><div class="ck">✅ Vidéos pub avec l\'IA<br>✅ Affiches pub avec l\'IA<br>✅ Bonus : pub Facebook + TikTok</div><div class="pr"><b>'+CFG.PRICE+'</b><s>45 000 F</s></div></div>');
  await say(['Tu veux apprendre à créer des vidéos et des affiches pub avec l\'IA ? 😊']);
@@ -214,7 +232,7 @@ async function s3(){log('3_facile');
 async function s5(){log('4_lecon');
  setWide(true);showStage('🎁 Vidéo 1 · offerte');
  var fl=document.getElementById('lqFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
- V.src=CFG.LECON_MP4;V.dataset.k='lecon1';prog.style.width='0';V.muted=false;V.play().catch(function(){V.muted=true;V.play().catch(function(){});snd.hidden=false});
+ V.dataset.k='lecon1';prog.style.width='0';play(CFG.LECON_MP4);
  V.ontimeupdate=function(){prog.style.width=(V.currentTime/(V.duration||1)*100)+'%'};
  var shown=false,gone=false;function next(){if(shown||gone)return;shown=true;buttons([{label:'✅ J\'ai regardé, je veux la suite',go:function(){gone=true;V.ontimeupdate=null;setWide(false);prime('plu');s5b()}}],'Quand tu as fini, appuie ici 👇')}
  V.onended=function(){if(gone)return;gone=true;V.ontimeupdate=null;clearBar();setWide(false);prime('plu');s5b()};setTimeout(next,20000);
