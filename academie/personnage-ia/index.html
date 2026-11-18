@@ -18,6 +18,7 @@
 .vn-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
 .vn-stage:after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,rgba(0,0,0,.7));pointer-events:none}
 .vn-stage.wide:after{display:none}
+.vn-stage.wide .vn-cap{font-size:17px;bottom:8px;-webkit-text-stroke:.5px rgba(0,0,0,.6)}
 .vn-cap{position:absolute;left:10px;right:10px;bottom:18px;z-index:2;text-align:center;font-weight:900;font-size:23px;line-height:1.18;color:#fff;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.8);-webkit-text-stroke:1px rgba(0,0,0,.6);text-wrap:balance}
 .vn-cap span{display:inline-block;margin:0 3px;animation:vnW .22s cubic-bezier(.3,1.6,.5,1) both}
 .vn-cap span.on{color:var(--yel)}
@@ -91,7 +92,8 @@ var CFG={
  PIXEL:"1601889501091366",     // Pixel Portfolio Pack Pro (compte shopwill) — chargé seulement s'il n'est pas déjà sur la page
  AVATAR:M+"01.jpg",
  CLIPS:["01","02","03","03b","04","04b","05","06"], // un clip absent de AVOIR est sauté
- AVOIR:["01","02","03","03b","04","04b","wilfried","05","06"],      // ajoute "03" quand le clip 03 est en ligne
+ AVOIR:["01","02","03","03b","04","04b","wilfried_16x9","05","06"],
+ WIDE:["wilfried_16x9"],     // vidéos horizontales (affichées en entier, format YouTube)      // ajoute "03" quand le clip 03 est en ligne
  FREE:"",                    // lien .mp4 de la vidéo de bienvenue offerte (vide = « J'hésite » propose WhatsApp)
  APERCUS:[M+'preuves/formation2.jpg',M+'preuves/formation3.jpg',M+'preuves/formation1.jpg'],                 // captures de l'intérieur de la formation (vidéos, pack de prompts…) — liens .jpg
  PROOFS:[M+'preuves/groupe3.jpg',M+'preuves/groupe2.jpg',M+'preuves/groupe1.jpg',M+'preuves/groupe4.jpg'],                  // captures du groupe WhatsApp / avis d'élèves (NUMÉROS CACHÉS) — liens .jpg
@@ -108,7 +110,7 @@ var CAPS={
  "04b":{"t": "Et moi, je présente les téléphones de mon patron. Lui, il ne se filme plus du tout !", "s": [[0.25, 5.6]]},
  "05":{"t": "Tout ça, avec le groupe et les textes prêts, pour un tout petit prix. Tu commences aujourd'hui ?", "s": [[0.85, 6.15]]},
  "06":{"t": "Pas de souci. Regarde d'abord la première vidéo de la formation, gratuitement. Après, tu décides. D'accord ?", "s": [[1.1, 6.85]]},
- "wilfried":{"t": "Salut, formateur Wilfried ! Tu vois tous les personnages que tu viens de voir, que ce soit la vendeuse de pagnes, le vendeur de téléphones, et même la fille qui parle je les ai créés juste avec mon téléphone. Clic par clic. Et toi aussi, tu peux le faire. Tu n'as pas besoin d'être un expert en montage, ni un expert en intelligence artificielle. Juste après ton inscription, tu vas avoir accès au mini-cours juste cinq vidéos, étape par étape. Si tu es bloqué, tu as des inquiétudes, tu vas rejoindre notre groupe WhatsApp, dans lequel on va t'accompagner jusqu'à ce que tu puisses créer ton propre personnage.", "s": [[0.23, 6.11], [6.25, 11.42], [11.5, 21.79], [21.99, 24.08], [24.2, 29.34]]},
+ "wilfried_16x9":{"t": "Salut, formateur Wilfried ! Tu vois tous les personnages que tu viens de voir, que ce soit la vendeuse de pagnes, le vendeur de téléphones, et même la fille qui parle je les ai créés juste avec mon téléphone. Clic par clic. Et toi aussi, tu peux le faire. Tu n'as pas besoin d'être un expert en montage, ni un expert en intelligence artificielle. Juste après ton inscription, tu vas avoir accès au mini-cours juste cinq vidéos, étape par étape. Si tu es bloqué, tu as des inquiétudes, tu vas rejoindre notre groupe WhatsApp, dans lequel on va t'accompagner jusqu'à ce que tu puisses créer ton propre personnage.", "s": [[0.23, 6.11], [6.25, 11.42], [11.5, 21.79], [21.99, 24.08], [24.2, 29.34]]},
  "03":{"t":"Je te comprends. Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?","s":[[1.15,6.45]]}
 };
 /* ============================================== */
@@ -147,7 +149,7 @@ function words(c){var w=c.t.split(/\s+/),S=c.s.reduce(function(x,s){return x+s[1
 function chunks(ws){var out=[],c=[];ws.forEach(function(o){c.push(o);if(/[.?!]$/.test(o.w)||c.length>=4||(/,$/.test(o.w)&&c.length>=2)){out.push(c);c=[]}});if(c.length)out.push(c);return out}
 function play(){var p=V.play();if(p&&p.catch)p.catch(function(e){if(e&&e.name==='AbortError')return;V.muted=true;sndB.hidden=false;V.play().catch(function(){})})}
 var RAF=0,FIN=null,PRE={};
-var NEXT={'01':'02','02':'03','03':'03b','03b':'04b','04b':'wilfried','wilfried':'04','04':'05','05':'06'};
+var NEXT={'01':'02','02':'03','03':'03b','03b':'04b','04b':'wilfried_16x9','wilfried_16x9':'04','04':'05','05':'06'};
 function prefetch(k){var n=NEXT[k];if(!n||PRE[n]||CFG.AVOIR.indexOf(n)<0)return;PRE[n]=1;
  try{var l=document.createElement('link');l.rel='preload';l.as='video';l.href=M+n+'.mp4'+MV;document.head.appendChild(l);var i=new Image();i.src=M+n+'.jpg'+MV}catch(e){}}
 V.addEventListener('waiting',function(){stage.classList.add('load')});V.addEventListener('playing',function(){stage.classList.remove('load')});
@@ -162,7 +164,7 @@ function urgency(){var el=$('vnCd');if(!el.hidden||!CFG.BONUS)return;el.hidden=f
  t();setInterval(t,1000)}
 // Joue un clip ; onReady = au bout de 1,5 s (boutons), la promesse finit à la fin du clip ou sur « Passer »
 function clip(k,step,onReady){return new Promise(function(res){
- setWide(false);compact(false);$('vnStep').textContent=step||'';skipB.hidden=false;
+ setWide(CFG.WIDE.indexOf(k)>=0);V.controls=false;compact(false);$('vnStep').textContent=step||'';skipB.hidden=false;
  var c=CAPS[k],ch=chunks(words(c)),done=false,last='',ready=false;
  cancelAnimationFrame(RAF);V.onended=null;
  if(CFG.AVOIR.indexOf(k)<0){skipB.hidden=true;capEl.innerHTML='';prog.style.width='0';onReady&&onReady();res();return}
@@ -215,7 +217,9 @@ function s3(k){clip('03','2/4',function(){bubble('✅ '+BLOC[k][1]+'<br>📱 <b>
 /* Deux exemples de personnages IA (Mariam puis Ibrahim) */
 function ex(){bubble('Regarde 👇 deux personnages créés avec l\'IA pour des commerçants.');var gone=false;
  function next(){if(gone)return;gone=true;stopClip();s4()}
- clip('03b','Exemple 1/2 · personnage IA').then(function(){if(gone)return;return clip('04b','Exemple 2/2 · personnage IA')}).then(function(){if(gone)return;log('Formateur vu');clip('wilfried','Wilfried · ton formateur',function(){buttons([{label:'Je veux le mien 👉',go:next}])})});
+ clip('03b','Exemple 1/2 · personnage IA').then(function(){if(gone)return;return clip('04b','Exemple 2/2 · personnage IA')}).then(function(){if(gone)return;
+  bubble('Tu veux savoir qui les a créés, et comment ? 👀','q');
+  buttons([{label:'Oui, montre-moi 👀',go:function(){log('Formateur vu');clip('wilfried_16x9','Wilfried · ton formateur',function(){buttons([{label:'Je veux le mien 👉',go:next}])})}}])});
 }
 
 /* ---------- ÉTAPE 4 : la formation ---------- */
