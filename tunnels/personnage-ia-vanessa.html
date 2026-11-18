@@ -12,6 +12,7 @@
 .vn-av img{width:100%;height:100%;object-fit:cover}
 .vn-name{font-weight:700;font-size:15.5px;line-height:1.2}.vn-st{font-size:12px;opacity:.85}
 .vn-stage{position:relative;flex:none;height:min(50vh,calc(min(100vw,480px)*16/9));height:min(50dvh,calc(min(100vw,480px)*16/9));background:#000;overflow:hidden;transition:height .35s}
+.vn-stage.compact{height:27vh;height:27dvh}.vn-stage.compact .vn-cap{font-size:17px;bottom:10px}.vn-stage.compact .vn-skip{top:6px;right:6px;padding:5px 9px}.vn-stage.compact .vn-step{top:6px;left:6px}
 .vn-stage.wide{height:auto;aspect-ratio:16/9}.vn-stage.wide video{object-fit:contain}
 .vn-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
 .vn-stage:after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,rgba(0,0,0,.7));pointer-events:none}
@@ -34,7 +35,10 @@
 .vn-b.me{background:var(--me);margin-left:auto;border-radius:10px 0 10px 10px}
 @keyframes vnIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .vn-card h3{font-size:16px;margin-bottom:6px;color:var(--dk)}
-.vn-card ul{list-style:none}.vn-card li{padding:4px 0;border-bottom:1px dashed #e5e5e5;font-size:14.5px}
+.vn-card ul{list-style:none}.vn-card li{padding:3px 0;border-bottom:1px dashed #e5e5e5;font-size:14px}
+.vn-card .x{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.vn-card .x span{background:#eaf8ee;border-radius:99px;padding:3px 8px;font-size:12.5px;font-weight:600}
+.vn-cd{flex:none;background:var(--red);color:#fff;text-align:center;font-size:13px;font-weight:700;padding:6px 8px;line-height:1.3}
+.vn-cd b{font-variant-numeric:tabular-nums;background:rgba(0,0,0,.25);padding:1px 6px;border-radius:6px;margin-left:3px}
 .vn-price{display:inline-block;background:var(--yel);font-weight:900;font-size:30px;padding:2px 12px 4px;border-radius:10px;margin:4px 0;animation:vnPop .5s cubic-bezier(.3,1.6,.5,1)}
 @keyframes vnPop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
 .vn-guar{background:#eaf8ee;border-radius:8px;padding:8px;margin-top:6px;font-size:14px}
@@ -55,6 +59,7 @@
 
 <div class="vn-app">
  <div class="vn-top"><div class="vn-av" id="vnAv">V</div><div style="flex:1;min-width:0"><div class="vn-name">Vanessa · Will Academy</div><div class="vn-st" id="vnSt">en ligne</div></div></div>
+ <div class="vn-cd" id="vnCd" hidden></div>
  <div class="vn-stage" id="vnStage">
   <video id="vnV" playsinline webkit-playsinline preload="auto" muted></video>
   <div class="vn-step" id="vnStep"></div><div class="vn-cap" id="vnCap"></div>
@@ -81,7 +86,10 @@ var CFG={
  CLIPS:{c1:M+"c1.mp4",c2:M+"c3.mp4",c3:M+"c4.mp4",c4:M+"c6.mp4",c5:M+"c7b.mp4",c6:M+"c8.mp4"},
  POSTERS:{c1:M+"c1.jpg",c2:M+"c3.jpg",c3:M+"c4.jpg"},
  FREE:M+"lecon1.mp4",        // vidéo gratuite (bienvenue) pour ceux qui hésitent
- PROOFS:[]                   // captures d'avis d'élèves (numéros cachés)
+ PROOFS:[],                  // captures d'avis d'élèves (numéros cachés)
+ /* Bonus du jour (affiché à partir de l'offre, compte à rebours jusqu'à minuit). À DONNER VRAIMENT à ceux qui paient le jour même. */
+ BONUS:"10 scripts prêts pour ton activité",
+ BONUS_COURT:"10 scripts offerts"
 };
 /* Paroles de Vanessa (minutage s = début/fin de parole en secondes, à recaler après montage) */
 var CAPS={
@@ -131,9 +139,14 @@ sndB.onclick=function(e){e.stopPropagation();SOUND=true;sndB.hidden=true;V.muted
 stage.onclick=function(){if(stage.classList.contains('wide'))return;if(V.muted){sndB.onclick({stopPropagation:function(){}})}else if(V.paused)play();else V.pause()};
 skipB.onclick=function(e){e.stopPropagation();V.pause();if(FIN)FIN()};
 function setWide(on){stage.classList.toggle('wide',on);V.controls=on}
+function compact(on){stage.classList.toggle('compact',on);if(on)setTimeout(scroll,400)}
+/* Compte à rebours jusqu'à minuit (heure du téléphone) */
+function urgency(){var el=$('vnCd');if(!el.hidden||!CFG.BONUS)return;el.hidden=false;function p(n){return ('0'+n).slice(-2)}
+ function t(){var n=new Date(),m=new Date(n);m.setHours(24,0,0,0);var s=Math.max(0,Math.floor((m-n)/1000));el.innerHTML='🎁 Bonus du jour : '+CFG.BONUS_COURT+' · fin dans <b>'+p(Math.floor(s/3600))+':'+p(Math.floor(s/60)%60)+':'+p(s%60)+'</b>'}
+ t();setInterval(t,1000)}
 // Joue un clip ; onReady = au bout de 1,5 s (boutons), la promesse finit à la fin du clip ou sur « Passer »
 function clip(k,step,onReady){return new Promise(function(res){
- setWide(false);$('vnStep').textContent=step||'';skipB.hidden=false;
+ setWide(false);compact(false);$('vnStep').textContent=step||'';skipB.hidden=false;
  var c=CAPS[k],ch=chunks(words(c)),done=false,last='',ready=false;
  cancelAnimationFrame(RAF);V.onended=null;
  V.poster=CFG.POSTERS[k]||'';V.src=CFG.CLIPS[k];V.muted=!SOUND;sndB.hidden=SOUND;prog.style.width='0';play();
@@ -172,11 +185,10 @@ function s3(k){clip('c3','2/4',function(){bubble('✅ '+BLOC[k][1]);
   {label:'C\'est possible pour moi ?',go:function(){stopClip();log('Solution vue');bubble('Oui ! Si tu sais utiliser WhatsApp, tu peux le faire 😉');s4()}}])})}
 
 /* ---------- ÉTAPE 4 : la formation ---------- */
-function s4(){log('Formation vue');clip('c4','3/4',function(){
+function s4(){log('Formation vue');clip('c4','3/4',function(){compact(true);
  bubble('<div class="vn-card"><h3>🎓 Crée ton personnage IA qui parle à ta place</h3><ul>'+
-  '<li>🎬 Vidéo 1 : bienvenue et ce dont tu as besoin</li><li>👤 Vidéo 2 : créer ton personnage (tenues, décors)</li>'+
-  '<li>✍️ Vidéo 3 : écrire ce qu\'il va dire</li><li>🗣️ Vidéo 4 : le faire parler en vidéo</li><li>✂️ Vidéo 5 : monter et publier</li>'+
-  '<li>🎁 Les textes prêts à copier</li><li>👥 Le groupe d\'entraide</li><li>📱 Tout sur ton téléphone, à ton rythme, à vie</li></ul></div>');
+  '<li>🎬 1 · Bienvenue</li><li>👤 2 · Créer ton personnage</li><li>✍️ 3 · Écrire ce qu\'il va dire</li><li>🗣️ 4 · Le faire parler</li><li>✂️ 5 · Monter et publier</li></ul>'+
+  '<div class="x"><span>🎁 Textes prêts</span><span>👥 Groupe d\'entraide</span><span>📱 Sur ton téléphone</span><span>♾️ À vie</span></div></div>');
  bubble('Tu veux savoir le prix ?','q');
  buttons([{label:'Oui, c\'est combien ? 👉',go:function(){stopClip();s5()}}])})}
 
@@ -188,9 +200,9 @@ function payItems(){var it=[];
   go:function(){stopClip();log('Clic WhatsApp',{type:'order',mode:'WhatsApp'});fb('Contact')}});
  return it}
 function waUrl(t){return 'https://wa.me/'+CFG.WA+'?text='+encodeURIComponent('Bonjour Wilfried, '+t+' à la formation « Personnage IA » à '+CFG.PRICE+'. (réf '+REF+')')}
-function s5(){log('Offre vue');clip('c5','4/4',function(){
+function s5(){log('Offre vue');urgency();clip('c5','4/4',function(){compact(true);
  bubble('<div class="vn-card"><h3>Ta formation complète</h3>Aujourd\'hui 👇<br><span class="vn-price">'+CFG.PRICE+'</span>'+
-  '<div class="vn-guar">🛡️ <b>Satisfait ou remboursé 7 jours.</b> Tu ne risques rien.</div><div style="margin-top:6px">⚡ Accès tout de suite après le paiement.</div>'+
+  '<div class="vn-guar">🎁 <b>Aujourd\'hui seulement :</b> '+CFG.BONUS+' en plus.</div><div class="vn-guar">🛡️ <b>Satisfait ou remboursé 7 jours.</b> Tu ne risques rien.</div><div style="margin-top:6px">⚡ Accès tout de suite après le paiement.</div>'+
   (CFG.PROOFS.length?'<div class="vn-proofs">'+CFG.PROOFS.map(function(u){return '<img src="'+u+'" alt="Avis">'}).join('')+'</div>':'')+'</div>');
  bubble('Tu commences aujourd\'hui ?','q');
  buttons(payItems(),false,{label:'J\'hésite encore 🤔',go:function(){stopClip();s6()}})})}
