@@ -141,3 +141,11 @@ Même modèle que le Kit, livraison à 1 000 F. En attente de la vidéo d'Awa av
 - **Pas encore en ligne** : la page Systeme.io /videos-ia garde l'ancien tunnel Sadia + le script de suivi `tunnels/formation-videos-ia-tracking.html` dans son code de pied de page. À la mise en ligne : remplacer le bloc de code et retirer ce script (sinon double comptage).
 - Suivi : le tunnel envoie au Sheet « WillShop Académie » et au Pixel 2354404514688190 seulement sur systeme.io.
 - Présentiel du 23/10 retiré du nouveau tunnel (date passée).
+
+## Tunnel « Crée ton personnage IA » — Vanessa (18/11/2026)
+- Fichier : `tunnels/personnage-ia-vanessa.html` (bloc Code HTML Systeme.io) ; essai : https://willshop-app.vercel.app/essai/personnage-ia.html (rien n'est envoyé au Sheet sur /essai/).
+- Parcours : 1 accroche (OUI/Non) → 2 blocage (5 boutons) → 3 « on te comprend » → 4 la formation (5 vidéos) → 5 offre 5 000 F (rouge « Je m'inscris » = Chariow, ou WhatsApp si `CHARIOW` vide ; jaune « J'ai une question ») → 6 « J'hésite » → vidéo de bienvenue offerte.
+- Vidéos : `CFG.CLIPS` c1…c6 = clips PROVISOIRES de l'ancien tunnel LIA, à remplacer par 01…06.mp4 de Vanessa + minutage `CAPS`.
+- Suivi : produit « Formation Personnage IA », identifiant `vn_sid` (localStorage), réf = 4 derniers caractères (dans le message WhatsApp). Étapes : Arrivée, Intéressé, Blocage, Solution vue, Formation vue, Offre vue, Hésite, Vidéo gratuite, Clic WhatsApp, Commande (Chariow), Achat.
+- Achat : page `academie/merci.html` (will-academy.vercel.app/merci.html) → à mettre comme redirection après paiement Chariow si possible.
+- `apps-script/tunnel-logger.gs` modifié (étapes, achat, numéro modifiable, action `pin`) : À RECOLLER dans le projet Apps Script « WillShop Commandes Tunnels » puis Déployer → Gérer les déploiements → modifier → Nouvelle version (même URL).
