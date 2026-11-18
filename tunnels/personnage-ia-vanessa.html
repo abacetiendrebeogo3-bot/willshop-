@@ -84,7 +84,7 @@ var M="https://will-academy.vercel.app/media/vanessa/",MV="?v=2";
 var CFG={
  PRODUIT:"Formation Personnage IA",
  PRICE:"5 000 F", VALUE:5000,
- CHARIOW:"https://will-academy.mychariow.shop/personnage-ia/checkout",                 // lien de paiement Chariow (vide = le bouton rouge ouvre WhatsApp)
+ CHARIOW:"",                 // vide = paiement sur WhatsApp (lancement Burkina). Pour Chariow, mettre : https://will-academy.mychariow.shop/personnage-ia/checkout                 // lien de paiement Chariow (vide = le bouton rouge ouvre WhatsApp)
  WA:"22672019524",           // WhatsApp de Wilfried
  SHEET:"https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec",
  PIXEL:"1601889501091366",     // Pixel Portfolio Pack Pro (compte shopwill) — chargé seulement s'il n'est pas déjà sur la page
@@ -233,9 +233,9 @@ function inside(){log('Aperçu vu');
 
 /* ---------- ÉTAPE 5 : l'offre ---------- */
 function payItems(){var it=[];
- it.push({label:'🔴 Je m\'inscris · '+CFG.PRICE,cls:'red',keep:true,href:CFG.CHARIOW||waUrl('Je veux m\'inscrire'),blank:!CFG.CHARIOW,
+ it.push({label:CFG.CHARIOW?'🔴 Je m\'inscris · '+CFG.PRICE:'🔴 Je m\'inscris · '+CFG.PRICE+'<small>Écris-moi sur WhatsApp pour finaliser ton inscription</small>',cls:'red',keep:true,href:CFG.CHARIOW||waUrl('Je veux m\'inscrire'),blank:!CFG.CHARIOW,
   go:function(){stopClip();if(CFG.CHARIOW){log('Commande',{type:'order',mode:'Chariow'});fb('InitiateCheckout',{value:CFG.VALUE,currency:'XOF'})}else{log('Clic WhatsApp',{type:'order',mode:'WhatsApp'});fb('Contact')}}});
- it.push({label:'💬 J\'ai une question<small>ou payer par Orange / Moov Money</small>',keep:true,href:waUrl('J\'ai une question'),blank:true,
+ it.push({label:'💬 J\'ai une question<small>Je te réponds sur WhatsApp</small>',keep:true,href:waUrl('J\'ai une question'),blank:true,
   go:function(){stopClip();log('Clic WhatsApp',{type:'order',mode:'WhatsApp'});fb('Contact')}});
  return it}
 function waUrl(t){return 'https://wa.me/'+CFG.WA+'?text='+encodeURIComponent('Bonjour Wilfried, '+t+' à la formation « Personnage IA » à '+CFG.PRICE+'. (réf '+REF+')')}
