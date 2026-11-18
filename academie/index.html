@@ -185,6 +185,7 @@ nav.tabs .badge{position:absolute;top:0;left:calc(50% + 6px);background:var(--ba
 .side-brand{display:none}
 .install{background:var(--gold-fill);border-color:var(--gold-fill);color:#06301F;font-weight:700}
 [hidden]{display:none!important}
+.srct{width:100%;border-collapse:collapse;font-size:14px}.srct th{text-align:right;font-weight:700;padding:6px 4px;color:var(--mut,#666);font-size:12.5px}.srct th:first-child,.srct td:first-child{text-align:left}.srct td{text-align:right;padding:8px 4px;border-top:1px solid var(--line,#eee);font-weight:700}.srct td:first-child{font-weight:600}.srct small{font-weight:500;opacity:.65}
 </style>
 </head>
 <body>
@@ -231,7 +232,22 @@ var STEPS = ["Arrivée", "Intéressé", "Objectif", "Blocage", "Solution vue", "
 var FUNNEL = [["Visiteurs", "Arrivée"], ["Ont dit oui", "Intéressé"], ["Blocage choisi", "Blocage"], ["Formation vue", "Formation vue"], ["Offre vue", "Offre vue"], ["Clic WhatsApp ou payer", "Clic WhatsApp"]];
 var FORMS = [["Formation Personnage IA", "Personnage IA"], ["*", "Toutes"]];
 var FORM = (function () { try { return localStorage.getItem("aca_form") || FORMS[0][0]; } catch (e) { return FORMS[0][0]; } })();
-function PP() { return FORM === "*" ? D.prospects : D.prospects.filter(function (p) { return p.formation === FORM; }); }
+var PERS = [["today", "Aujourd'hui"], ["7j", "7 jours"], ["all", "Tout"]];
+var PER = (function () { try { return localStorage.getItem("aca_per") || "all"; } catch (e) { return "all"; } })();
+function inPer(p) { if (PER === "all") return true; var n = daysSince(p.date); return PER === "today" ? n === 0 : n < 7; }
+function PP() { return D.prospects.filter(function (p) { return (FORM === "*" || p.formation === FORM) && inPer(p); }); }
+function setPer(x) { PER = x; ls("aca_per", x); render(); }
+function srcName(p) { return String(p.source || "").split(" · ")[0] || "Inconnue"; }
+function sources() {
+  var P = PP(), m = {};
+  P.forEach(function (p) { var k = srcName(p), o = m[k] || (m[k] = { v: 0, c: 0, a: 0 }); o.v++;
+    if (p.statut === "Veut payer" || p.statut === "Payé" || p.statut === "Acompte" || STEPS.indexOf(p.etape) >= STEPS.indexOf("Clic WhatsApp")) o.c++;
+    if (p.statut === "Payé" || p.statut === "Acompte") o.a++; });
+  var ks = Object.keys(m).sort(function (a, b) { return m[b].v - m[a].v; });
+  if (!ks.length) return '<div class="empty">Pas encore de visiteur sur cette période.</div>';
+  return '<div class="funnel"><table class="srct"><tr><th>Source</th><th>Visites</th><th>WhatsApp</th><th>Achats</th></tr>' +
+    ks.map(function (k) { var o = m[k]; return "<tr><td>" + esc(k) + "</td><td>" + o.v + "</td><td>" + o.c + (o.v ? " <small>" + Math.round(o.c / o.v * 100) + " %</small>" : "") + "</td><td>" + o.a + "</td></tr>"; }).join("") + "</table></div>";
+}
 function setForm(f) { FORM = f; ls("aca_form", f); render(); }
 function ref(p) { return String(p.sid || "").slice(-4).toUpperCase(); }
 function label(p) { return p.nom || p.tel || "Visiteur réf " + ref(p); }
@@ -347,6 +363,7 @@ function viewHome() {
   var s = stats(), pr = D.params || {}, pct = Math.min(100, Math.round(s.ventes / s.obj * 100)), due = dueList();
   var cpvCls = s.cpv && pr.coutMax && s.cpv > pr.coutMax ? "alert" : (s.cpv ? "good" : "");
   var h = '<div class="seg" role="group" style="margin-bottom:8px">' + FORMS.map(function (f) { return '<button aria-pressed="' + (FORM === f[0]) + '" onclick="setForm(\'' + f[0] + '\')">' + f[1] + "</button>"; }).join("") + "</div>";
+  h += '<div class="seg" role="group" style="margin-bottom:8px">' + PERS.map(function (f) { return '<button aria-pressed="' + (PER === f[0]) + '" onclick="setPer(\'' + f[0] + '\')">' + f[1] + "</button>"; }).join("") + "</div>";
   h += '<h1>Bonjour Wilfried</h1><p class="sub">' + s.today + " visiteur" + (s.today > 1 ? "s" : "") + " aujourd'hui · " + s.todayTel + " numéro" + (s.todayTel > 1 ? "s" : "") + " laissé" + (s.todayTel > 1 ? "s" : "") + "</p>";
   h += '<div class="kpis">' +
     '<div class="kpi hero"><div class="l">Objectif du mois</div><div class="v">' + s.ventes + " / " + s.obj + ' ventes</div><div class="h">' + fmt(s.enc) + " encaissés · marge nette " + fmt(s.marge) + '</div><div class="bar"><i style="width:' + pct + '%"></i></div></div>' +
@@ -356,7 +373,7 @@ function viewHome() {
     kpi("Dépense pub", fmt(s.pub), "saisie dans le Sheet") + kpi("Coût par vente", s.cpv ? fmt(s.cpv) : "—", "max " + fmt(pr.coutMax || 3000), cpvCls) +
     "</div>";
   if (due.length) h += '<div class="tip"><b>' + due.length + " relance" + (due.length > 1 ? "s" : "") + "</b> à faire aujourd'hui. " + '<a href="#" onclick="go(\'rel\');return false" style="color:var(--bx);font-weight:700">Les envoyer →</a></div>';
-  h += '<div class="home-grid"><div><h2>Entonnoir</h2>' + funnel() + "</div>";
+  h += '<div class="home-grid"><div><h2>Entonnoir</h2>' + funnel() + '<h2 style="margin-top:18px">D\'où viennent les visiteurs</h2>' + sources() + "</div>";
   var b = blocNow(); if (b) h += "<h2>Budget pub · " + esc(b.bloc) + '</h2><div class="kpis" style="margin-top:0">' + kpi("Dépensé", fmt(b.pub), dShort(b.du) + " → " + dShort(b.au)) + kpi("Encaissé", fmt(b.encaisse), b.ventes + " vente" + (b.ventes > 1 ? "s" : "")) + kpi("À réinjecter", fmt(b.reinjecter), Math.round((pr.reinjection || .6) * 100) + " % de l'encaissé") + kpi("Budget / jour", b.parJour ? fmt(b.parJour) : "—", "bloc suivant") + "</div>" + advice(b, pr);
   h = h.replace(/<h2>Budget pub/, "<div><h2>Budget pub");
   return h + (b ? "</div>" : "") + "</div>";
@@ -434,7 +451,7 @@ function openP(sid) {
   var p = find(sid); if (!p) return;
   var n = nextMsg(p), pr = D.params || {}, s = esc(sid), paid = p.statut === "Payé";
   var h = '<div style="display:flex;align-items:center;gap:12px"><div class="av" style="width:48px;height:48px;font-size:18px">' + esc(initials(p)) + '</div><div style="flex:1;min-width:0"><div style="font:700 20px var(--serif)">' + esc(label(p)) + "</div>" + chip(p.statut) + "</div></div>";
-  h += '<div class="kv"><span>WhatsApp</span><b>' + esc(p.tel || "—") + "</b><span>Réf</span><b>" + esc(ref(p)) + "</b><span>Formation</span><b>" + esc(p.formation || "—") + "</b><span>Pays</span><b>" + esc(p.pays || "—") + "</b><span>Choix</span><b>" + esc(p.objectif || "—") + "</b><span>Étape</span><b>" + esc(p.etape || "—") + "</b><span>Arrivé</span><b>" + esc(when(p.date)) + "</b>" +
+  h += '<div class="kv"><span>WhatsApp</span><b>' + esc(p.tel || "—") + "</b><span>Réf</span><b>" + esc(ref(p)) + "</b><span>Formation</span><b>" + esc(p.formation || "—") + "</b><span>Source</span><b>" + esc(p.source || "—") + "</b><span>Pays</span><b>" + esc(p.pays || "—") + "</b><span>Choix</span><b>" + esc(p.objectif || "—") + "</b><span>Étape</span><b>" + esc(p.etape || "—") + "</b><span>Arrivé</span><b>" + esc(when(p.date)) + "</b>" +
     (p.montant ? "<span>Payé</span><b>" + fmt(p.montant) + " · " + esc(when(p.datePaiement)) + "</b>" : "") + "<span>Relances</span><b>" + (Number(p.relances) || 0) + (p.derniereRelance ? " · dernière " + esc(when(p.derniereRelance)) : "") + "</b></div>";
   if (hasTel(p)) {
     if (n && !n.done) { var f = fill(n.m.message, p); h += '<div class="field">Prochain message : ' + esc(n.m.titre) + (n.due ? "" : " (dans " + n.dans + " j)") + '</div><div class="msg" style="margin-top:6px">' + esc(f.text) + '</div><div class="row" style="margin-top:8px"><a class="btn wa" href="' + esc(waLink(p, f.text)) + '" target="_blank" rel="noopener" onclick="sent(\'' + s + '\')">' + WAI + "Envoyer ce message</a></div>"; }

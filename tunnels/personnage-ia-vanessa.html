@@ -124,7 +124,17 @@ if(document.readyState==='complete')setTimeout(loadPixel,800);else addEventListe
 var SID='';try{SID=localStorage.getItem('vn_sid')||''}catch(e){}
 if(!SID){SID='v'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);try{localStorage.setItem('vn_sid',SID)}catch(e){}}
 var REF=SID.slice(-4).toUpperCase();
-function log(step,extra){if(TEST||!CFG.SHEET)return;try{var b=JSON.stringify(Object.assign({produit:CFG.PRODUIT,sid:SID,step:step,lieu:lead.blocage,date:new Date().toISOString()},extra||{}));
+/* Source du visiteur (gardée depuis sa première visite) : Facebook, Instagram, TikTok, WhatsApp, Google ou Direct */
+var SRCV='';try{SRCV=localStorage.getItem('vn_src')||''}catch(e){}
+if(!SRCV){var q=new URLSearchParams(location.search),u=(q.get('utm_source')||'').toLowerCase(),rf=(document.referrer||'').toLowerCase(),ua=navigator.userAgent||'';
+ SRCV=/instagram|^ig$/.test(u)||/instagram/.test(rf)||/Instagram/.test(ua)?'Instagram':
+  /facebook|^fb$|meta/.test(u)||q.get('fbclid')||/facebook\.com|fb\.com|fb\.me/.test(rf)||/FBAN|FBAV|FB_IAB/.test(ua)?'Facebook':
+  /tiktok/.test(u)||q.get('ttclid')||/tiktok/.test(rf)||/BytedanceWebview|musical_ly/i.test(ua)?'TikTok':
+  /whatsapp/.test(u)||/whatsapp/.test(rf)||/WhatsApp/.test(ua)?'WhatsApp':
+  /google/.test(u+rf)?'Google':u?u.slice(0,30):rf?(rf.split('/')[2]||'Autre site'):'Direct';
+ if(q.get('utm_campaign'))SRCV+=' · '+q.get('utm_campaign').slice(0,30);
+ try{localStorage.setItem('vn_src',SRCV)}catch(e){}}
+function log(step,extra){if(TEST||!CFG.SHEET)return;try{var b=JSON.stringify(Object.assign({produit:CFG.PRODUIT,sid:SID,step:step,lieu:lead.blocage,source:SRCV,date:new Date().toISOString()},extra||{}));
  if(!(navigator.sendBeacon&&navigator.sendBeacon(CFG.SHEET,b)))fetch(CFG.SHEET,{method:'POST',mode:'no-cors',keepalive:true,body:b})}catch(e){}}
 function fb(ev,p){try{if(window.fbq)fbq('track',ev,p||{})}catch(e){}}
 

@@ -86,7 +86,7 @@ function upsertAcademie(d) {
   var r = findRow(sh, 3, d.sid);
   if (!r) {
     sh.appendRow([now, txt(d.produit), txt(d.sid, 40), txt(d.nom, 60), d.tel ? "'" + txt(d.tel, 25) : "", txt(d.zone, 30),
-      txt(d.lieu || d.veut, 40), step, statut, achat ? Number(d.montant) || "" : "", achat ? now : "", "", 0, "", txt(d.mode ? "Clic : " + d.mode : d.note, 200), now]);
+      txt(d.lieu || d.veut, 40), step, statut, achat ? Number(d.montant) || "" : "", achat ? now : "", "", 0, "", txt(d.mode ? "Clic : " + d.mode : d.note, 200), now, "", txt(d.source, 40)]);
     return;
   }
   var row = sh.getRange(r, 1, 1, 16).getValues()[0];
@@ -101,12 +101,13 @@ function upsertAcademie(d) {
   if (d.mode && String(row[14]).indexOf(d.mode) < 0) row[14] = (row[14] ? row[14] + " · " : "") + "Clic : " + txt(d.mode, 30);
   row[15] = now;
   sh.getRange(r, 1, 1, 16).setValues([row]);
+  if (d.source && !sh.getRange(r, 18).getValue()) sh.getRange(r, 18).setValue(txt(d.source, 40)); // R : Source (première visite)
 }
 
 // ===================== API de l'app « WillShop Académie » =====================
 // L'app envoie {app:1, action, pin, p}. Le PIN est dans l'onglet Config (B1) du Sheet Académie.
 var ACA_COLS = ["date", "formation", "sid", "nom", "tel", "pays", "objectif", "etape", "statut", "montant", "datePaiement",
-  "acces", "relances", "derniereRelance", "note", "maj", "progression"];
+  "acces", "relances", "derniereRelance", "note", "maj", "progression", "source"];
 
 function acaJson(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function acaIso(v) { return v instanceof Date ? v.toISOString() : v; }
@@ -121,7 +122,7 @@ function acaCheckPin(ss, pin) {
 
 function acaData(ss) {
   var sh = ss.getSheetByName("Prospects"), last = sh.getLastRow(), rows = [];
-  if (last >= 2) sh.getRange(2, 1, last - 1, 17).getValues().forEach(function (r, i) {
+  if (last >= 2) sh.getRange(2, 1, last - 1, 18).getValues().forEach(function (r, i) {
     var o = { row: i + 2 };
     ACA_COLS.forEach(function (k, j) { o[k] = acaIso(r[j]); });
     o.tel = String(o.tel || "").replace(/^'/, "");
