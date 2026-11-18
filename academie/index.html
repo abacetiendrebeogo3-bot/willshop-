@@ -103,6 +103,10 @@ h2 .count{font:600 13px var(--sans);color:var(--mut)}
 .c-Acompte{background:var(--gold-soft);color:var(--gold)}
 .c-Payé{background:var(--ok-soft);color:var(--ok)}
 .c-Perdu{background:var(--bad-soft);color:var(--bad)}
+.c-RDV{background:var(--warn-soft);color:var(--warn)}
+.c-En,.c-Pub{background:var(--info-soft);color:var(--info)}
+.c-Terminé{background:var(--ok-soft);color:var(--ok)}
+.item.hot{border-color:var(--warn);box-shadow:inset 3px 0 0 var(--warn)}
 .empty{color:var(--mut);text-align:center;padding:28px 12px;background:var(--sunk);border-radius:16px;font-size:14px}
 /* Cartes de relance */
 .rel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
@@ -123,7 +127,7 @@ h2 .count{font:600 13px var(--sans);color:var(--mut)}
 .btn[disabled]{opacity:.5;pointer-events:none}
 /* Onglets du bas */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom))}
-nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
 nav.tabs button{border:0;background:none;color:var(--mut);font:600 11.5px var(--sans);display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;position:relative}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-selected="true"]{color:var(--bx)}
@@ -217,6 +221,7 @@ nav.tabs .badge{position:absolute;top:0;left:calc(50% + 6px);background:var(--ba
   <button role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Accueil</button>
   <button role="tab" data-tab="rel" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20l1.3-5A8.5 8.5 0 1 1 21 11.5z"/></svg>Relances<span class="badge" id="badge" hidden></span></button>
   <button role="tab" data-tab="contacts" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 3.5a4 4 0 0 1 0 9M22 21a7 7 0 0 0-4-6.3"/></svg>Contacts</button>
+  <button role="tab" data-tab="ag" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>Agence</button>
 </div></nav>
 
 <div class="scrim" id="scrim"></div>
@@ -354,8 +359,8 @@ function render() {
   var due = dueList().length;
   $("badge").hidden = !due; $("badge").textContent = due;
   document.querySelectorAll("nav.tabs button").forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.tab === tab)); });
-  $("fab").hidden = tab !== "contacts";
-  $("view").innerHTML = tab === "home" ? viewHome() : tab === "rel" ? viewRel() : viewContacts();
+  $("fab").hidden = tab !== "contacts" && tab !== "ag";
+  $("view").innerHTML = tab === "home" ? viewHome() : tab === "rel" ? viewRel() : tab === "ag" ? viewAg() : viewContacts();
   if (tab === "contacts") { var s = $("q"); if (s) { s.value = q; s.oninput = function () { q = s.value; var y = window.scrollY; $("lst").innerHTML = contactItems(); window.scrollTo(0, y); }; } }
 }
 
@@ -526,12 +531,205 @@ async function addC() {
   catch (e) { $("ab").disabled = false; toast(e.net ? "Pas de connexion" : e.message); }
 }
 
+/* ---------- Agence : clients pub (onglet « Clients Pub » du Sheet WillShop) ---------- */
+var AG = { prix: 15000, avance: 7500, deplacement: 2000, objectif: 1000000, places: 50 };
+var AG_ST = ["Visiteur", "Prospect", "RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée", "Terminé", "Perdu"];
+var AG_ACTIFS = ["RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée"];
+var AG_PAYANTS = ["Acompte payé", "En production", "Pub lancée", "Terminé"];
+var AG_STEPS = ["Arrivée", "Commerce", "Pub", "Preuve vue", "Vidéo lancée", "Offre vue", "Question WhatsApp", "Budget pub", "Page Facebook", "Rendez-vous", "Numéro donné", "Récap vu", "Clic WhatsApp"];
+var AG_FUN = [["Visiteurs", "Arrivée"], ["Commerce choisi", "Commerce"], ["Offre vue", "Offre vue"], ["Rendez-vous choisi", "Rendez-vous"], ["Numéro laissé", "Numéro donné"], ["Clic WhatsApp", "Clic WhatsApp"]];
+var AG_NEXT = { "Visiteur": "RDV fait", "Prospect": "RDV fait", "RDV demandé": "RDV fait", "RDV fait": "Acompte payé", "Acompte payé": "En production", "En production": "Pub lancée", "Pub lancée": "Terminé" };
+var AG_NEXT_TXT = { "RDV fait": "✓ Rendez-vous fait", "Acompte payé": "💰 Acompte reçu (" + fmt(AG.avance) + ")", "En production": "🎬 Je commence le travail", "Pub lancée": "📢 Pub lancée", "Terminé": "🏁 Terminé" };
+var agSeg = ls("ag_seg") || "jour", agF = "cours", agPer = "all";
+function AGL() { return (D && D.agence) || []; }
+function agFind(sid) { return AGL().filter(function (c) { return c.sid === sid; })[0]; }
+function agName(c) { return c.nom ? c.nom + (c.ent ? " · " + c.ent : "") : (c.tel || "Visiteur réf " + ref(c)); }
+function agPrix(c) { return AG.prix + (c.rdv === "Rencontre" ? AG.deplacement : 0); }
+function dd(d) { return Math.round((day0(d) - day0(new Date())) / 864e5); }
+function dLabel(d) { var n = dd(d); return n === 0 ? "Aujourd'hui" : n === 1 ? "Demain" : n === -1 ? "Hier" : dShort(d); }
+var MOIS = { janv: 0, "févr": 1, fevr: 1, mars: 2, avr: 3, avril: 3, mai: 4, juin: 5, juil: 6, "août": 7, aout: 7, sept: 8, oct: 9, nov: 10, "déc": 11, dec: 11 };
+/* « Jeudi 19 nov. à 15 h » → date (null si la date n'est pas lisible) */
+function rdvDate(c) {
+  var m = String(c.quand || "").match(/(\d{1,2})\s+([a-zéèû]+)\.?(?:.*?(\d{1,2})\s*h\s*(\d{2})?)?/i);
+  if (!m) return null; var mo = MOIS[m[2].toLowerCase()]; if (mo == null) return null;
+  var now = new Date(), d = new Date(now.getFullYear(), mo, +m[1], m[3] ? +m[3] : 9, m[4] ? +m[4] : 0);
+  if (d - now < -60 * 864e5) d.setFullYear(d.getFullYear() + 1);
+  return d;
+}
+function finPub(c) { if (!c.pubLe) return null; var d = new Date(c.pubLe); d.setDate(d.getDate() + 7); return d; }
+function agStep(c) { return AG_STEPS.indexOf(c.etape); }
+function agPerOk(c) { if (agPer === "all") return true; var n = daysSince(c.date); return agPer === "today" ? n === 0 : n < 7; }
+function setAgSeg(s) { agSeg = s; ls("ag_seg", s); render(); window.scrollTo(0, 0); }
+function setAgF(f) { agF = f; render(); }
+function setAgPer(p) { agPer = p; render(); }
+
+function agStats() {
+  var L = AGL(), now = new Date(), enc = 0, reste = 0, places = 0, cours = 0;
+  L.forEach(function (c) {
+    var pay = AG_PAYANTS.indexOf(c.statut) >= 0;
+    if (pay) { places++; reste += Math.max(0, agPrix(c) - (Number(c.encaisse) || 0)); }
+    if (c.acompteLe && new Date(c.acompteLe).getMonth() === now.getMonth() && new Date(c.acompteLe).getFullYear() === now.getFullYear()) enc += Number(c.encaisse) || 0;
+    if (AG_ACTIFS.indexOf(c.statut) >= 2) cours++;
+  });
+  return { enc: enc, reste: reste, places: places, cours: cours };
+}
+
+function viewAg() {
+  var h = '<div class="seg" role="group">' + [["jour", "Aujourd'hui"], ["clients", "Clients"], ["tunnel", "Tunnel"]].map(function (s) {
+    return '<button aria-pressed="' + (agSeg === s[0]) + '" onclick="setAgSeg(\'' + s[0] + '\')">' + s[1] + "</button>"; }).join("") + "</div>";
+  if (!D.agence) return h + '<div class="empty" style="margin-top:14px">Le serveur n\'est pas encore à jour : recolle le script « WillShop Commandes Tunnels » (Nouvelle version).</div>';
+  return h + (agSeg === "clients" ? agClients() : agSeg === "tunnel" ? agTunnel() : agJour());
+}
+function agItem(c, extra, cls) {
+  return '<button class="item' + (cls ? " " + cls : "") + '" onclick="openAg(\'' + esc(c.sid) + '\')"><div class="av">' + esc(initials(c)) + '</div><div class="m"><div class="n">' + esc(agName(c)) +
+    '</div><div class="d">' + esc(extra) + "</div></div>" + chip(c.statut) + "</button>";
+}
+function agJour() {
+  var s = agStats(), L = AGL(), pct = Math.min(100, Math.round(s.enc / AG.objectif * 100));
+  var h = "<h1>Agence</h1><p class=\"sub\">" + s.cours + " client" + (s.cours > 1 ? "s" : "") + " en cours · " + s.places + " / " + AG.places + " places prises</p>";
+  h += '<div class="kpis"><div class="kpi hero"><div class="l">Encaissé ce mois</div><div class="v">' + fmt(s.enc) + '</div><div class="h">objectif ' + fmt(AG.objectif) + " · il manque " + fmt(Math.max(0, AG.objectif - s.enc)) +
+    '</div><div class="bar"><i style="width:' + pct + '%"></i></div></div>' + kpi("Reste à encaisser", fmt(s.reste), "chez les clients en cours") + kpi("Places", s.places + " / " + AG.places, "offre fêtes") + "</div>";
+  // Rendez-vous
+  var R = L.filter(function (c) { return c.statut === "RDV demandé"; }).map(function (c) { return { c: c, d: rdvDate(c) }; })
+    .sort(function (a, b) { return (a.d || 9e15) - (b.d || 9e15); });
+  h += "<h2>📅 Rendez-vous <span class=\"count\">" + R.length + "</span></h2>";
+  h += R.length ? '<div class="list">' + R.map(function (x) {
+    var c = x.c, t = x.d ? (dd(x.d) < 0 ? "⚠️ Passé (" + dShort(x.d) + ") : mets à jour" : dLabel(x.d) + " à " + x.d.getHours() + " h") : (c.quand || "Date à fixer");
+    return agItem(c, [t, c.rdv === "Rencontre" ? "Rencontre" + (c.lieu ? " à " + c.lieu : "") : c.rdv, c.tel].filter(Boolean).join(" · "), x.d && dd(x.d) === 0 ? "hot" : "");
+  }).join("") + "</div>" : '<div class="empty">Aucun rendez-vous prévu.</div>';
+  // À livrer
+  var A = L.filter(function (c) { return c.statut === "Acompte payé" || c.statut === "En production"; }).sort(function (a, b) { return new Date(a.livraison || 9e15) - new Date(b.livraison || 9e15); });
+  h += "<h2>🎬 À livrer <span class=\"count\">" + A.length + "</span></h2>";
+  h += A.length ? '<div class="list">' + A.map(function (c) {
+    var t = c.livraison ? (dd(c.livraison) < 0 ? "🔴 En retard (" + dShort(c.livraison) + ")" : "Livraison " + dLabel(c.livraison).toLowerCase()) : "Date de livraison à fixer";
+    return agItem(c, t + " · 2 vidéos + 3 affiches", c.livraison && dd(c.livraison) <= 0 ? "hot" : "");
+  }).join("") + "</div>" : '<div class="empty">Rien à livrer pour le moment.</div>';
+  // Pubs en cours
+  var P = L.filter(function (c) { return c.statut === "Pub lancée"; });
+  h += "<h2>📢 Pubs en cours <span class=\"count\">" + P.length + "</span></h2>";
+  h += P.length ? '<div class="list">' + P.map(function (c) {
+    var f = finPub(c), j = c.pubLe ? Math.min(7, daysSince(c.pubLe) + 1) : 0;
+    var t = !f ? "Date de lancement à mettre" : dd(f) <= 0 ? "✅ 7 jours finis : envoie le bilan et propose la suite" : "Jour " + j + " / 7 · vérifie les résultats";
+    return agItem(c, t, f && dd(f) <= 0 ? "hot" : "");
+  }).join("") + "</div>" : '<div class="empty">Aucune pub en cours.</div>';
+  // À appeler
+  var C = L.filter(function (c) { return c.statut === "Prospect" && hasTel(c) && daysSince(c.date) < 7; }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+  h += "<h2>📞 À appeler <span class=\"count\">" + C.length + "</span></h2><p class=\"sub\">Ils ont laissé leur numéro mais n'ont pas écrit sur WhatsApp.</p>";
+  h += C.length ? '<div class="list">' + C.map(function (c) { return agItem(c, [c.tel, c.com, when(c.date)].filter(Boolean).join(" · ")); }).join("") + "</div>" : '<div class="empty">Personne à rappeler.</div>';
+  return h;
+}
+var AG_FILTERS = [["cours", "En cours", function (c) { return AG_ACTIFS.indexOf(c.statut) >= 0; }], ["prospects", "Prospects", function (c) { return c.statut === "Prospect"; }],
+  ["fini", "Terminés", function (c) { return c.statut === "Terminé"; }], ["perdus", "Perdus", function (c) { return c.statut === "Perdu"; }],
+  ["tous", "Tous avec numéro", function (c) { return hasTel(c); }]];
+function agClients() {
+  var h = '<div class="seg" role="group">' + AG_FILTERS.map(function (f) { var n = AGL().filter(f[2]).length; return '<button aria-pressed="' + (agF === f[0]) + '" onclick="setAgF(\'' + f[0] + '\')">' + f[1] + "<em>" + n + "</em></button>"; }).join("") + "</div>";
+  var fn = AG_FILTERS.filter(function (x) { return x[0] === agF; })[0][2];
+  var L = AGL().filter(fn).sort(function (a, b) { return new Date(b.maj || b.date) - new Date(a.maj || a.date); });
+  return h + (L.length ? '<div class="list">' + L.slice(0, 300).map(function (c) { return agItem(c, [c.tel, c.com, c.quand, when(c.date)].filter(Boolean).join(" · ")); }).join("") + "</div>" : '<div class="empty" style="margin-top:12px">Personne ici pour le moment.</div>');
+}
+function agTunnel() {
+  var L = AGL().filter(function (c) { return !/^m/.test(c.sid) && agPerOk(c); }), max = L.length || 1;
+  var h = '<div class="seg" role="group">' + [["today", "Aujourd'hui"], ["7", "7 jours"], ["all", "Tout"]].map(function (p) { return '<button aria-pressed="' + (agPer === p[0]) + '" onclick="setAgPer(\'' + p[0] + '\')">' + p[1] + "</button>"; }).join("") + "</div>";
+  h += '<h2>Entonnoir</h2><div class="funnel">';
+  var prev = null, drop = null;
+  AG_FUN.forEach(function (f) {
+    var k = AG_STEPS.indexOf(f[1]), n = L.filter(function (c) { return agStep(c) >= k; }).length;
+    if (prev !== null && prev - n > 0 && (!drop || prev - n > drop.n)) drop = { n: prev - n, at: f[0] }; prev = n;
+    h += '<div class="fl"><span>' + f[0] + '</span><div class="t"><i style="width:' + (n / max * 100) + '%"></i></div><b>' + n + "</b></div>";
+  });
+  var pay = L.filter(function (c) { return AG_PAYANTS.indexOf(c.statut) >= 0; }).length;
+  h += '<div class="fl"><span>Acompte payé</span><div class="t"><i style="width:' + (pay / max * 100) + '%"></i></div><b>' + pay + "</b></div></div>";
+  if (drop) h += '<div class="tip">Le plus grand départ : <b>' + drop.n + " personne" + (drop.n > 1 ? "s" : "") + "</b> " + (drop.n > 1 ? "partent" : "part") + " juste avant « " + esc(drop.at) + " ». C'est l'étape à améliorer en premier.</div>";
+  function count(key, title) {
+    var m = {}; L.forEach(function (c) { var v = c[key]; if (v) m[v] = (m[v] || 0) + 1; });
+    var ks = Object.keys(m).sort(function (a, b) { return m[b] - m[a]; }); if (!ks.length) return "";
+    return "<h2>" + title + '</h2><div class="funnel">' + ks.map(function (k) { return '<div class="fl"><span>' + esc(k) + '</span><div class="t"><i style="width:' + (m[k] / max * 100) + '%"></i></div><b>' + m[k] + "</b></div>"; }).join("") + "</div>";
+  }
+  return h + count("com", "Type de commerce") + count("pub", "Pub déjà faite ?") + count("carte", "Carte bancaire") + count("rdv", "Rendez-vous choisi");
+}
+
+/* Fiche client */
+function dInput(d) { if (!d) return ""; d = new Date(d); if (isNaN(d)) return ""; return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function agMsg(c) {
+  var p = prenom(c) || "";
+  if (c.statut === "RDV demandé") return "Bonjour " + p + ", c'est Willy 👋 Je te confirme notre rendez-vous" + (c.quand ? " : " + c.quand : "") + ". À tout à l'heure !";
+  if (c.statut === "Prospect") return "Bonjour " + p + ", c'est Willy 👋 Tu as laissé ton numéro pour l'offre fêtes à 15 000 F (2 vidéos + 3 affiches + ta pub). On en parle quand ?";
+  if (c.statut === "Pub lancée") return "Bonjour " + p + ", c'est Willy 👋 Voici le point sur ta pub : ";
+  return "";
+}
+function openAg(sid) {
+  var c = agFind(sid); if (!c) return;
+  var s = esc(sid), f = finPub(c), nx = AG_NEXT[c.statut];
+  var h = '<div style="display:flex;align-items:center;gap:12px"><div class="av" style="width:48px;height:48px;font-size:18px">' + esc(initials(c)) + '</div><div style="flex:1;min-width:0"><div style="font:700 20px var(--serif)">' + esc(agName(c)) + "</div>" + chip(c.statut) + "</div></div>";
+  h += '<div class="kv"><span>WhatsApp</span><b>' + esc(c.tel || "—") + "</b><span>Commerce</span><b>" + esc(c.com || "—") + "</b><span>Rendez-vous</span><b>" + esc([c.rdv, c.quand, c.lieu].filter(Boolean).join(" · ") || "—") +
+    "</b><span>Carte</span><b>" + esc(c.carte || "—") + "</b><span>Page Facebook</span><b>" + esc(c.page || "—") + "</b><span>Pub déjà ?</span><b>" + esc(c.pub || "—") +
+    "</b><span>Encaissé</span><b>" + fmt(c.encaisse) + " / " + fmt(agPrix(c)) + "</b><span>Livraison</span><b>" + esc(c.livraison ? dLabel(c.livraison) : "—") +
+    "</b><span>Pub</span><b>" + esc(c.pubLe ? "lancée " + dShort(c.pubLe) + " → fin " + dShort(f) : "—") + "</b><span>Étape tunnel</span><b>" + esc(c.etape || "—") + "</b><span>Arrivé</span><b>" + esc(when(c.date)) + "</b></div>";
+  if (hasTel(c)) h += '<div class="row"><a class="btn wa" href="' + esc(waLink(c, agMsg(c))) + '" target="_blank" rel="noopener">' + WAI + "Écrire sur WhatsApp</a></div>";
+  h += '<h2 style="margin-top:20px">Statut</h2><div class="row">';
+  if (nx) h += '<button class="btn pri" onclick="agSet(\'' + s + '\',\'' + nx + '\')">' + AG_NEXT_TXT[nx] + "</button>";
+  if (AG_PAYANTS.indexOf(c.statut) >= 0 && (Number(c.encaisse) || 0) < agPrix(c)) h += '<button class="btn ok" onclick="agUpd(\'' + s + '\',{encaisse:' + agPrix(c) + '},\'Tout est payé 🎉\')">Tout payé (' + fmt(agPrix(c)) + ")</button>";
+  if (c.statut !== "Perdu") h += '<button class="btn" onclick="agSet(\'' + s + '\',\'Perdu\')">Perdu</button>';
+  h += '</div><label class="field">Changer le statut<select id="gst">' + AG_ST.map(function (x) { return "<option" + (x === c.statut ? " selected" : "") + ">" + x + "</option>"; }).join("") + "</select></label>";
+  h += '<label class="field">Rendez-vous (ex : Jeudi 19 nov. à 15 h)<input id="gq" value="' + esc(c.quand) + '"></label>' +
+    '<label class="field">Encaissé (F)<input id="ge" type="number" inputmode="numeric" value="' + esc(c.encaisse) + '"></label>' +
+    '<label class="field">Livraison prévue<input id="gl" type="date" value="' + dInput(c.livraison) + '"></label>' +
+    '<label class="field">Pub lancée le<input id="gp" type="date" value="' + dInput(c.pubLe) + '"></label>' +
+    '<label class="field">Retouches faites (1 offerte)<input id="gr" type="number" inputmode="numeric" min="0" value="' + esc(c.retouches || 0) + '"></label>' +
+    '<label class="field">Prénom<input id="gn" value="' + esc(c.nom) + '"></label><label class="field">Nom du commerce<input id="gc" value="' + esc(c.ent) + '"></label>' +
+    '<label class="field">Numéro WhatsApp<input id="gt" type="tel" inputmode="tel" value="' + esc(c.tel) + '"></label>' +
+    '<label class="field">Note<textarea id="gno" placeholder="Ce qu\'il veut, ses produits, ses prix…">' + esc(c.note) + "</textarea></label>" +
+    '<div class="row" style="margin-top:10px"><button class="btn pri" onclick="agSave(\'' + s + '\')">Enregistrer</button><button class="btn ghost" onclick="closeSheet()">Fermer</button></div>';
+  openSheet(h);
+}
+function agSet(sid, st) { agUpd(sid, { statut: st }, "Statut : " + st); }
+function agSave(sid) {
+  var c = agFind(sid), f = {}, v;
+  function put(k, val, old) { if (String(val) !== String(old == null ? "" : old)) f[k] = val; }
+  put("statut", $("gst").value, c.statut); put("quand", $("gq").value.trim(), c.quand); put("encaisse", $("ge").value, c.encaisse);
+  v = $("gl").value; if (v !== dInput(c.livraison)) f.livraison = v ? v + "T00:00:00" : "";
+  v = $("gp").value; if (v !== dInput(c.pubLe)) f.pubLe = v ? v + "T08:00:00" : "";
+  put("retouches", $("gr").value, c.retouches || 0); put("nom", $("gn").value.trim(), c.nom); put("ent", $("gc").value.trim(), c.ent);
+  put("tel", $("gt").value.trim(), c.tel); put("note", $("gno").value, c.note);
+  if (!Object.keys(f).length) return closeSheet();
+  agUpd(sid, f, "Enregistré");
+}
+async function agUpd(sid, fields, msg) {
+  var c = agFind(sid); if (!c) return;
+  var before = JSON.stringify(c), now = new Date();
+  for (var k in fields) c[k] = fields[k];
+  if (fields.statut === "Acompte payé") {
+    if (!c.encaisse) c.encaisse = AG.avance; if (!c.acompteLe) c.acompteLe = now.toISOString();
+    if (!c.livraison) { var l = new Date(now); l.setDate(l.getDate() + 2); l.setHours(0, 0, 0, 0); c.livraison = l.toISOString(); }
+  }
+  if (fields.statut === "Pub lancée" && !c.pubLe) c.pubLe = now.toISOString();
+  c.maj = now.toISOString();
+  if ($("sheet").classList.contains("on")) openAg(sid);
+  render(); if (msg) toast(msg);
+  try { await api("agUpdate", { sid: sid, fields: fields, avance: AG.avance }); ls("aca_cache", JSON.stringify(D)); }
+  catch (e) { var o = JSON.parse(before); for (var j in o) c[j] = o[j]; render(); toast(e.net ? "Pas de connexion : rien n'a été enregistré" : e.message === "Action inconnue" ? "Le serveur n'est pas encore à jour" : e.message); }
+}
+function agAddForm() {
+  openSheet('<div style="font:700 20px var(--serif)">Nouveau client</div><p class="sub">Pour quelqu\'un qui vient hors du tunnel (WhatsApp, bouche-à-oreille…).</p>' +
+    '<label class="field">Prénom<input id="an" autocomplete="off"></label><label class="field">Nom du commerce<input id="ac"></label>' +
+    '<label class="field">Numéro WhatsApp<input id="at" type="tel" inputmode="tel" placeholder="70 00 00 00"></label>' +
+    '<label class="field">Rendez-vous (facultatif, ex : Jeudi 19 nov. à 15 h)<input id="aq"></label>' +
+    '<label class="field">Note<textarea id="ao"></textarea></label><div class="row" style="margin-top:12px"><button class="btn pri" id="ab" onclick="agAddC()">Ajouter</button><button class="btn ghost" onclick="closeSheet()">Annuler</button></div>');
+}
+async function agAddC() {
+  var n = $("an").value.trim(), t = $("at").value.trim();
+  if (!n || t.replace(/\D/g, "").length < 8) return toast("Mets un prénom et un numéro valide");
+  $("ab").disabled = true;
+  try { await api("agAdd", { nom: n, ent: $("ac").value.trim(), tel: t, quand: $("aq").value.trim(), note: $("ao").value }); closeSheet(); toast("Client ajouté"); agSeg = "clients"; agF = "tous"; await load(true); }
+  catch (e) { $("ab").disabled = false; toast(e.net ? "Pas de connexion" : e.message === "Action inconnue" ? "Le serveur n'est pas encore à jour" : e.message); }
+}
+
 /* ---------- Navigation, connexion ---------- */
 function go(t) { tab = t; closeSheet(); render(); window.scrollTo(0, 0); }
 function setF(f) { filter = f; render(); }
 document.querySelectorAll("nav.tabs button").forEach(function (b) { b.onclick = function () { go(b.dataset.tab); }; });
 $("scrim").onclick = closeSheet;
-$("fab").onclick = addForm;
+$("fab").onclick = function () { if (tab === "ag") agAddForm(); else addForm(); };
 $("refresh").onclick = function () { load(); };
 $("theme").onclick = function () { var r = document.documentElement, t = r.dataset.theme === "dark" ? "light" : "dark"; r.dataset.theme = t; ls("aca_theme", t); tc(); };
 function tc() { $("tc").content = document.documentElement.dataset.theme === "dark" ? "#14100F" : "#FFFFFF"; } tc();

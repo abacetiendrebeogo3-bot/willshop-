@@ -70,9 +70,10 @@ function upsertCommande(ss, d) {
 // ===================== AGENCE (clients pub : Offre Fêtes…) =====================
 // Onglet « Clients Pub » du Sheet WillShop, créé tout seul au premier prospect. Séparé des commandes de la boutique.
 var AG_HEAD = ["Date", "Offre", "Session", "Prénom", "Commerce (nom)", "WhatsApp", "Type de commerce", "Pub déjà ?", "Carte", "Page Facebook",
-  "Rendez-vous", "Quand", "Lieu", "Dernière étape", "Statut", "Acompte reçu", "Livraison prévue", "Retouches (sur 1)", "Note", "Mise à jour"];
+  "Rendez-vous", "Quand", "Lieu", "Dernière étape", "Statut", "Encaissé (F)", "Livraison prévue", "Retouches (sur 1)", "Note", "Mise à jour",
+  "Pub lancée le", "Acompte le"];
 var AG_STEPS = ["Arrivée", "Commerce", "Pub", "Preuve vue", "Vidéo lancée", "Offre vue", "Question WhatsApp", "Budget pub", "Page Facebook", "Rendez-vous", "Numéro donné", "Récap vu", "Clic WhatsApp"];
-var AG_STATUTS = ["Visiteur", "Prospect", "RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée", "Livré", "Perdu"];
+var AG_STATUTS = ["Visiteur", "Prospect", "RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée", "Terminé", "Perdu"];
 function agSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID), sh = ss.getSheetByName("Clients Pub");
   if (sh) return sh;
@@ -81,13 +82,58 @@ function agSheet_() {
   sh.getRange(2, 15, 2000, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(AG_STATUTS).build());
   return sh;
 }
+// Pour l'app (onglet Agence) : toutes les lignes de « Clients Pub »
+var AG_KEYS = ["date", "offre", "sid", "nom", "ent", "tel", "com", "pub", "carte", "page", "rdv", "quand", "lieu", "etape", "statut", "encaisse", "livraison",
+  "retouches", "note", "maj", "pubLe", "acompteLe"];
+function agData_() {
+  var sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Clients Pub"), out = [];
+  if (!sh || sh.getLastRow() < 2) return out;
+  sh.getRange(2, 1, sh.getLastRow() - 1, AG_KEYS.length).getValues().forEach(function (r) {
+    var o = {}; AG_KEYS.forEach(function (k, j) { o[k] = acaIso(r[j]); });
+    o.tel = String(o.tel || "").replace(/^'/, ""); if (o.sid) out.push(o);
+  });
+  return out;
+}
+// Mise à jour depuis l'app. Le planning se remplit tout seul : acompte → livraison à +2 jours ; pub lancée → date du jour.
+function agUpdate_(p) {
+  var sh = agSheet_(), r = findRow(sh, 3, p.sid);
+  if (!r) throw new Error("Client introuvable");
+  var row = sh.getRange(r, 1, 1, AG_KEYS.length).getValues()[0], f = p.fields || {}, now = new Date();
+  if (f.statut !== undefined) {
+    if (AG_STATUTS.indexOf(String(f.statut)) < 0) throw new Error("Statut inconnu");
+    row[14] = String(f.statut);
+    if (f.statut === "Acompte payé") {
+      if (!row[15]) row[15] = Number(p.avance) || 7500;
+      if (!row[21]) row[21] = now;
+      if (!row[16]) { var l = new Date(now); l.setDate(l.getDate() + 2); l.setHours(0, 0, 0, 0); row[16] = l; }
+    }
+    if (f.statut === "Pub lancée" && !row[20]) row[20] = now;
+  }
+  if (f.encaisse !== undefined) row[15] = Number(f.encaisse) || "";
+  if (f.livraison !== undefined) row[16] = f.livraison ? new Date(f.livraison) : "";
+  if (f.pubLe !== undefined) row[20] = f.pubLe ? new Date(f.pubLe) : "";
+  if (f.retouches !== undefined) row[17] = Math.max(0, Number(f.retouches) || 0);
+  [["note", 18, 500], ["nom", 3, 60], ["ent", 4, 60], ["quand", 11, 40], ["lieu", 12, 60]].forEach(function (c) { if (f[c[0]] !== undefined) row[c[1]] = String(f[c[0]]).slice(0, c[2]); });
+  if (f.tel !== undefined) row[5] = String(f.tel).replace(/[^\d+ ]/g, "").slice(0, 25);
+  if (row[5]) row[5] = "'" + String(row[5]).replace(/^'/, "");
+  row[19] = now;
+  sh.getRange(r, 1, 1, AG_KEYS.length).setValues([row]);
+  return true;
+}
+// Client venu hors tunnel (WhatsApp direct, bouche-à-oreille…)
+function agAdd_(p) {
+  var sh = agSheet_(), now = new Date(), sid = "m" + now.getTime().toString(36);
+  sh.appendRow([now, String(p.offre || "Offre Fêtes 15 000"), sid, String(p.nom || "").slice(0, 60), String(p.ent || "").slice(0, 60), "'" + String(p.tel || "").slice(0, 25),
+    String(p.com || "").slice(0, 60), "", "", "", "", String(p.quand || "").slice(0, 40), "", "Ajout manuel", p.quand ? "RDV demandé" : "Prospect", "", "", "", String(p.note || "").slice(0, 500), now, "", ""]);
+  return sid;
+}
 function upsertAgence(d) {
   var sh = agSheet_(), now = new Date(), r = findRow(sh, 3, d.sid);
   var statut = d.step === "Clic WhatsApp" ? "RDV demandé" : (d.tel ? "Prospect" : "Visiteur");
   var step = txt(d.step || "Arrivée", 40);
   if (!r) {
     sh.appendRow([now, txt(d.produit), txt(d.sid, 40), txt(d.nom, 60), txt(d.ent, 60), d.tel ? "'" + txt(d.tel, 25) : "", txt(d.com, 60), txt(d.pub, 30),
-      txt(d.carte, 20), txt(d.page, 10), txt(d.rdv, 20), txt(d.quand, 40), txt(d.lieu, 60), step, statut, "", "", "", "", now]);
+      txt(d.carte, 20), txt(d.page, 10), txt(d.rdv, 20), txt(d.quand, 40), txt(d.lieu, 60), step, statut, "", "", "", "", now, "", ""]);
     return;
   }
   var row = sh.getRange(r, 1, 1, 20).getValues()[0];
@@ -174,7 +220,8 @@ function acaData(ss) {
     if (r[0]) blocs.push({ bloc: r[0], du: acaIso(r[1]), au: acaIso(r[2]), pub: Number(r[3]) || 0, ventes: Number(r[4]) || 0, encaisse: Number(r[5]) || 0,
       reinjecter: Number(r[7]) || 0, epargner: Number(r[8]) || 0, parJour: Number(r[9]) || 0 });
   });
-  return { prospects: rows, sequence: seq, config: cfg,
+  var agence = []; try { agence = agData_(); } catch (e) {}
+  return { prospects: rows, sequence: seq, config: cfg, agence: agence,
     params: { budget: tb[0], prix: tb[1], bonus: tb[2], reinjection: tb[3], coutMax: tb[4], objectif: tb[5] }, pub: pub, blocs: blocs,
     now: new Date().toISOString() };
 }
@@ -227,6 +274,8 @@ function acaApi(d) {
     if (d.action === "update") return acaJson({ ok: true, data: acaUpdate(ss, d.p || {}) });
     if (d.action === "add") return acaJson({ ok: true, data: acaAdd(ss, d.p || {}) });
     if (d.action === "pin") return acaJson({ ok: true, data: acaPin(ss, d.p || {}) });
+    if (d.action === "agUpdate") return acaJson({ ok: true, data: agUpdate_(d.p || {}) });
+    if (d.action === "agAdd") return acaJson({ ok: true, data: agAdd_(d.p || {}) });
     return acaJson({ ok: false, error: "Action inconnue" });
   } catch (err) {
     return acaJson({ ok: false, error: String(err.message || err) });
