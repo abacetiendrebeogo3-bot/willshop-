@@ -1,4 +1,4 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Crée ton personnage IA qui parle à ta place · Will Academy</title><meta name="description" content="Crée un personnage IA qui présente tes produits, juste avec ton téléphone. 5 vidéos, 5 000 F."><meta property="og:title" content="Crée ton personnage IA qui parle à ta place"><meta property="og:image" content="https://will-academy.vercel.app/media/vanessa/preuves/formation1.jpg"><link rel="preload" as="video" href="https://will-academy.vercel.app/media/vanessa/01.mp4?v=2"><link rel="preload" as="image" href="https://will-academy.vercel.app/media/vanessa/01.jpg?v=2"></head><body style="margin:0">
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Crée ton personnage IA qui parle à ta place · Will Academy</title><meta name="description" content="Crée un personnage IA qui présente tes produits, juste avec ton téléphone. 5 vidéos, 5 000 F."><meta property="og:title" content="Crée ton personnage IA qui parle à ta place"><meta property="og:image" content="https://will-academy.vercel.app/media/vanessa/preuves/formation1.jpg"><link rel="preload" as="video" href="https://will-academy.vercel.app/media/vanessa/01.mp4?v=3"><link rel="preload" as="image" href="https://will-academy.vercel.app/media/vanessa/01.jpg?v=3"></head><body style="margin:0">
 <!-- ===== Tunnel « Crée ton personnage IA qui parle à ta place » — Vanessa — Will Academy =====
      À coller dans un bloc Code HTML Systeme.io. Réglages dans CFG plus bas. -->
 <div id="vn-root">
@@ -82,7 +82,7 @@
 <script>
 (function(){
 /* ================== RÉGLAGES ================== */
-var M="https://will-academy.vercel.app/media/vanessa/",MV="?v=2";
+var M="https://will-academy.vercel.app/media/vanessa/",MV="?v=3";
 var CFG={
  PRODUIT:"Formation Personnage IA",
  PRICE:"5 000 F", VALUE:5000,
@@ -104,7 +104,7 @@ var CFG={
 /* Paroles exactes (transcrites) + minutage s = [début, fin] de la parole */
 var CAPS={
  "01":{"t": "Salut, moi c'est Vanessa. Je ne suis pas réelle, je suis une IA. Tu veux créer ton propre personnage comme moi ?", "s": [[0.7, 6.75]]},
- "02":{"t": "Beaucoup veulent publier tous les jours, mais quelque chose les bloque. Dis-moi franchement, toi, c'est quoi ?", "s": [[0.25, 6.3]]},
+ "02":{"t": "Beaucoup veulent publier tous les jours, mais quelque chose les bloque. Dis-moi franchement, toi, c'est quoi ?", "s": [[0.25, 6.1]]},
  "03b":{"t": "Moi, je suis le personnage IA d'une vendeuse de pagnes. C'est moi qui présente ses pagnes tous les jours !", "s": [[0.85, 6.85]]},
  "04":{"t": "Parlons de ma formation. En cinq vidéos simples, tu crées ton personnage et tu le fais parler. Tu veux voir ?", "s": [[0.25, 6.85]]},
  "04b":{"t": "Et moi, je présente les téléphones de mon patron. Lui, il ne se filme plus du tout !", "s": [[0.25, 5.6]]},
@@ -206,17 +206,17 @@ var BLOC={honte:['😳 J\'ai honte de me filmer','Tu restes caché. C\'est ton p
  tel:['📱 Mon téléphone filme mal','Pas besoin d\'un bon téléphone pour filmer : l\'IA fait l\'image pour toi.'],
  dire:['🤔 Je ne sais pas quoi dire','Je te donne les textes déjà prêts.'],
  vue:['👀 Personne ne voit mes vidéos','Tu publies tous les jours, alors on te voit plus.']};
-function s2(){clip('02','1/4',function(){bubble('Qu\'est-ce qui te bloque, toi ? 👇','q');
+function s2(){clip('02','1/3',function(){bubble('Qu\'est-ce qui te bloque, toi ? 👇','q');
  buttons(Object.keys(BLOC).map(function(k){return {label:BLOC[k][0],go:function(){stopClip();lead.blocage=BLOC[k][0].slice(2).trim();log('Blocage');s3(k)}}}))})}
 
 /* ---------- ÉTAPE 3 : on te comprend ---------- */
-function s3(k){clip('03','2/4',function(){bubble('✅ '+BLOC[k][1]+'<br>📱 <b>Pas besoin d\'être un expert :</b> juste avec ton téléphone, tu peux le faire.');
+function s3(k){clip('03','2/3',function(){bubble('✅ '+BLOC[k][1]+'<br>📱 <b>Pas besoin d\'être un expert :</b> juste avec ton téléphone, tu peux le faire.');
  bubble('Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?','q');
  buttons([{label:'Oui, je veux ça 🔥',go:function(){stopClip();log('Solution vue');ex()}},
   {label:'C\'est possible pour moi ?',go:function(){stopClip();log('Solution vue');bubble('Oui ! Pas besoin d\'être un expert 😉 Si tu sais utiliser WhatsApp sur ton téléphone, tu peux le faire.');ex()}}])})}
 /* Deux exemples de personnages IA (Mariam puis Ibrahim) */
 function ex(){bubble('Regarde 👇 deux personnages créés avec l\'IA pour des commerçants.');var gone=false;
- function next(){if(gone)return;gone=true;stopClip();s4()}
+ function next(){if(gone)return;gone=true;stopClip();s5()}
  clip('03b','Exemple 1/2 · personnage IA').then(function(){if(gone)return;return clip('04b','Exemple 2/2 · personnage IA')}).then(function(){if(gone)return;
   bubble('Tu veux savoir qui les a créés, et comment ? 👀','q');
   buttons([{label:'Oui, montre-moi 👀',go:function(){log('Formateur vu');clip('wilfried_16x9','Wilfried · ton formateur',function(){buttons([{label:'Je veux le mien 👉',go:next}])})}}])});
@@ -244,8 +244,9 @@ function payItems(){var it=[];
   go:function(){stopClip();log('Clic WhatsApp',{type:'order',mode:'WhatsApp'});fb('Contact')}});
  return it}
 function waUrl(t){return 'https://wa.me/'+CFG.WA+'?text='+encodeURIComponent('Bonjour Wilfried, '+t+' à la formation « Personnage IA » à '+CFG.PRICE+'. (réf '+REF+')')}
-function s5(){log('Offre vue');urgency();clip('05','4/4',function(){compact(true);
+function s5(){log('Offre vue');urgency();clip('05','3/3',function(){compact(true);
  bubble('<div class="vn-card"><h3>Ta formation complète</h3>Aujourd\'hui 👇<br><span class="vn-price">'+CFG.PRICE+'</span>'+
+  '<ul style="margin:6px 0 2px">'+['🎬 5 vidéos étape par étape, à vie','📄 17 prompts prêts + modèle de script','👥 Groupe WhatsApp pour t\'aider','📱 Tout se fait sur ton téléphone'].map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'+
   '<div class="vn-guar">🎁 <b>Aujourd\'hui seulement :</b> '+CFG.BONUS+' en plus.</div><div class="vn-guar">🛡️ <b>Satisfait ou remboursé 7 jours.</b> Tu ne risques rien.</div><div style="margin-top:6px">⚡ Accès tout de suite après le paiement.</div>'+
   '</div>');
  bubble('Tu commences aujourd\'hui ?','q');
