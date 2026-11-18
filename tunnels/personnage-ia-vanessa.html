@@ -87,6 +87,7 @@ var CFG={
  CHARIOW:"",                 // lien de paiement Chariow (vide = le bouton rouge ouvre WhatsApp)
  WA:"22672019524",           // WhatsApp de Wilfried
  SHEET:"https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec",
+ PIXEL:"1601889501091366",     // Pixel Portfolio Pack Pro (compte shopwill) — chargé seulement s'il n'est pas déjà sur la page
  AVATAR:M+"01.jpg",
  CLIPS:["01","02","03","03b","04","04b","05","06"], // un clip absent de AVOIR est sauté
  AVOIR:["01","02","03","03b","04","04b","05","06"],      // ajoute "03" quand le clip 03 est en ligne
@@ -113,6 +114,7 @@ var $=function(i){return document.getElementById(i)};
 var chat=$('vnChat'),bar=$('vnBar'),stage=$('vnStage'),V=$('vnV'),capEl=$('vnCap'),prog=$('vnProg'),sndB=$('vnSnd'),skipB=$('vnSkip');
 if(CFG.AVATAR)$('vnAv').innerHTML='<img src="'+CFG.AVATAR+'" alt="">';
 var lead={blocage:""},SOUND=false,TEST=/\/essai\//.test(location.pathname)||location.protocol==='file:';
+if(!TEST&&CFG.PIXEL&&!window.fbq){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init',CFG.PIXEL);fbq('track','PageView')}
 
 /* ---------- Suivi : identifiant visiteur + Sheet + Pixel ---------- */
 var SID='';try{SID=localStorage.getItem('vn_sid')||''}catch(e){}
