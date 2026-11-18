@@ -80,7 +80,7 @@
 <script>
 (function(){
 /* ================== RÉGLAGES ================== */
-var M="https://will-academy.vercel.app/media/vanessa/",MV="?v=1";
+var M="https://will-academy.vercel.app/media/vanessa/",MV="?v=2";
 var CFG={
  PRODUIT:"Formation Personnage IA",
  PRICE:"5 000 F", VALUE:5000,
@@ -90,7 +90,7 @@ var CFG={
  PIXEL:"1601889501091366",     // Pixel Portfolio Pack Pro (compte shopwill) — chargé seulement s'il n'est pas déjà sur la page
  AVATAR:M+"01.jpg",
  CLIPS:["01","02","03","03b","04","04b","05","06"], // un clip absent de AVOIR est sauté
- AVOIR:["01","02","03","03b","04","04b","05","06"],      // ajoute "03" quand le clip 03 est en ligne
+ AVOIR:["01","02","03","03b","04","04b","wilfried","05","06"],      // ajoute "03" quand le clip 03 est en ligne
  FREE:"",                    // lien .mp4 de la vidéo de bienvenue offerte (vide = « J'hésite » propose WhatsApp)
  APERCUS:[M+'preuves/formation2.jpg',M+'preuves/formation3.jpg',M+'preuves/formation1.jpg'],                 // captures de l'intérieur de la formation (vidéos, pack de prompts…) — liens .jpg
  PROOFS:[M+'preuves/groupe3.jpg',M+'preuves/groupe2.jpg',M+'preuves/groupe1.jpg',M+'preuves/groupe4.jpg'],                  // captures du groupe WhatsApp / avis d'élèves (NUMÉROS CACHÉS) — liens .jpg
@@ -107,6 +107,7 @@ var CAPS={
  "04b":{"t": "Et moi, je présente les téléphones de mon patron. Lui, il ne se filme plus du tout !", "s": [[0.25, 5.6]]},
  "05":{"t": "Tout ça, avec le groupe et les textes prêts, pour un tout petit prix. Tu commences aujourd'hui ?", "s": [[0.85, 6.15]]},
  "06":{"t": "Pas de souci. Regarde d'abord la première vidéo de la formation, gratuitement. Après, tu décides. D'accord ?", "s": [[1.1, 6.85]]},
+ "wilfried":{"t": "Salut, formateur Wilfried ! Tu vois tous les personnages que tu viens de voir, que ce soit la vendeuse de pagnes, le vendeur de téléphones, et même la fille qui parle je les ai créés juste avec mon téléphone. Clic par clic. Et toi aussi, tu peux le faire. Tu n'as pas besoin d'être un expert en montage, ni un expert en intelligence artificielle. Juste après ton inscription, tu vas avoir accès au mini-cours juste cinq vidéos, étape par étape. Si tu es bloqué, tu as des inquiétudes, tu vas rejoindre notre groupe WhatsApp, dans lequel on va t'accompagner jusqu'à ce que tu puisses créer ton propre personnage.", "s": [[0.23, 6.11], [6.25, 11.42], [11.5, 21.79], [21.99, 24.08], [24.2, 29.34]]},
  "03":{"t":"Je te comprends. Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?","s":[[1.15,6.45]]}
 };
 /* ============================================== */
@@ -203,7 +204,7 @@ function s3(k){clip('03','2/4',function(){bubble('✅ '+BLOC[k][1]+'<br>📱 <b>
 /* Deux exemples de personnages IA (Mariam puis Ibrahim) */
 function ex(){bubble('Regarde 👇 deux personnages créés avec l\'IA pour des commerçants.');var gone=false;
  function next(){if(gone)return;gone=true;stopClip();s4()}
- clip('03b','Exemple 1/2 · personnage IA').then(function(){if(gone)return;clip('04b','Exemple 2/2 · personnage IA',function(){buttons([{label:'Je veux le mien 👉',go:next}])}).then(function(){})});
+ clip('03b','Exemple 1/2 · personnage IA').then(function(){if(gone)return;return clip('04b','Exemple 2/2 · personnage IA')}).then(function(){if(gone)return;log('Formateur vu');clip('wilfried','Wilfried · ton formateur',function(){buttons([{label:'Je veux le mien 👉',go:next}])})});
  setTimeout(function(){if(!gone&&!bar.children.length)buttons([{label:'Je veux le mien 👉',go:next}])},1500)}
 
 /* ---------- ÉTAPE 4 : la formation ---------- */
