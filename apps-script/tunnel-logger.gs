@@ -71,7 +71,7 @@ function upsertCommande(ss, d) {
 // Les formations vont dans un Sheet séparé « WillShop Académie », pas dans les commandes de la boutique.
 var ACADEMIE_ID = "1Zdj2DA8Zh_iHEfdvYg6GdFTNMSsjth0v8W2-TXOxIhU";
 // Ordre des étapes (anciens tunnels + tunnel Vanessa « Personnage IA »). Une étape ne recule jamais.
-var ACA_STEPS = ["Arrivée", "Intéressé", "Objectif", "Blocage", "Solution vue", "Extrait lancé", "Extrait vu", "Formation vue", "Offre vue", "Hésite", "Vidéo gratuite",
+var ACA_STEPS = ["Arrivée", "Intéressé", "Objectif", "Blocage", "Solution vue", "Extrait lancé", "Extrait vu", "Formation vue", "Aperçu vu", "Offre vue", "Hésite", "Vidéo gratuite",
   "Question", "Numéro donné", "Clic WhatsApp", "Commande", "Achat"];
 var ACA_RANK = { "Visiteur": 0, "Prospect": 1, "Veut payer": 2, "Acompte": 3, "Payé": 4, "Perdu": 4 };
 

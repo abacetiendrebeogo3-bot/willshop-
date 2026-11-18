@@ -43,7 +43,13 @@
 .vn-price{display:inline-block;background:var(--yel);font-weight:900;font-size:30px;padding:2px 12px 4px;border-radius:10px;margin:4px 0;animation:vnPop .5s cubic-bezier(.3,1.6,.5,1)}
 @keyframes vnPop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
 .vn-guar{background:#eaf8ee;border-radius:8px;padding:8px;margin-top:6px;font-size:14px}
-.vn-proofs{display:flex;gap:8px;overflow-x:auto;margin-top:8px}.vn-proofs img{flex:0 0 70%;width:70%;border-radius:8px}
+.vn-gal{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:6px;padding-bottom:4px}
+.vn-gal>*{flex:0 0 44%;scroll-snap-align:start;border-radius:8px;overflow:hidden;cursor:zoom-in;background:#ddd}
+.vn-gal img{width:100%;display:block}
+.vn-ph{aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;color:#555;padding:10px;background:repeating-linear-gradient(45deg,#e7e7e7 0 10px,#efefef 10px 20px)}
+.vn-zoom{position:absolute;inset:0;z-index:20;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:14px}
+.vn-zoom img{max-width:100%;max-height:100%;border-radius:8px}
+.vn-zoom b{position:absolute;top:10px;right:14px;color:#fff;font-size:28px;cursor:pointer}
 .vn-bar{flex:none;padding:9px 10px calc(10px + env(safe-area-inset-bottom));background:#f0f2f5;border-top:1px solid #e2e2e2;min-height:16px}
 .vn-btns{display:flex;flex-direction:column;gap:7px}
 .vn-btns.two{flex-direction:row}.vn-btns.two .vn-btn{flex:1;font-size:19px;padding:16px 10px}
@@ -86,7 +92,8 @@ var CFG={
  CLIPS:["01","02","03","03b","04","04b","05","06"], // un clip absent de AVOIR est sauté
  AVOIR:["01","02","03","03b","04","04b","05","06"],      // ajoute "03" quand le clip 03 est en ligne
  FREE:"",                    // lien .mp4 de la vidéo de bienvenue offerte (vide = « J'hésite » propose WhatsApp)
- PROOFS:[],                  // captures d'avis d'élèves (numéros cachés)
+ APERCUS:[],                 // captures de l'intérieur de la formation (vidéos, pack de prompts…) — liens .jpg
+ PROOFS:[],                  // captures du groupe WhatsApp / avis d'élèves (NUMÉROS CACHÉS) — liens .jpg
  /* Bonus du jour (affiché à partir de l'offre, compte à rebours jusqu'à minuit). À DONNER VRAIMENT à ceux qui paient le jour même. */
  BONUS:"10 scripts prêts pour ton activité",
  BONUS_COURT:"10 scripts offerts"
@@ -163,6 +170,12 @@ function clip(k,step,onReady){return new Promise(function(res){
   if(key!==last){last=key;capEl.innerHTML=(key==='x'||ci<0)?'':ch[ci].slice(0,wi+1).map(function(o,i){return '<span'+(i===wi?' class="on"':'')+'>'+o.w+'</span>'}).join(' ')}
   if(!done)RAF=requestAnimationFrame(tick)}
  RAF=requestAnimationFrame(tick)})}
+/* Galerie de captures (touche = agrandir). Sur la page d'essai, des cases grises montrent l'emplacement. */
+function gallery(list,name){if(!list.length&&!TEST)return '';
+ var items=list.length?list.map(function(u){return '<div><img src="'+u+'" alt="" loading="lazy"></div>'}).join(''):[1,2,3].map(function(i){return '<div class="vn-ph">'+name+' '+i+'<br>(à envoyer)</div>'}).join('');
+ return '<div class="vn-gal">'+items+'</div>'}
+chat.addEventListener('click',function(e){var im=e.target.closest('.vn-gal img');if(!im)return;var z=document.createElement('div');z.className='vn-zoom';
+ z.innerHTML='<img src="'+im.src+'" alt=""><b>✕</b>';z.onclick=function(){z.remove()};document.querySelector('.vn-app').appendChild(z)});
 function stopClip(){if(FIN){var f=FIN;FIN=null;f()}V.pause()}
 
 /* ---------- ÉTAPE 1 : accroche ---------- */
@@ -182,10 +195,10 @@ function s2(){clip('02','1/4',function(){bubble('Qu\'est-ce qui te bloque, toi ?
  buttons(Object.keys(BLOC).map(function(k){return {label:BLOC[k][0],go:function(){stopClip();lead.blocage=BLOC[k][0].slice(2).trim();log('Blocage');s3(k)}}}))})}
 
 /* ---------- ÉTAPE 3 : on te comprend ---------- */
-function s3(k){clip('03','2/4',function(){bubble('✅ '+BLOC[k][1]);
+function s3(k){clip('03','2/4',function(){bubble('✅ '+BLOC[k][1]+'<br>📱 <b>Pas besoin d\'être un expert :</b> juste avec ton téléphone, tu peux le faire.');
  bubble('Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?','q');
  buttons([{label:'Oui, je veux ça 🔥',go:function(){stopClip();log('Solution vue');ex()}},
-  {label:'C\'est possible pour moi ?',go:function(){stopClip();log('Solution vue');bubble('Oui ! Si tu sais utiliser WhatsApp, tu peux le faire 😉');ex()}}])})}
+  {label:'C\'est possible pour moi ?',go:function(){stopClip();log('Solution vue');bubble('Oui ! Pas besoin d\'être un expert 😉 Si tu sais utiliser WhatsApp sur ton téléphone, tu peux le faire.');ex()}}])})}
 /* Deux exemples de personnages IA (Mariam puis Ibrahim) */
 function ex(){bubble('Regarde 👇 deux personnages créés avec l\'IA pour des commerçants.');var gone=false;
  function next(){if(gone)return;gone=true;stopClip();s4()}
@@ -197,8 +210,14 @@ function s4(){log('Formation vue');clip('04','3/4',function(){compact(true);
  bubble('<div class="vn-card"><h3>🎓 Crée ton personnage IA qui parle à ta place</h3><ul>'+
   '<li>🎬 1 · Bienvenue</li><li>👤 2 · Créer ton personnage</li><li>✍️ 3 · Écrire ce qu\'il va dire</li><li>🗣️ 4 · Le faire parler</li><li>✂️ 5 · Monter et publier</li></ul>'+
   '<div class="x"><span>🎁 Textes prêts</span><span>👥 Groupe d\'entraide</span><span>📱 Sur ton téléphone</span><span>♾️ À vie</span></div></div>');
+ if(CFG.APERCUS.length||CFG.PROOFS.length||TEST){bubble('Tu veux voir à quoi ça ressemble à l\'intérieur ?','q');
+  buttons([{label:'Oui, montre-moi 👀',go:function(){stopClip();inside()}},{label:'Non, c\'est combien ? 👉',go:function(){stopClip();s5()}}])}
+ else{bubble('Tu veux savoir le prix ?','q');buttons([{label:'Oui, et c\'est combien ? 👉',go:function(){stopClip();s5()}}])}})}
+function inside(){log('Aperçu vu');
+ if(CFG.APERCUS.length||TEST)bubble('📸 <b>L\'intérieur de la formation</b> (touche une image pour l\'agrandir)'+gallery(CFG.APERCUS,'Capture formation'));
+ if(CFG.PROOFS.length||TEST)bubble('💬 <b>Dans le groupe des élèves</b> : leurs messages et leurs premières vidéos'+gallery(CFG.PROOFS,'Capture groupe'));
  bubble('Tu veux savoir le prix ?','q');
- buttons([{label:'Oui, et c\'est combien ? 👉',go:function(){stopClip();s5()}}])})}
+ buttons([{label:'Oui, et c\'est combien ? 👉',go:function(){s5()}}])}
 
 /* ---------- ÉTAPE 5 : l'offre ---------- */
 function payItems(){var it=[];
@@ -211,9 +230,10 @@ function waUrl(t){return 'https://wa.me/'+CFG.WA+'?text='+encodeURIComponent('Bo
 function s5(){log('Offre vue');urgency();clip('05','4/4',function(){compact(true);
  bubble('<div class="vn-card"><h3>Ta formation complète</h3>Aujourd\'hui 👇<br><span class="vn-price">'+CFG.PRICE+'</span>'+
   '<div class="vn-guar">🎁 <b>Aujourd\'hui seulement :</b> '+CFG.BONUS+' en plus.</div><div class="vn-guar">🛡️ <b>Satisfait ou remboursé 7 jours.</b> Tu ne risques rien.</div><div style="margin-top:6px">⚡ Accès tout de suite après le paiement.</div>'+
-  (CFG.PROOFS.length?'<div class="vn-proofs">'+CFG.PROOFS.map(function(u){return '<img src="'+u+'" alt="Avis">'}).join('')+'</div>':'')+'</div>');
+  '</div>');
  bubble('Tu commences aujourd\'hui ?','q');
- buttons(payItems(),false,{label:'J\'hésite encore 🤔',go:function(){stopClip();s6()}})})}
+ var it=payItems();it.push({label:'🤔 J\'hésite<small>Je veux d\'abord voir une vidéo gratuite</small>',echo:'J\'hésite, je veux voir une vidéo gratuite',go:function(){stopClip();s6()}});
+ buttons(it)})}
 
 /* ---------- ÉTAPE 6 : pour ceux qui doutent ---------- */
 function s6(){log('Hésite');clip('06','',function(){
