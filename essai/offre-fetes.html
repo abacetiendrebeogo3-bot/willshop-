@@ -1,0 +1,484 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Essai · Offre Fêtes</title></head><body style="margin:0">
+<!-- ============================================================
+  Tunnel « Offre Fêtes 15 000 F » (media buying) — chat avec Aïcha (assistante de Willy Tiendré)
+  À coller dans UN bloc « Code HTML » d'une page Systeme.io. Plein écran sur téléphone.
+  Source : tunnels/offre-fetes-media/flow.js → build : python3 tunnels/offre-fetes-media/build.py
+  Médias : ceux du Pack Pro (media/pack-pro/).
+============================================================= -->
+<style>
+#wa-tunnel{--dk:#0B4A36;--dk2:#083727;--gr:#22C32A;--gr-d:#16881F;--gr-soft:#E6F8E5;--me:#D9F5D6;--bg:#ECE8E1;--ink:#1B1F1D;--mut:#5E6862;--line:#DAD5CC;--wa:#1F8F4E;
+  position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font:15.5px/1.45 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+#wa-tunnel *{box-sizing:border-box}
+body.wat-on{overflow:hidden!important}
+#wa-tunnel .top{background:var(--dk);color:#fff;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+#wa-tunnel .top img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--gr)}
+#wa-tunnel .top .who{flex:1;min-width:0;line-height:1.2}
+#wa-tunnel .top b{display:block;font-size:16px}
+#wa-tunnel .top small{font-size:12.5px;color:#BFE3CF}
+#wa-tunnel .top small i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gr);margin-right:5px;vertical-align:1px}
+#wa-tunnel .top .logo{width:34px;height:34px;border-radius:9px;border:0;background:#CACDC9}
+#wa-tunnel .prog{height:3px;background:var(--dk2);flex:none}
+#wa-tunnel .prog i{display:block;height:100%;width:5%;background:var(--gr);transition:width .5s ease}
+#wa-tunnel .chat{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 12px 18px;display:flex;flex-direction:column;gap:6px;
+  background-image:radial-gradient(rgba(11,74,54,.05) 1px,transparent 1px);background-size:18px 18px}
+#wa-tunnel .wrap{max-width:560px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+#wa-tunnel .row{display:flex;gap:8px;align-items:flex-end;animation:wat-in .25s ease both}
+#wa-tunnel .row.me{justify-content:flex-end}
+#wa-tunnel .row .av{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none}
+#wa-tunnel .row.cont .av{visibility:hidden}
+#wa-tunnel .bub{background:#fff;border-radius:4px 16px 16px 16px;padding:9px 12px;max-width:82%;box-shadow:0 1px 1px rgba(0,0,0,.08);word-wrap:break-word}
+#wa-tunnel .row.cont .bub{border-radius:16px}
+#wa-tunnel .row.me .bub{background:var(--me);border-radius:16px 4px 16px 16px}
+#wa-tunnel .bub b{color:var(--dk)}
+#wa-tunnel .typing{display:inline-flex;gap:4px;padding:12px 14px}
+#wa-tunnel .typing i{width:7px;height:7px;border-radius:50%;background:#A9B3AE;animation:wat-dot 1s infinite}
+#wa-tunnel .typing i:nth-child(2){animation-delay:.15s}#wa-tunnel .typing i:nth-child(3){animation-delay:.3s}
+#wa-tunnel .card{background:#fff;border-radius:16px;overflow:hidden;max-width:86%;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+#wa-tunnel .card .pad{padding:12px 14px}
+#wa-tunnel .card h4{margin:0 0 6px;font-size:16px;color:var(--dk)}
+#wa-tunnel .vid{position:relative;background:#000;aspect-ratio:9/16;max-height:62vh;width:min(300px,72vw)}
+#wa-tunnel .vid video{width:100%;height:100%;object-fit:cover;display:block}
+#wa-tunnel .vid .snd{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;border:0;border-radius:99px;padding:8px 14px;font:600 13px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
+#wa-tunnel .vid .play{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.25);border:0;cursor:pointer}
+#wa-tunnel .vid .play span{width:64px;height:64px;border-radius:50%;background:var(--gr);display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+#wa-tunnel .vid .play svg{width:26px;height:26px;margin-left:4px}
+#wa-tunnel .tag{display:inline-block;background:var(--gr-soft);color:var(--gr-d);font:700 11px/1 inherit;font-family:inherit;padding:5px 8px;border-radius:99px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+#wa-tunnel ol.prog8{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:5px;font-size:14px}
+#wa-tunnel ol.prog8 li{display:flex;gap:8px;align-items:baseline}
+#wa-tunnel ol.prog8 li span{flex:none;width:22px;height:22px;border-radius:50%;background:var(--dk);color:#fff;font:700 11.5px/22px inherit;font-family:inherit;text-align:center}
+#wa-tunnel ol.prog8 li.free span{background:var(--gr)}
+#wa-tunnel ol.prog8 small{color:var(--mut)}
+#wa-tunnel .steps4{display:grid;gap:8px;font-size:14px}
+#wa-tunnel .steps4 div{display:flex;gap:10px;align-items:flex-start}
+#wa-tunnel .steps4 em{font-style:normal;flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr-soft);display:grid;place-items:center}
+#wa-tunnel .price{display:flex;align-items:baseline;gap:10px;margin:2px 0 8px}
+#wa-tunnel .price b{font-size:28px;color:var(--dk);letter-spacing:-.02em}
+#wa-tunnel .price s{color:var(--mut)}
+#wa-tunnel .bonus{display:grid;gap:4px;font-size:14px}
+#wa-tunnel .recap div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:14px}
+#wa-tunnel .recap div:last-child{border:0;font-weight:700;font-size:15.5px}
+#wa-tunnel .recap .off{color:var(--gr-d);font-weight:700}
+/* zone de réponse */
+#wa-tunnel .dock{flex:none;background:#F6F3EE;border-top:1px solid var(--line);padding:10px 12px calc(12px + env(safe-area-inset-bottom))}
+#wa-tunnel .dock:empty{display:none}
+#wa-tunnel .dock .in{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+#wa-tunnel .hint{font-size:12.5px;color:var(--mut);text-align:center}
+#wa-tunnel .opt{border:2px solid var(--dk);background:#fff;color:var(--dk);font:600 15px inherit;font-family:inherit;padding:12px 14px;border-radius:14px;cursor:pointer;text-align:center;animation:wat-pop .3s ease both;min-height:48px}
+#wa-tunnel .opt.main{background:var(--dk);color:#fff}
+#wa-tunnel .opt.soft{border-color:var(--line);color:var(--mut);font-weight:500;background:transparent}
+#wa-tunnel .opt:active{transform:scale(.98)}
+#wa-tunnel .cta{display:flex;align-items:center;justify-content:center;gap:10px;border:0;background:var(--gr);color:#06301F;font:800 16.5px inherit;font-family:inherit;padding:15px 16px;border-radius:14px;cursor:pointer;text-decoration:none;min-height:54px;animation:wat-pulse 1.8s ease-in-out infinite;box-shadow:0 6px 16px rgba(34,195,42,.35)}
+#wa-tunnel .cta.wa{background:var(--wa);color:#fff;box-shadow:0 6px 16px rgba(31,143,78,.35)}
+#wa-tunnel .cta svg{width:22px;height:22px;flex:none}
+#wa-tunnel .form{display:grid;gap:8px}
+#wa-tunnel .form .tel{display:flex;gap:8px}
+#wa-tunnel .form input,#wa-tunnel .form select{border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:12px;font:16px inherit;font-family:inherit;min-width:0;width:100%}
+#wa-tunnel .form select{width:auto;flex:none;padding:12px 8px}
+#wa-tunnel .form input:focus,#wa-tunnel .form select:focus{outline:2px solid var(--gr);border-color:var(--gr)}
+#wa-tunnel .form .err{border-color:#C0392B}
+#wa-tunnel .form .msg{color:#C0392B;font-size:13px;display:none}
+#wa-tunnel .safe{font-size:12px;color:var(--mut);text-align:center}
+#wa-tunnel .link{background:none;border:0;color:var(--mut);font:500 13.5px inherit;font-family:inherit;text-decoration:underline;cursor:pointer;padding:4px}
+@keyframes wat-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes wat-pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes wat-dot{0%,60%,100%{opacity:.35;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+@keyframes wat-pulse{0%,100%{transform:none}50%{transform:scale(1.025)}}
+@media (prefers-reduced-motion:reduce){#wa-tunnel *{animation:none!important;transition:none!important}}
+@media (min-width:700px){#wa-tunnel .chat{padding:22px 16px}#wa-tunnel .bub{max-width:70%}}
+#wa-tunnel .card .pic{display:block;width:min(300px,72vw);height:auto;background:#ddd}
+#wa-tunnel .card .ph{width:min(300px,72vw);padding:22px 16px;text-align:center;background:linear-gradient(135deg,#0B4A36,#16881F);color:#fff;font-size:14px}
+#wa-tunnel .card .ph span{display:block;font-size:30px;margin-bottom:6px}
+#wa-tunnel .card .ph b{color:#fff}
+#wa-tunnel .card .note{margin:8px 0 0;font-size:12.5px;color:var(--mut)}
+#wa-tunnel .lnk{color:var(--wa);font-weight:700}
+#wa-tunnel .steps4 em{font-weight:800;color:var(--gr-d)}
+#wa-tunnel .price{margin-top:10px}
+#wa-tunnel .recap span:last-child{white-space:nowrap}
+</style>
+
+<div id="wa-tunnel" role="main" aria-label="Discussion avec Aïcha, assistante de Willy Tiendré">
+  <div class="top">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2322C32A'/%3E%3Ctext x='32' y='43' font-family='Arial' font-weight='700' font-size='30' fill='%2306301F' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" alt="Aïcha">
+    <div class="who"><b>Aïcha · Willy Tiendré</b><small><i></i>en ligne</small></div>
+  </div>
+  <div class="prog"><i id="wat-prog"></i></div>
+  <div class="chat" id="wat-chat"><div class="wrap" id="wat-list"></div></div>
+  <div class="dock" id="wat-dock"></div>
+</div>
+
+<script>
+(function () {
+  /* ===================== RÉGLAGES ===================== */
+  var CFG = {
+    prix: 15000, avance: 7500,      /* prix du pack et avance (le reste après avoir vu le travail) */
+    budgetMin: 10000,               /* budget pub conseillé minimum (payé à part par le client) */
+    deplacement: 2000,              /* rencontre à Ouaga */
+    places: 50, fin: "31 décembre",
+    jours: 5,                       /* nb de jours proposés pour le rendez-vous (dimanche exclu) */
+    heures: ["9 h", "11 h", "15 h", "17 h"],
+    agenda: "",                     /* lien de ta page de réservation Google Agenda (vide = choix du créneau dans le chat) */
+    wa: "22672019524",
+    media: "https://willshop-app.vercel.app/media/pack-pro/",
+    pageWeb: "",            /* lien de la page web du Maquis Le Baobab (laisser vide = pas de bouton) */
+    pixel: "1530587975198974",
+    sheet: "https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec"
+  };
+  var AV = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2322C32A'/%3E%3Ctext x='32' y='43' font-family='Arial' font-weight='700' font-size='30' fill='%2306301F' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E", PROD = "Offre Fêtes 15 000";
+  /* Suivi seulement sur la vraie page (pas en aperçu, pas avec ?test) */
+  var LIVE = (/systeme\.io$/.test(location.hostname) || (location.hostname === "willshop-app.vercel.app" && !/^\/essai\//.test(location.pathname))) && !/[?&]test/.test(location.search);
+  /* ==================================================== */
+  var root = document.getElementById("wa-tunnel"); if (!root) return;
+  document.body.classList.add("wat-on");
+  var chat = document.getElementById("wat-chat"), list = document.getElementById("wat-list"), dock = document.getElementById("wat-dock");
+  var S = {}, SID;
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  SID = store("of_sid"); if (!SID) { SID = "f" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); store("of_sid", SID); }
+  try { S = JSON.parse(store("of_s") || "{}") || {}; } catch (e) { S = {}; }
+  function save() { store("of_s", JSON.stringify(S)); }
+  /* Pixel Facebook : installé ici seulement s'il n'est pas déjà sur la page */
+  if (LIVE && CFG.pixel && !window.fbq) {
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    window.fbq("init", CFG.pixel); window.fbq("track", "PageView");
+  }
+  /* ---------- Suivi : Sheet (onglet « Clients Pub ») + Pixel ---------- */
+  function send(o) {
+    if (!LIVE) return;
+    try {
+      o.sid = SID; o.produit = PROD; o.agence = 1; if (o.com == null && S.com != null) o.com = comTxt();
+      var d = JSON.stringify(o);
+      if (!(navigator.sendBeacon && navigator.sendBeacon(CFG.sheet, d))) fetch(CFG.sheet, { method: "POST", mode: "no-cors", body: d, keepalive: true });
+    } catch (e) {}
+  }
+  function step(s) { send({ type: "visit", step: s }); }
+  function px(ev, data, custom) { if (!LIVE) return; try { var f = window.fbq; if (f) f(custom ? "trackCustom" : "track", ev, data || {}); } catch (e) {} }
+
+  /* ---------- Outils du chat ---------- */
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " F"; }
+  function prog(p) { document.getElementById("wat-prog").style.width = p + "%"; }
+  function down() { [20, 350, 900].forEach(function (ms) { setTimeout(function () { chat.scrollTop = chat.scrollHeight; }, ms); }); }
+  var lastWho = "";
+  function add(html, who) {
+    var d = document.createElement("div");
+    d.className = "row" + (who === "me" ? " me" : "") + (who !== "me" && lastWho === "bot" ? " cont" : "");
+    d.innerHTML = (who === "me" ? "" : '<img class="av" src="' + AV + '" alt="">') + html;
+    list.appendChild(d); lastWho = who === "me" ? "me" : "bot"; down(); return d;
+  }
+  function bot(msgs, done) {
+    msgs = [].concat(msgs);
+    (function next() {
+      if (!msgs.length) return done && done();
+      var m = msgs.shift(), t = add('<div class="bub typing"><i></i><i></i><i></i></div>', "bot");
+      var wait = typeof m === "string" ? Math.min(1300, 420 + m.replace(/<[^>]+>/g, "").length * 11) : 450;
+      setTimeout(function () {
+        t.remove(); lastWho = list.lastElementChild && !list.lastElementChild.classList.contains("me") ? "bot" : "me";
+        var el = add(typeof m === "string" ? '<div class="bub">' + m + "</div>" : m.html, "bot");
+        if (m.after) m.after(el);
+        setTimeout(next, 260);
+      }, wait);
+    })();
+  }
+  function me(t) { add('<div class="bub">' + esc(t) + "</div>", "me"); }
+  function clear() { dock.innerHTML = ""; }
+  function ask(opts, cb) {
+    var h = '<div class="in"><div class="hint">👇 Choisis ta réponse</div>';
+    opts.forEach(function (o, i) { var t = typeof o === "string" ? o : o.t, c = typeof o === "string" ? (i === 0 ? "main" : "") : (o.c || ""); h += '<button type="button" class="opt ' + c + '" data-i="' + i + '" style="animation-delay:' + (i * .07) + 's">' + esc(t) + "</button>"; });
+    dock.innerHTML = h + "</div>";
+    dock.querySelectorAll(".opt").forEach(function (b) {
+      b.onclick = function () { var o = opts[+b.dataset.i], t = typeof o === "string" ? o : o.t; clear(); me(t); setTimeout(function () { cb(t, +b.dataset.i); }, 300); };
+    });
+    down();
+  }
+  var WAI = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2c0 1.3.9 2.5 1.1 2.7.1.2 1.9 2.9 4.6 4 1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.5-.2z"/></svg>';
+  var PLAY = '<svg viewBox="0 0 24 24" fill="#06301F"><path d="M8 5v14l11-7z"/></svg>';
+
+  /* Carte vidéo : lecture dans le chat, son à la demande */
+  function videoCard(src, poster, opts) {
+    opts = opts || {};
+    return { html: '<div class="card"><div class="vid"><video playsinline preload="none" ' + (poster ? 'poster="' + poster + '"' : "") + ' src="' + src + '"' + (opts.auto ? " muted loop" : "") + '></video>' +
+      (opts.auto ? '<button type="button" class="snd">🔊 Touche pour le son</button>' : '<button type="button" class="play" aria-label="Lire la vidéo"><span>' + PLAY + "</span></button>") + "</div>" +
+      (opts.caption ? '<div class="pad">' + opts.caption + "</div>" : "") + "</div>",
+      after: function (el) {
+        var v = el.querySelector("video"), snd = el.querySelector(".snd"), pl = el.querySelector(".play"), started = false, half = false;
+        function start() { if (!started) { started = true; opts.onStart && opts.onStart(); } }
+        v.addEventListener("timeupdate", function () { if (!half && v.duration && v.currentTime / v.duration > .5) { half = true; opts.onHalf && opts.onHalf(); } });
+        v.addEventListener("ended", function () { opts.onEnd && opts.onEnd(); });
+        if (opts.auto) {
+          var c = navigator.connection || {};
+          if (!(c.saveData || /2g/.test(c.effectiveType || ""))) { v.preload = "auto"; v.play().catch(function () {}); }
+          snd.onclick = function () { v.muted = false; v.loop = false; v.currentTime = 0; v.controls = true; v.play().catch(function () {}); snd.remove(); start(); };
+        } else {
+          pl.onclick = function () { pl.remove(); v.controls = true; v.play().catch(function () {}); start(); };
+        }
+      } };
+  }
+
+  /* ===================== CONTENU ===================== */
+  var COM = [
+    { t: "👗 Boutique / vêtements", k: "Boutique", phr: "une boutique de vêtements",
+      reac: "Ah, les habits ! Pendant les fêtes, tout le monde veut être frais 👌",
+      aff: "affiche-faso-style.jpg", affCap: "Affiche pour <b>Faso Style</b> (boutique de vêtements)",
+      vid: "spot-produit", vidCap: "Spot pub pour un <b>produit</b>. Pour toi, ce sera tes habits 👗" },
+    { t: "🍗 Restaurant / maquis", k: "Maquis", phr: "un restaurant / maquis",
+      reac: "Ah, un maquis ! Les fêtes, c'est le moment où les gens sortent manger 😄",
+      aff: "affiche-maquis-baobab.jpg", affCap: "Affiche pour le <b>Maquis Le Baobab</b>",
+      vid: "spot-histoire", vidCap: "Spot pub en <b>mini-histoire</b>. Pour toi, ce sera ton poulet braisé 🍗" },
+    { t: "💇🏾‍♀️ Salon / beauté", k: "Salon", phr: "un salon de beauté",
+      reac: "Un salon, super ! Pour les fêtes, les femmes veulent être belles 💅🏾",
+      aff: "affiche-belle-afro.jpg", affCap: "Affiche pour le <b>Salon Belle Afro</b>",
+      vid: "spot-produit", vidCap: "Spot pub pour un <b>produit de beauté</b> 💚" },
+    { t: "🛍️ Autre commerce", k: "Autre", phr: "un commerce",
+      reac: "Très bien, c'est noté 👍",
+      aff: "affiche-faso-style.jpg", affCap: "Affiche pour <b>Faso Style</b>",
+      vid: "spot-tbm", vidCap: "Spot pub pour <b>TBM Inov Afrika</b> (entreprise d'étanchéité) 🏗️" }
+  ];
+  var PUB = [
+    { t: "✅ Oui, et ça marche", k: "Oui, ça marche", r: ["Bien ! Pendant les fêtes, on va pousser encore plus fort 🚀"] },
+    { t: "😕 Oui, mais pas de résultats", k: "Oui, sans résultats", r: ["Je comprends. Souvent, c'est le visuel ou le réglage de la pub qui bloque.", "C'est exactement le travail de Willy : il fait des pubs pour WillShop et pour des entreprises tous les jours 💪🏾"] },
+    { t: "🙅🏾 Jamais", k: "Jamais", r: ["Pas de souci, c'est notre travail 😉", "Tu n'as rien à filmer, rien à régler. On s'occupe de tout."] }
+  ];
+  function M(f) { return CFG.media + f; }
+  function comTxt() { var c = COM[S.com]; if (!c) return ""; return c.k === "Autre" && S.autre ? "Autre : " + S.autre : c.k; }
+
+  /* Image dans le chat (si l'image manque, on montre une carte texte à la place) */
+  function imgCard(file, caption) {
+    return { html: '<div class="card"><img class="pic" alt="" src="' + M(file) + '">' +
+      '<div class="ph" hidden><span>🖼️</span>' + caption + "</div>" +
+      '<div class="pad">' + caption + "</div></div>",
+      after: function (el) {
+        var im = el.querySelector(".pic");
+        im.onload = down;
+        im.onerror = function () { im.remove(); el.querySelector(".ph").hidden = false; el.querySelector(".pad").hidden = true; };
+      } };
+  }
+  function input(ph, label, min, cb) {
+    dock.innerHTML = '<div class="in"><form class="form" id="wat-f"><input id="wat-i" maxlength="40" placeholder="' + ph + '">' +
+      '<div class="msg" id="wat-m">Écris au moins ' + min + ' lettres 🙂</div><button class="opt main" type="submit">' + label + "</button></form></div>";
+    var f = document.getElementById("wat-f"), i = document.getElementById("wat-i");
+    f.onsubmit = function (e) {
+      e.preventDefault();
+      var v = i.value.replace(/\s+/g, " ").trim();
+      if (v.length < min) { i.classList.add("err"); document.getElementById("wat-m").style.display = "block"; return; }
+      i.blur(); clear(); me(v); setTimeout(function () { cb(v); }, 300);
+    };
+    down();
+  }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  /* Jours proposés pour le rendez-vous : à partir de demain, sans le dimanche */
+  var JN = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+  var MN = ["janv.", "févr.", "mars", "avril", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+  function jours() {
+    var out = [], d = new Date();
+    while (out.length < CFG.jours) {
+      d.setDate(d.getDate() + 1);
+      if (d.getDay() === 0) continue;
+      out.push(JN[d.getDay()] + " " + d.getDate() + " " + MN[d.getMonth()]);
+    }
+    return out;
+  }
+
+  /* ===================== PARCOURS ===================== */
+  if (/[?&](reset|test)/.test(location.search)) { S = {}; save(); }
+  var arrived = false;
+  function start() {
+    prog(6);
+    if (!arrived) { arrived = true; step("Arrivée"); px("ViewContent", { content_name: PROD }); }
+    if (S.nom && S.clicWa) return retour();
+    bot(["Bonjour 👋 Moi c'est <b>Aïcha</b>, l'assistante de <b>Willy Tiendré</b>.",
+      "Les fêtes arrivent 🎄 C'est le moment où les gens achètent le plus. Si on ne te voit pas, ils vont acheter ailleurs.",
+      "Dis-moi d'abord : tu as quel type de commerce ?"], function () {
+      ask(COM.map(function (c) { return { t: c.t }; }), function (a, i) {
+        S.com = i; save(); send({ type: "visit", step: "Commerce", com: comTxt() }); px("TunnelDemarre", {}, true);
+        if (COM[i].k !== "Autre") return pub();
+        bot(["D'accord ! Tu vends quoi ? Écris-le en 2 ou 3 mots 👇"], function () {
+          input("Ex : pièces de moto, pagnes, cosmétiques…", "Continuer", 3, function (v) { S.autre = v; save(); send({ type: "visit", step: "Commerce", com: comTxt() }); pub(); });
+        });
+      });
+    });
+  }
+
+  function pub() {
+    prog(18);
+    bot([COM[S.com].reac, "Tu fais déjà la pub sur Facebook ?"], function () {
+      ask(PUB.map(function (o) { return { t: o.t }; }), function (a, i) {
+        S.pub = i; save(); send({ type: "visit", step: "Pub", pub: PUB[i].k });
+        bot(PUB[i].r.concat(["Regarde ce qu'on fait pour des commerces comme le tien 👇"]), preuve);
+      });
+    });
+  }
+
+  function preuve() {
+    prog(30); step("Preuve vue");
+    var c = COM[S.com];
+    var vc = videoCard(M(c.vid + ".mp4"), M(c.vid + ".jpg"), { caption: c.vidCap, onStart: function () { step("Vidéo lancée"); px("VideoExemple", {}, true); } }), va = vc.after;
+    vc.after = function (el) { va(el); el.querySelector("video").addEventListener("error", function () { el.querySelector(".card").innerHTML = '<div class="ph"><span>🎬</span>' + c.vidCap + "</div>"; }); };
+    bot([imgCard(c.aff, c.affCap), vc, "Et après, Willy lance ta pub et la suit lui-même. Toi, tu reçois les clients sur WhatsApp 📲"], function () {
+      ask([{ t: "C'est combien ? 👀", c: "main" }], offre);
+    });
+  }
+
+  function offre() {
+    prog(42); step("Offre vue"); px("OffreVue", {}, true);
+    bot(["Voici l'<b>Offre spéciale fêtes</b> 👇", { html: '<div class="card"><div class="pad"><span class="tag">🎄 Spécial fêtes</span><h4>Pub clé en main · Willy Tiendré</h4>' +
+      '<div class="recap"><div><span>🎬 2 vidéos pub</span><span>✅</span></div>' +
+      '<div><span>🖼️ 3 affiches pro</span><span>✅</span></div>' +
+      '<div><span>📢 Ta pub Facebook lancée et suivie pendant 7 jours</span><span>✅</span></div></div>' +
+      '<div class="price"><b>' + fmt(CFG.prix) + '</b></div>' +
+      '<div class="bonus"><span>⏱️ Prêt en 48 h</span><span>✏️ 1 correction offerte</span></div>' +
+      '<p class="note">Le budget de la pub (l\'argent pour Facebook) est à part. C\'est toi qui choisis. On conseille à partir de ' + fmt(CFG.budgetMin) + '.</p></div></div>' },
+      "⚠️ Seulement <b>" + CFG.places + " places</b>, jusqu'au " + CFG.fin + ". Willy veut bien faire le travail de chaque client."], function () {
+      ask([{ t: "Ok ! Et le budget pub, je paie comment ? 💳", c: "main" }, { t: "J'ai une question", c: "soft" }], function (a, i) {
+        if (i) return question(offre);
+        carte();
+      });
+    });
+  }
+
+  function carte() {
+    prog(52);
+    bot(["Tu as une carte bancaire (Visa, carte Orange Money…) ?"], function () {
+      ask([{ t: "💳 Oui, j'ai une carte" }, { t: "🙅🏾 Non, pas de carte" }], function (a, i) {
+        S.carte = i ? "Pas de carte" : "A une carte"; save(); send({ type: "visit", step: "Budget pub", carte: S.carte });
+        bot(i ? ["Pas de souci 👍 Tu envoies le budget pub à Willy par <b>Orange Money ou Moov</b>, et il le paie avec sa carte.", "Tu reçois les preuves de paiement de Facebook."]
+          : ["Parfait 👍 Tu mets le budget sur ta carte, et Willy lance la pub avec.", "L'argent reste chez toi, tu vois tout ce qui est dépensé."], page);
+      });
+    });
+  }
+
+  function page() {
+    prog(60);
+    bot(["Ton commerce a déjà une page Facebook ?"], function () {
+      ask([{ t: "Oui ✅" }, { t: "Non, pas encore" }], function (a, i) {
+        S.page = i ? "Non" : "Oui"; save(); send({ type: "visit", step: "Page Facebook", page: S.page });
+        bot([i ? "Pas grave, Willy t'aide à la créer 😉" : "Super ! Tu donneras juste l'accès à Willy pour lancer la pub, il t'explique comment.",
+          "Pour le pack, c'est simple 🤝", { html: '<div class="card"><div class="pad"><div class="steps4">' +
+          '<div><em>1</em><span>Tu paies <b>' + fmt(CFG.avance) + ' d\'avance</b> par Orange Money ou Moov.</span></div>' +
+          '<div><em>2</em><span>Tu envoies tes photos, tes prix et ton logo.</span></div>' +
+          '<div><em>3</em><span>En <b>48 h</b>, tu vois tes vidéos et tes affiches.</span></div>' +
+          '<div><em>4</em><span>Ça te plaît ? Tu paies le reste (' + fmt(CFG.prix - CFG.avance) + ') et Willy lance ta pub.</span></div></div></div></div>' },
+          "On en parle ensemble avant de commencer. Tu préfères comment ?"], rdv);
+      });
+    });
+  }
+
+  var RDV = [
+    { t: "📞 Un appel de 15 min", k: "Appel" },
+    { t: "🤝 Se rencontrer à Ouaga", k: "Rencontre" },
+    { t: "💬 Juste sur WhatsApp", k: "WhatsApp" }
+  ];
+  function rdv() {
+    prog(70);
+    ask(RDV.map(function (o) { return { t: o.t }; }), function (a, i) {
+      S.rdv = RDV[i].k; S.quand = ""; S.lieu = ""; save(); send({ type: "visit", step: "Rendez-vous", rdv: S.rdv });
+      if (S.rdv === "WhatsApp") return bot(["D'accord, Willy t'écrit directement 👍"], contact);
+      if (S.rdv === "Rencontre") return bot(["Pas de souci 🤝 Willy se déplace. Le déplacement est à <b>" + fmt(CFG.deplacement) + "</b>.", "Tu es dans quel quartier ?"], function () {
+        input("Ex : Pissy, Ouaga 2000, Tampouy…", "Continuer", 3, function (v) { S.lieu = cap(v); save(); quand(); });
+      });
+      quand();
+    });
+  }
+
+  function quand() {
+    prog(78);
+    if (CFG.agenda) {
+      dock.innerHTML = '<div class="in"><div class="hint">👇 Choisis ton heure</div><a class="cta" id="wat-ag" href="' + CFG.agenda + '" target="_blank" rel="noopener">📅 Choisir mon jour et mon heure</a>' +
+        '<button type="button" class="opt" id="wat-ok">C\'est fait ✅</button></div>';
+      document.getElementById("wat-ag").onclick = function () { S.quand = "Agenda Google"; save(); send({ type: "visit", step: "Rendez-vous", quand: S.quand }); };
+      document.getElementById("wat-ok").onclick = function () { clear(); me("C'est fait ✅"); setTimeout(contact, 300); };
+      return bot([S.rdv === "Appel" ? "Choisis le moment de ton appel 👇" : "Choisis le moment de la rencontre 👇"], down);
+    }
+    var J = jours();
+    bot(["Quel jour t'arrange ?"], function () {
+      ask(J, function (j) {
+        bot(["Et à quelle heure ?"], function () {
+          ask(CFG.heures, function (h) {
+            S.quand = j + " à " + h; save(); send({ type: "visit", step: "Rendez-vous", quand: S.quand });
+            bot(["Noté : <b>" + esc(S.quand) + "</b> 🗓️ Willy te confirme sur WhatsApp."], contact);
+          });
+        });
+      });
+    });
+  }
+
+  function contact() {
+    prog(86); px("InitiateCheckout", { value: CFG.prix, currency: "XOF" });
+    bot(["Dernière chose : ton prénom, le nom de ton commerce et ton numéro WhatsApp 👇"], function () {
+      dock.innerHTML = '<div class="in"><form class="form" id="wat-c">' +
+        '<input name="nom" maxlength="40" autocomplete="given-name" placeholder="Ton prénom">' +
+        '<input name="ent" maxlength="50" placeholder="Nom de ton commerce (facultatif)">' +
+        '<div class="tel"><input name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ton numéro WhatsApp (ex : 70 00 00 00)"></div>' +
+        '<div class="msg">Mets ton prénom et un numéro de 8 chiffres 🙂</div>' +
+        '<button class="opt main" type="submit">Continuer</button></form></div>';
+      var f = document.getElementById("wat-c");
+      f.onsubmit = function (e) {
+        e.preventDefault();
+        var nom = f.nom.value.replace(/\s+/g, " ").trim(), d = f.tel.value.replace(/\D/g, "").replace(/^(00)?226/, "");
+        var okN = nom.length >= 2, okT = d.length === 8;
+        f.nom.classList.toggle("err", !okN); f.tel.classList.toggle("err", !okT); f.querySelector(".msg").style.display = okN && okT ? "none" : "block";
+        if (!okN || !okT) return;
+        S.nom = cap(nom); S.ent = f.ent.value.replace(/\s+/g, " ").trim(); S.tel = d.replace(/(\d{2})(?=\d)/g, "$1 "); save();
+        clear(); me(S.nom + (S.ent ? " · " + S.ent : "") + " · " + S.tel);
+        send({ type: "lead", step: "Numéro donné", nom: S.nom, ent: S.ent, tel: S.tel, rdv: S.rdv, quand: S.quand, lieu: S.lieu, carte: S.carte, page: S.page, pub: (PUB[S.pub] || {}).k });
+        px("Lead", { value: CFG.prix, currency: "XOF" });
+        setTimeout(final, 300);
+      };
+      down();
+    });
+  }
+
+  function rdvTxt() {
+    if (S.rdv === "Appel") return "Appel" + (S.quand ? " : " + S.quand : "");
+    if (S.rdv === "Rencontre") return "Rencontre" + (S.lieu ? " à " + S.lieu : "") + (S.quand ? ", " + S.quand : "");
+    return "Sur WhatsApp";
+  }
+  function msgWa() {
+    var c = COM[S.com] || COM[3], phr = c.phr;
+    if (c.k === "Autre" && S.autre) phr = "un commerce (" + S.autre + ")";
+    return "Bonjour Willy, je suis " + S.nom + (S.ent ? " de " + S.ent : "") + ", j'ai " + phr + ". Je veux l'offre fêtes à 15 000 F (2 vidéos + 3 affiches + pub). " +
+      "Rendez-vous : " + rdvTxt() + ". " + (S.carte === "Pas de carte" ? "Je n'ai pas de carte bancaire." : "J'ai une carte bancaire.");
+  }
+  function final() {
+    prog(96); step("Récap vu");
+    var lignes = '<div><span>Offre fêtes (2 vidéos + 3 affiches + pub 7 jours)</span><span>' + fmt(CFG.prix) + '</span></div>';
+    if (S.rdv === "Rencontre") lignes += '<div><span>Déplacement à Ouaga</span><span>' + fmt(CFG.deplacement) + '</span></div>';
+    lignes += '<div><span>Après avoir vu ton travail</span><span>' + fmt(CFG.prix - CFG.avance) + '</span></div>' +
+      '<div><span>À payer aujourd\'hui (avance)</span><span>' + fmt(CFG.avance) + '</span></div></div>' +
+      '<p class="note">🗓️ Rendez-vous : <b>' + esc(rdvTxt()) + '</b><br>📢 Budget pub à part : à partir de ' + fmt(CFG.budgetMin) + '</p>';
+    bot(["Merci <b>" + esc(S.nom) + "</b> 🙏 Voici ton récap 👇", { html: '<div class="card"><div class="pad"><div class="recap">' + lignes + '</div></div>' },
+      "Touche le bouton pour réserver ta place. Ton message est déjà écrit, tu as juste à l'envoyer 👇"], cta);
+  }
+  function cta() {
+    var url = "https://wa.me/" + CFG.wa + "?text=" + encodeURIComponent(msgWa());
+    dock.innerHTML = '<div class="in"><div class="hint">👇 Touche ici</div><a class="cta wa" id="wat-go" href="' + url + '" target="_blank" rel="noopener">' + WAI + "Réserver ma place sur WhatsApp</a>" +
+      '<div class="safe">🔒 Tu paies l\'avance seulement après avoir parlé avec Willy</div></div>';
+    document.getElementById("wat-go").onclick = function () {
+      S.clicWa = 1; save(); send({ type: "visit", step: "Clic WhatsApp" }); px("Contact");
+      if (!S.done) { S.done = 1; setTimeout(function () { bot(["Top 🎉 Willy va te répondre pour confirmer ton rendez-vous.", "À tout de suite sur WhatsApp 👋🏾"]); }, 1200); }
+    };
+    down();
+  }
+
+  function question(back) {
+    var url = "https://wa.me/" + CFG.wa + "?text=" + encodeURIComponent("Bonjour Willy, j'ai une question sur l'offre fêtes à 15 000 F : ");
+    dock.innerHTML = '<div class="in"><a class="cta wa" id="wat-q" href="' + url + '" target="_blank" rel="noopener">' + WAI + "Poser ma question à Willy</a>" +
+      '<button type="button" class="link" id="wat-back">Revenir à l\'offre</button></div>';
+    document.getElementById("wat-q").onclick = function () { step("Question WhatsApp"); px("Contact"); };
+    document.getElementById("wat-back").onclick = function () { clear(); back(); }; down();
+  }
+
+  function retour() {
+    prog(90);
+    bot(["Re-bonjour <b>" + esc(S.nom) + "</b> 👋", "Tu as pu envoyer ton message à Willy sur WhatsApp ?"], function () {
+      ask([{ t: "Renvoyer mon message", c: "main" }, { t: "Revoir l'offre" }, { t: "🔄 Recommencer depuis le début" }], function (a, i) {
+        if (i === 0) return bot(["Voilà 👇"], cta);
+        if (i === 1) return offre();
+        S = {}; save(); list.innerHTML = ""; lastWho = ""; start();
+      });
+    });
+  }
+
+  start();
+})();
+</script>
+</body></html>

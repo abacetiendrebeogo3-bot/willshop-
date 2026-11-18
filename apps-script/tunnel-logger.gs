@@ -67,6 +67,39 @@ function upsertCommande(ss, d) {
   sh.getRange(r, 1, 1, 14).setValues([row]);
 }
 
+// ===================== AGENCE (clients pub : Offre Fêtes…) =====================
+// Onglet « Clients Pub » du Sheet WillShop, créé tout seul au premier prospect. Séparé des commandes de la boutique.
+var AG_HEAD = ["Date", "Offre", "Session", "Prénom", "Commerce (nom)", "WhatsApp", "Type de commerce", "Pub déjà ?", "Carte", "Page Facebook",
+  "Rendez-vous", "Quand", "Lieu", "Dernière étape", "Statut", "Acompte reçu", "Livraison prévue", "Retouches (sur 1)", "Note", "Mise à jour"];
+var AG_STEPS = ["Arrivée", "Commerce", "Pub", "Preuve vue", "Vidéo lancée", "Offre vue", "Question WhatsApp", "Budget pub", "Page Facebook", "Rendez-vous", "Numéro donné", "Récap vu", "Clic WhatsApp"];
+var AG_STATUTS = ["Visiteur", "Prospect", "RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée", "Livré", "Perdu"];
+function agSheet_() {
+  var ss = SpreadsheetApp.openById(SHEET_ID), sh = ss.getSheetByName("Clients Pub");
+  if (sh) return sh;
+  sh = ss.insertSheet("Clients Pub");
+  sh.appendRow(AG_HEAD); sh.setFrozenRows(1); sh.getRange(1, 1, 1, AG_HEAD.length).setFontWeight("bold").setBackground("#0B4A36").setFontColor("#FFFFFF");
+  sh.getRange(2, 15, 2000, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(AG_STATUTS).build());
+  return sh;
+}
+function upsertAgence(d) {
+  var sh = agSheet_(), now = new Date(), r = findRow(sh, 3, d.sid);
+  var statut = d.step === "Clic WhatsApp" ? "RDV demandé" : (d.tel ? "Prospect" : "Visiteur");
+  var step = txt(d.step || "Arrivée", 40);
+  if (!r) {
+    sh.appendRow([now, txt(d.produit), txt(d.sid, 40), txt(d.nom, 60), txt(d.ent, 60), d.tel ? "'" + txt(d.tel, 25) : "", txt(d.com, 60), txt(d.pub, 30),
+      txt(d.carte, 20), txt(d.page, 10), txt(d.rdv, 20), txt(d.quand, 40), txt(d.lieu, 60), step, statut, "", "", "", "", now]);
+    return;
+  }
+  var row = sh.getRange(r, 1, 1, 20).getValues()[0];
+  [[3, "nom", 60], [4, "ent", 60], [6, "com", 60], [7, "pub", 30], [8, "carte", 20], [9, "page", 10], [10, "rdv", 20], [11, "quand", 40], [12, "lieu", 60]]
+    .forEach(function (c) { if (d[c[1]] != null && d[c[1]] !== "") row[c[0]] = txt(d[c[1]], c[2]); });
+  if (d.tel) row[5] = "'" + txt(d.tel, 25); else if (row[5]) row[5] = "'" + String(row[5]).replace(/^'/, "");
+  if (AG_STEPS.indexOf(step) > AG_STEPS.indexOf(String(row[13]))) row[13] = step;
+  if (AG_STATUTS.indexOf(statut) > AG_STATUTS.indexOf(String(row[14]))) row[14] = statut; // ne rétrograde jamais (statuts mis à la main inclus)
+  row[19] = now;
+  sh.getRange(r, 1, 1, 20).setValues([row]);
+}
+
 // ===================== ACADÉMIE (formations) =====================
 // Les formations vont dans un Sheet séparé « WillShop Académie », pas dans les commandes de la boutique.
 var ACADEMIE_ID = "1Zdj2DA8Zh_iHEfdvYg6GdFTNMSsjth0v8W2-TXOxIhU";
@@ -206,6 +239,7 @@ function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
     if (d.app) return acaApi(d);
+    if (d.agence) { upsertAgence(d); return ContentService.createTextOutput("ok"); }
     if (/^Formation/i.test(String(d.produit || ""))) { upsertAcademie(d); return ContentService.createTextOutput("ok"); }
     var ss = SpreadsheetApp.openById(SHEET_ID);
     if (d.type === "order" || !d.type) d.step = "Commande";
