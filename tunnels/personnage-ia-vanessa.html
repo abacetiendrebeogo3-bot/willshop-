@@ -199,7 +199,11 @@ function stopClip(){if(FIN){var f=FIN;FIN=null;f()}V.pause()}
 /* ---------- ÉTAPE 1 : accroche ---------- */
 /* Étape 0 : les navigateurs interdisent le son automatique. On affiche Vanessa (image) + une question :
    le toucher sur le bouton lance la vidéo 1 directement AVEC le son. */
-function s0(){log('Arrivée');
+/* « Arrivée » est comptée seulement quand la page est vraiment visible :
+   Facebook précharge souvent la page en arrière-plan quand la pub s'affiche, sans que la personne l'ouvre. */
+function arrivee(){if(document.visibilityState==='visible'){log('Arrivée');return}
+ var f=function(){if(document.visibilityState==='visible'){document.removeEventListener('visibilitychange',f);log('Arrivée')}};document.addEventListener('visibilitychange',f)}
+function s0(){arrivee();
  V.preload='auto';V.poster=M+'01.jpg'+MV;V.src=M+'01.mp4'+MV;V.muted=false;skipB.hidden=true;sndB.hidden=true;
  bubble('Stop ✋ Tu vois cette fille ? 👆 Elle n\'existe pas. Elle a été créée avec un téléphone.','q');
  buttons([{label:'▶ Oui, montre-moi<small>🔊 avec le son</small>',echo:'Oui, montre-moi 👀',go:function(){s1()}}])}
