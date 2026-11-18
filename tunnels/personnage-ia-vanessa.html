@@ -74,31 +74,32 @@
 <script>
 (function(){
 /* ================== RÉGLAGES ================== */
-var M="https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/";
+var M="https://will-academy.vercel.app/media/vanessa/",MV="?v=1";
 var CFG={
  PRODUIT:"Formation Personnage IA",
  PRICE:"5 000 F", VALUE:5000,
  CHARIOW:"",                 // lien de paiement Chariow (vide = le bouton rouge ouvre WhatsApp)
  WA:"22672019524",           // WhatsApp de Wilfried
  SHEET:"https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec",
- AVATAR:"",
- /* Vidéos PROVISOIRES (ancien tunnel) — à remplacer par 01.mp4 … 06.mp4 de Vanessa */
- CLIPS:{c1:M+"c1.mp4",c2:M+"c3.mp4",c3:M+"c4.mp4",c4:M+"c6.mp4",c5:M+"c7b.mp4",c6:M+"c8.mp4"},
- POSTERS:{c1:M+"c1.jpg",c2:M+"c3.jpg",c3:M+"c4.jpg"},
- FREE:M+"lecon1.mp4",        // vidéo gratuite (bienvenue) pour ceux qui hésitent
+ AVATAR:M+"01.jpg",
+ CLIPS:["01","02","03","03b","04","04b","05","06"], // un clip absent de AVOIR est sauté
+ AVOIR:["01","02","03b","04","04b","05","06"],      // ajoute "03" quand le clip 03 est en ligne
+ FREE:"",                    // lien .mp4 de la vidéo de bienvenue offerte (vide = « J'hésite » propose WhatsApp)
  PROOFS:[],                  // captures d'avis d'élèves (numéros cachés)
  /* Bonus du jour (affiché à partir de l'offre, compte à rebours jusqu'à minuit). À DONNER VRAIMENT à ceux qui paient le jour même. */
  BONUS:"10 scripts prêts pour ton activité",
  BONUS_COURT:"10 scripts offerts"
 };
-/* Paroles de Vanessa (minutage s = début/fin de parole en secondes, à recaler après montage) */
+/* Paroles exactes (transcrites) + minutage s = [début, fin] de la parole */
 var CAPS={
- c1:{t:"Salut, moi c'est Vanessa. Je ne suis pas réelle, je suis une IA. Tu veux créer ton propre personnage comme moi ?",s:[[0.2,7.6]]},
- c2:{t:"Beaucoup veulent publier tous les jours, mais quelque chose les bloque. Dis-moi franchement, toi, c'est quoi ?",s:[[0.2,7.6]]},
- c3:{t:"Je te comprends. Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?",s:[[0.2,7.6]]},
- c4:{t:"Parlons de ma formation. En cinq vidéos simples, tu apprends à créer ton personnage et à le faire parler. Tu veux voir ce qu'il y a dedans ?",s:[[0.2,7.6]]},
- c5:{t:"Tout ça, avec le groupe et les textes prêts, c'est cinq mille francs. Satisfait ou remboursé. Tu commences aujourd'hui ?",s:[[0.2,7.6]]},
- c6:{t:"Pas de souci. Regarde d'abord la première vidéo de la formation, gratuitement. Après, tu décides. D'accord ?",s:[[0.2,7.6]]}
+ "01":{"t": "Salut, moi c'est Vanessa. Je ne suis pas réelle, je suis une IA. Tu veux créer ton propre personnage comme moi ?", "s": [[0.7, 6.75]]},
+ "02":{"t": "Beaucoup veulent publier tous les jours, mais quelque chose les bloque. Dis-moi franchement, toi, c'est quoi ?", "s": [[0.25, 6.3]]},
+ "03b":{"t": "Moi, je suis le personnage IA d'une vendeuse de pagnes. C'est moi qui présente ses pagnes tous les jours !", "s": [[0.85, 6.85]]},
+ "04":{"t": "Parlons de ma formation. En cinq vidéos simples, tu crées ton personnage et tu le fais parler. Tu veux voir ?", "s": [[0.25, 6.85]]},
+ "04b":{"t": "Et moi, je présente les téléphones de mon patron. Lui, il ne se filme plus du tout !", "s": [[0.25, 5.6]]},
+ "05":{"t": "Tout ça, avec le groupe et les textes prêts, pour un tout petit prix. Tu commences aujourd'hui ?", "s": [[0.85, 6.15]]},
+ "06":{"t": "Pas de souci. Regarde d'abord la première vidéo de la formation, gratuitement. Après, tu décides. D'accord ?", "s": [[1.1, 6.85]]},
+ "03":{"t":"Je te comprends. Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?","s":[[0.4,6.8]]}
 };
 /* ============================================== */
 var $=function(i){return document.getElementById(i)};
@@ -149,7 +150,8 @@ function clip(k,step,onReady){return new Promise(function(res){
  setWide(false);compact(false);$('vnStep').textContent=step||'';skipB.hidden=false;
  var c=CAPS[k],ch=chunks(words(c)),done=false,last='',ready=false;
  cancelAnimationFrame(RAF);V.onended=null;
- V.poster=CFG.POSTERS[k]||'';V.src=CFG.CLIPS[k];V.muted=!SOUND;sndB.hidden=SOUND;prog.style.width='0';play();
+ if(CFG.AVOIR.indexOf(k)<0){skipB.hidden=true;capEl.innerHTML='';prog.style.width='0';onReady&&onReady();res();return}
+ V.poster=M+k+'.jpg'+MV;V.src=M+k+'.mp4'+MV;V.muted=!SOUND;sndB.hidden=SOUND;prog.style.width='0';play();
  function readyNow(){if(!ready){ready=true;onReady&&onReady()}}
  var rt=setTimeout(readyNow,1500);V.onplaying=function(){clearTimeout(rt);rt=setTimeout(readyNow,1500)};
  FIN=function(){if(done)return;done=true;FIN=null;cancelAnimationFrame(RAF);clearTimeout(rt);capEl.innerHTML='';prog.style.width='100%';skipB.hidden=true;readyNow();res()};
@@ -164,7 +166,7 @@ function stopClip(){if(FIN){var f=FIN;FIN=null;f()}V.pause()}
 
 /* ---------- ÉTAPE 1 : accroche ---------- */
 function s1(){log('Arrivée');fb('ViewContent',{content_name:CFG.PRODUIT});
- clip('c1','',function(){bubble('Tu veux créer ton propre personnage IA, comme moi ? 😊','q');
+ clip('01','',function(){bubble('Tu veux créer ton propre personnage IA, comme moi ? 😊','q');
   buttons([{label:'OUI 👍',go:function(){stopClip();log('Intéressé');s2()}},{label:'Non',go:function(){stopClip();s1non()}}],true)})}
 function s1non(){bubble('Ok 😊 Juste 30 secondes : tu veux voir ce que l\'IA peut faire pour toi ?','q');
  buttons([{label:'Bon, montre-moi 👀',go:function(){log('Intéressé',{note:'a dit non puis oui'});s2()}}])}
@@ -175,22 +177,27 @@ var BLOC={honte:['😳 J\'ai honte de me filmer','Tu restes caché. C\'est ton p
  tel:['📱 Mon téléphone filme mal','Pas besoin d\'un bon téléphone pour filmer : l\'IA fait l\'image pour toi.'],
  dire:['🤔 Je ne sais pas quoi dire','Je te donne les textes déjà prêts.'],
  vue:['👀 Personne ne voit mes vidéos','Tu publies tous les jours, alors on te voit plus.']};
-function s2(){clip('c2','1/4',function(){bubble('Qu\'est-ce qui te bloque, toi ? 👇','q');
+function s2(){clip('02','1/4',function(){bubble('Qu\'est-ce qui te bloque, toi ? 👇','q');
  buttons(Object.keys(BLOC).map(function(k){return {label:BLOC[k][0],go:function(){stopClip();lead.blocage=BLOC[k][0].slice(2).trim();log('Blocage');s3(k)}}}))})}
 
 /* ---------- ÉTAPE 3 : on te comprend ---------- */
-function s3(k){clip('c3','2/4',function(){bubble('✅ '+BLOC[k][1]);
+function s3(k){clip('03','2/4',function(){bubble('✅ '+BLOC[k][1]);
  bubble('Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?','q');
- buttons([{label:'Oui, je veux ça 🔥',go:function(){stopClip();log('Solution vue');s4()}},
-  {label:'C\'est possible pour moi ?',go:function(){stopClip();log('Solution vue');bubble('Oui ! Si tu sais utiliser WhatsApp, tu peux le faire 😉');s4()}}])})}
+ buttons([{label:'Oui, je veux ça 🔥',go:function(){stopClip();log('Solution vue');ex()}},
+  {label:'C\'est possible pour moi ?',go:function(){stopClip();log('Solution vue');bubble('Oui ! Si tu sais utiliser WhatsApp, tu peux le faire 😉');ex()}}])})}
+/* Deux exemples de personnages IA (Mariam puis Ibrahim) */
+function ex(){bubble('Regarde 👇 deux personnages créés avec l\'IA pour des commerçants.');var gone=false;
+ function next(){if(gone)return;gone=true;stopClip();s4()}
+ clip('03b','Exemple 1/2 · personnage IA').then(function(){if(gone)return;clip('04b','Exemple 2/2 · personnage IA',function(){buttons([{label:'Je veux le mien 👉',go:next}])}).then(function(){})});
+ setTimeout(function(){if(!gone&&!bar.children.length)buttons([{label:'Je veux le mien 👉',go:next}])},1500)}
 
 /* ---------- ÉTAPE 4 : la formation ---------- */
-function s4(){log('Formation vue');clip('c4','3/4',function(){compact(true);
+function s4(){log('Formation vue');clip('04','3/4',function(){compact(true);
  bubble('<div class="vn-card"><h3>🎓 Crée ton personnage IA qui parle à ta place</h3><ul>'+
   '<li>🎬 1 · Bienvenue</li><li>👤 2 · Créer ton personnage</li><li>✍️ 3 · Écrire ce qu\'il va dire</li><li>🗣️ 4 · Le faire parler</li><li>✂️ 5 · Monter et publier</li></ul>'+
   '<div class="x"><span>🎁 Textes prêts</span><span>👥 Groupe d\'entraide</span><span>📱 Sur ton téléphone</span><span>♾️ À vie</span></div></div>');
  bubble('Tu veux savoir le prix ?','q');
- buttons([{label:'Oui, c\'est combien ? 👉',go:function(){stopClip();s5()}}])})}
+ buttons([{label:'Oui, et c\'est combien ? 👉',go:function(){stopClip();s5()}}])})}
 
 /* ---------- ÉTAPE 5 : l'offre ---------- */
 function payItems(){var it=[];
@@ -200,7 +207,7 @@ function payItems(){var it=[];
   go:function(){stopClip();log('Clic WhatsApp',{type:'order',mode:'WhatsApp'});fb('Contact')}});
  return it}
 function waUrl(t){return 'https://wa.me/'+CFG.WA+'?text='+encodeURIComponent('Bonjour Wilfried, '+t+' à la formation « Personnage IA » à '+CFG.PRICE+'. (réf '+REF+')')}
-function s5(){log('Offre vue');urgency();clip('c5','4/4',function(){compact(true);
+function s5(){log('Offre vue');urgency();clip('05','4/4',function(){compact(true);
  bubble('<div class="vn-card"><h3>Ta formation complète</h3>Aujourd\'hui 👇<br><span class="vn-price">'+CFG.PRICE+'</span>'+
   '<div class="vn-guar">🎁 <b>Aujourd\'hui seulement :</b> '+CFG.BONUS+' en plus.</div><div class="vn-guar">🛡️ <b>Satisfait ou remboursé 7 jours.</b> Tu ne risques rien.</div><div style="margin-top:6px">⚡ Accès tout de suite après le paiement.</div>'+
   (CFG.PROOFS.length?'<div class="vn-proofs">'+CFG.PROOFS.map(function(u){return '<img src="'+u+'" alt="Avis">'}).join('')+'</div>':'')+'</div>');
@@ -208,8 +215,9 @@ function s5(){log('Offre vue');urgency();clip('c5','4/4',function(){compact(true
  buttons(payItems(),false,{label:'J\'hésite encore 🤔',go:function(){stopClip();s6()}})})}
 
 /* ---------- ÉTAPE 6 : pour ceux qui doutent ---------- */
-function s6(){log('Hésite');clip('c6','',function(){
- buttons([{label:'Oui, je regarde ▶️',go:function(){stopClip();free()}}])})}
+function s6(){log('Hésite');clip('06','',function(){
+ if(CFG.FREE)buttons([{label:'Oui, je regarde ▶️',go:function(){stopClip();free()}}]);
+ else{bubble('Dis-moi ce qui te fait hésiter, je te réponds tout de suite 🙂','q');buttons(payItems())}})}
 function free(){log('Vidéo gratuite');setWide(true);$('vnStep').textContent='🎁 Vidéo 1 · offerte';skipB.hidden=true;sndB.hidden=true;capEl.innerHTML='';
  V.poster='';V.src=CFG.FREE;V.muted=false;play();
  V.ontimeupdate=function(){prog.style.width=(V.currentTime/(V.duration||1)*100)+'%'};
