@@ -216,7 +216,7 @@ function s3(k){clip('03','2/4',function(){bubble('✅ '+BLOC[k][1]+'<br>📱 <b>
 function ex(){bubble('Regarde 👇 deux personnages créés avec l\'IA pour des commerçants.');var gone=false;
  function next(){if(gone)return;gone=true;stopClip();s4()}
  clip('03b','Exemple 1/2 · personnage IA').then(function(){if(gone)return;return clip('04b','Exemple 2/2 · personnage IA')}).then(function(){if(gone)return;log('Formateur vu');clip('wilfried','Wilfried · ton formateur',function(){buttons([{label:'Je veux le mien 👉',go:next}])})});
- setTimeout(function(){if(!gone&&!bar.children.length)buttons([{label:'Je veux le mien 👉',go:next}])},1500)}
+}
 
 /* ---------- ÉTAPE 4 : la formation ---------- */
 function s4(){log('Formation vue');clip('04','3/4',function(){compact(true);
