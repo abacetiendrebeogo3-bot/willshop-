@@ -70,7 +70,9 @@ function upsertCommande(ss, d) {
 // ===================== ACADÉMIE (formations) =====================
 // Les formations vont dans un Sheet séparé « WillShop Académie », pas dans les commandes de la boutique.
 var ACADEMIE_ID = "1Zdj2DA8Zh_iHEfdvYg6GdFTNMSsjth0v8W2-TXOxIhU";
-var ACA_STEPS = ["Arrivée", "Intéressé", "Objectif", "Extrait lancé", "Extrait vu", "Offre vue", "Question", "Numéro donné", "Commande"];
+// Ordre des étapes (anciens tunnels + tunnel Vanessa « Personnage IA »). Une étape ne recule jamais.
+var ACA_STEPS = ["Arrivée", "Intéressé", "Objectif", "Blocage", "Solution vue", "Extrait lancé", "Extrait vu", "Formation vue", "Offre vue", "Hésite", "Vidéo gratuite",
+  "Question", "Numéro donné", "Clic WhatsApp", "Commande", "Achat"];
 var ACA_RANK = { "Visiteur": 0, "Prospect": 1, "Veut payer": 2, "Acompte": 3, "Payé": 4, "Perdu": 4 };
 
 // Onglet Prospects : A Date | B Formation | C Session | D Nom | E WhatsApp | F Pays | G Objectif | H Dernière étape | I Statut
@@ -78,12 +80,13 @@ var ACA_RANK = { "Visiteur": 0, "Prospect": 1, "Veut payer": 2, "Acompte": 3, "P
 function upsertAcademie(d) {
   var sh = SpreadsheetApp.openById(ACADEMIE_ID).getSheetByName("Prospects");
   var now = new Date();
-  var step = d.type === "order" ? "Commande" : txt(d.step || "Arrivée", 40);
-  var statut = d.type === "order" ? "Veut payer" : (d.tel ? "Prospect" : "Visiteur");
+  var achat = d.type === "achat";
+  var step = achat ? "Achat" : (d.type === "order" ? txt(d.step || "Commande", 40) : txt(d.step || "Arrivée", 40));
+  var statut = achat ? "Payé" : (d.type === "order" ? "Veut payer" : (d.tel ? "Prospect" : "Visiteur"));
   var r = findRow(sh, 3, d.sid);
   if (!r) {
     sh.appendRow([now, txt(d.produit), txt(d.sid, 40), txt(d.nom, 60), d.tel ? "'" + txt(d.tel, 25) : "", txt(d.zone, 30),
-      txt(d.lieu || d.veut, 40), step, statut, "", "", "", 0, "", "", now]);
+      txt(d.lieu || d.veut, 40), step, statut, achat ? Number(d.montant) || "" : "", achat ? now : "", "", 0, "", txt(d.mode ? "Clic : " + d.mode : d.note, 200), now]);
     return;
   }
   var row = sh.getRange(r, 1, 1, 16).getValues()[0];
@@ -94,6 +97,8 @@ function upsertAcademie(d) {
   if (d.lieu || d.veut) row[6] = txt(d.lieu || d.veut, 40);
   if (ACA_STEPS.indexOf(step) > ACA_STEPS.indexOf(String(row[7]))) row[7] = step;
   if ((ACA_RANK[statut] || 0) > (ACA_RANK[String(row[8])] || 0)) row[8] = statut; // ne rétrograde jamais un statut
+  if (achat) { if (!row[9]) row[9] = Number(d.montant) || ""; if (!row[10]) row[10] = now; }
+  if (d.mode && String(row[14]).indexOf(d.mode) < 0) row[14] = (row[14] ? row[14] + " · " : "") + "Clic : " + txt(d.mode, 30);
   row[15] = now;
   sh.getRange(r, 1, 1, 16).setValues([row]);
 }
@@ -154,6 +159,7 @@ function acaUpdate(ss, p) {
   if (f.acces !== undefined) row[11] = f.acces ? "Oui" : "";
   if (f.note !== undefined) row[14] = String(f.note).slice(0, 500);
   if (f.nom !== undefined) row[3] = String(f.nom).slice(0, 60);
+  if (f.tel !== undefined) row[4] = String(f.tel).replace(/[^\d+ ]/g, "").slice(0, 25);
   if (f.progression !== undefined) row[16] = Math.max(0, Math.min(8, Number(f.progression) || 0));
   if (p.relance) { row[12] = (Number(row[12]) || 0) + 1; row[13] = now; }
   if (row[4]) row[4] = "'" + String(row[4]).replace(/^'/, "");
@@ -171,6 +177,14 @@ function acaAdd(ss, p) {
   return sid;
 }
 
+// Change le code PIN (case B1 de l'onglet Config). L'ancien PIN a déjà été vérifié.
+function acaPin(ss, p) {
+  var n = String(p.nouveau || "").trim();
+  if (!/^\d{4,12}$/.test(n)) throw new Error("Le PIN doit avoir 4 à 12 chiffres");
+  ss.getSheetByName("Config").getRange("B1").setValue("'" + n);
+  return true;
+}
+
 function acaApi(d) {
   var ss = SpreadsheetApp.openById(ACADEMIE_ID);
   try {
@@ -178,6 +192,7 @@ function acaApi(d) {
     if (d.action === "data") return acaJson({ ok: true, data: acaData(ss) });
     if (d.action === "update") return acaJson({ ok: true, data: acaUpdate(ss, d.p || {}) });
     if (d.action === "add") return acaJson({ ok: true, data: acaAdd(ss, d.p || {}) });
+    if (d.action === "pin") return acaJson({ ok: true, data: acaPin(ss, d.p || {}) });
     return acaJson({ ok: false, error: "Action inconnue" });
   } catch (err) {
     return acaJson({ ok: false, error: String(err.message || err) });

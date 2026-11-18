@@ -1,0 +1,214 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Essai · Personnage IA (Vanessa)</title></head><body style="margin:0">
+<!-- ===== Tunnel « Crée ton personnage IA qui parle à ta place » — Vanessa — Will Academy =====
+     À coller dans un bloc Code HTML Systeme.io. Réglages dans CFG plus bas. -->
+<div id="vn-root">
+<style>
+#vn-root{--dk:#075e54;--gr:#1fa855;--bg:#efeae2;--me:#d9fdd3;--yel:#ffd21e;--red:#ff2e2e;--ink:#111b21;--mut:#667781;
+ position:fixed;inset:0;z-index:99999;background:#0b141a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);display:flex;justify-content:center}
+:where(#vn-root *){box-sizing:border-box;margin:0;padding:0}
+.vn-app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
+@media (min-width:560px){#vn-root{padding:3vh 0;align-items:center}.vn-app{max-width:400px;height:94vh;max-height:860px;border:11px solid #0d0d0d;border-radius:46px}}
+.vn-top{background:var(--dk);color:#fff;display:flex;align-items:center;gap:10px;padding:9px 12px;flex:none}
+.vn-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#0b4a36,#22c32a);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--yel);flex:none;overflow:hidden}
+.vn-av img{width:100%;height:100%;object-fit:cover}
+.vn-name{font-weight:700;font-size:15.5px;line-height:1.2}.vn-st{font-size:12px;opacity:.85}
+.vn-stage{position:relative;flex:none;height:min(50vh,calc(min(100vw,480px)*16/9));height:min(50dvh,calc(min(100vw,480px)*16/9));background:#000;overflow:hidden;transition:height .35s}
+.vn-stage.wide{height:auto;aspect-ratio:16/9}.vn-stage.wide video{object-fit:contain}
+.vn-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
+.vn-stage:after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,rgba(0,0,0,.7));pointer-events:none}
+.vn-stage.wide:after{display:none}
+.vn-cap{position:absolute;left:10px;right:10px;bottom:18px;z-index:2;text-align:center;font-weight:900;font-size:23px;line-height:1.18;color:#fff;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.8);-webkit-text-stroke:1px rgba(0,0,0,.6);text-wrap:balance}
+.vn-cap span{display:inline-block;margin:0 3px;animation:vnW .22s cubic-bezier(.3,1.6,.5,1) both}
+.vn-cap span.on{color:var(--yel)}
+@keyframes vnW{from{transform:translateY(10px) scale(.6);opacity:0}to{opacity:1}}
+.vn-snd{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:4;border:none;background:rgba(0,0,0,.72);color:#fff;font:800 16px inherit;font-family:inherit;padding:13px 18px;border-radius:99px;cursor:pointer;animation:vnPulse 1.6s infinite;white-space:nowrap}
+.vn-skip{position:absolute;top:10px;right:10px;z-index:4;border:none;background:rgba(0,0,0,.55);color:#fff;font:700 13px inherit;font-family:inherit;padding:7px 12px;border-radius:99px;cursor:pointer}
+.vn-step{position:absolute;top:10px;left:10px;z-index:3;background:var(--yel);color:#06291e;font-weight:800;font-size:12px;padding:4px 10px;border-radius:99px}
+.vn-step:empty,[hidden]{display:none!important}
+.vn-prog{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25);z-index:3}
+.vn-prog i{display:block;height:100%;width:0;background:var(--gr)}
+.vn-stage.load:before{content:"";position:absolute;left:50%;top:45%;width:42px;height:42px;margin:-21px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;z-index:3;animation:vnSpin .8s linear infinite}
+@keyframes vnSpin{to{transform:rotate(360deg)}}
+.vn-chat{flex:1;overflow-y:auto;padding:10px 10px 6px;background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:18px 18px}
+.vn-b{max-width:88%;background:#fff;border-radius:0 10px 10px 10px;padding:8px 10px;margin:3px 0 8px;font-size:15.5px;line-height:1.38;box-shadow:0 1px .5px rgba(0,0,0,.13);animation:vnIn .28s ease-out}
+.vn-b.q{background:var(--gr);color:#fff;font-weight:700}
+.vn-b.me{background:var(--me);margin-left:auto;border-radius:10px 0 10px 10px}
+@keyframes vnIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vn-card h3{font-size:16px;margin-bottom:6px;color:var(--dk)}
+.vn-card ul{list-style:none}.vn-card li{padding:4px 0;border-bottom:1px dashed #e5e5e5;font-size:14.5px}
+.vn-price{display:inline-block;background:var(--yel);font-weight:900;font-size:30px;padding:2px 12px 4px;border-radius:10px;margin:4px 0;animation:vnPop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes vnPop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+.vn-guar{background:#eaf8ee;border-radius:8px;padding:8px;margin-top:6px;font-size:14px}
+.vn-proofs{display:flex;gap:8px;overflow-x:auto;margin-top:8px}.vn-proofs img{flex:0 0 70%;width:70%;border-radius:8px}
+.vn-bar{flex:none;padding:9px 10px calc(10px + env(safe-area-inset-bottom));background:#f0f2f5;border-top:1px solid #e2e2e2;min-height:16px}
+.vn-btns{display:flex;flex-direction:column;gap:7px}
+.vn-btns.two{flex-direction:row}.vn-btns.two .vn-btn{flex:1;font-size:19px;padding:16px 10px}
+.vn-btn{border:none;border-radius:24px;padding:12px 14px;font-size:15.5px;font-weight:800;cursor:pointer;background:var(--yel);color:#2a2200;box-shadow:0 2px 0 rgba(0,0,0,.15);animation:vnBtn .35s cubic-bezier(.3,1.5,.5,1) both;font-family:inherit;width:100%;text-align:center;text-decoration:none;display:block;line-height:1.2}
+.vn-btn small{display:block;font-size:12px;font-weight:600;opacity:.8;margin-top:2px}
+.vn-btn.red{background:var(--red);color:#fff;font-size:17px;padding:15px;animation:vnBtn .35s both,vnPulse 1.6s .5s infinite}
+.vn-btn:active{transform:scale(.97)}
+.vn-link{background:none;border:none;color:var(--dk);font-size:14px;text-decoration:underline;cursor:pointer;font-family:inherit;margin:6px auto 0;display:block}
+@keyframes vnBtn{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes vnPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,46,46,.55)}50%{box-shadow:0 0 0 10px rgba(255,46,46,0)}}
+@media (max-height:620px){.vn-stage{height:42vh;height:42dvh}.vn-cap{font-size:19px;bottom:12px}.vn-btn{padding:10px 12px;font-size:14.5px}.vn-btns{gap:6px}.vn-b{font-size:14.5px;margin-bottom:6px}}
+@media (max-width:340px){.vn-btn{font-size:14px}.vn-cap{font-size:19px}}
+</style>
+
+<div class="vn-app">
+ <div class="vn-top"><div class="vn-av" id="vnAv">V</div><div style="flex:1;min-width:0"><div class="vn-name">Vanessa · Will Academy</div><div class="vn-st" id="vnSt">en ligne</div></div></div>
+ <div class="vn-stage" id="vnStage">
+  <video id="vnV" playsinline webkit-playsinline preload="auto" muted></video>
+  <div class="vn-step" id="vnStep"></div><div class="vn-cap" id="vnCap"></div>
+  <button class="vn-skip" id="vnSkip" type="button">Passer ⏭</button>
+  <button class="vn-snd" id="vnSnd" type="button" hidden>🔊 Touche pour le son</button>
+  <div class="vn-prog"><i id="vnProg"></i></div>
+ </div>
+ <div class="vn-chat" id="vnChat"></div>
+ <div class="vn-bar" id="vnBar"></div>
+</div>
+
+<script>
+(function(){
+/* ================== RÉGLAGES ================== */
+var M="https://cdn.jsdelivr.net/gh/abacetiendrebeogo3-bot/willshop-@cfd2b5270c0a7bca61abc606197831014f8b2708/lia/";
+var CFG={
+ PRODUIT:"Formation Personnage IA",
+ PRICE:"5 000 F", VALUE:5000,
+ CHARIOW:"",                 // lien de paiement Chariow (vide = le bouton rouge ouvre WhatsApp)
+ WA:"22672019524",           // WhatsApp de Wilfried
+ SHEET:"https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec",
+ AVATAR:"",
+ /* Vidéos PROVISOIRES (ancien tunnel) — à remplacer par 01.mp4 … 06.mp4 de Vanessa */
+ CLIPS:{c1:M+"c1.mp4",c2:M+"c3.mp4",c3:M+"c4.mp4",c4:M+"c6.mp4",c5:M+"c7b.mp4",c6:M+"c8.mp4"},
+ POSTERS:{c1:M+"c1.jpg",c2:M+"c3.jpg",c3:M+"c4.jpg"},
+ FREE:M+"lecon1.mp4",        // vidéo gratuite (bienvenue) pour ceux qui hésitent
+ PROOFS:[]                   // captures d'avis d'élèves (numéros cachés)
+};
+/* Paroles de Vanessa (minutage s = début/fin de parole en secondes, à recaler après montage) */
+var CAPS={
+ c1:{t:"Salut, moi c'est Vanessa. Je ne suis pas réelle, je suis une IA. Tu veux créer ton propre personnage comme moi ?",s:[[0.2,7.6]]},
+ c2:{t:"Beaucoup veulent publier tous les jours, mais quelque chose les bloque. Dis-moi franchement, toi, c'est quoi ?",s:[[0.2,7.6]]},
+ c3:{t:"Je te comprends. Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?",s:[[0.2,7.6]]},
+ c4:{t:"Parlons de ma formation. En cinq vidéos simples, tu apprends à créer ton personnage et à le faire parler. Tu veux voir ce qu'il y a dedans ?",s:[[0.2,7.6]]},
+ c5:{t:"Tout ça, avec le groupe et les textes prêts, c'est cinq mille francs. Satisfait ou remboursé. Tu commences aujourd'hui ?",s:[[0.2,7.6]]},
+ c6:{t:"Pas de souci. Regarde d'abord la première vidéo de la formation, gratuitement. Après, tu décides. D'accord ?",s:[[0.2,7.6]]}
+};
+/* ============================================== */
+var $=function(i){return document.getElementById(i)};
+var chat=$('vnChat'),bar=$('vnBar'),stage=$('vnStage'),V=$('vnV'),capEl=$('vnCap'),prog=$('vnProg'),sndB=$('vnSnd'),skipB=$('vnSkip');
+if(CFG.AVATAR)$('vnAv').innerHTML='<img src="'+CFG.AVATAR+'" alt="">';
+var lead={blocage:""},SOUND=false,TEST=/\/essai\//.test(location.pathname)||location.protocol==='file:';
+
+/* ---------- Suivi : identifiant visiteur + Sheet + Pixel ---------- */
+var SID='';try{SID=localStorage.getItem('vn_sid')||''}catch(e){}
+if(!SID){SID='v'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);try{localStorage.setItem('vn_sid',SID)}catch(e){}}
+var REF=SID.slice(-4).toUpperCase();
+function log(step,extra){if(TEST||!CFG.SHEET)return;try{var b=JSON.stringify(Object.assign({produit:CFG.PRODUIT,sid:SID,step:step,lieu:lead.blocage,date:new Date().toISOString()},extra||{}));
+ if(!(navigator.sendBeacon&&navigator.sendBeacon(CFG.SHEET,b)))fetch(CFG.SHEET,{method:'POST',mode:'no-cors',keepalive:true,body:b})}catch(e){}}
+function fb(ev,p){try{if(window.fbq)fbq('track',ev,p||{})}catch(e){}}
+
+/* ---------- Chat ---------- */
+function scroll(){setTimeout(function(){chat.scrollTop=chat.scrollHeight},30)}
+function bubble(html,cls){var d=document.createElement('div');d.className='vn-b'+(cls?' '+cls:'');d.innerHTML=html;chat.appendChild(d);scroll();return d}
+function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function clearBar(){bar.innerHTML=''}
+function buttons(items,two,link){clearBar();var w=document.createElement('div');w.className='vn-btns'+(two?' two':'');
+ items.forEach(function(it,i){var b=document.createElement(it.href?'a':'button');b.className='vn-btn'+(it.cls?' '+it.cls:'');b.style.animationDelay=(i*.07)+'s';b.innerHTML=it.label;
+  if(it.href){b.href=it.href;if(it.blank){b.target='_blank';b.rel='noopener'}}
+  b.onclick=function(){if(!it.keep){clearBar();bubble(it.echo||it.label.replace(/<small>.*<\/small>/,''),'me')}SOUND=true;it.go&&it.go()};w.appendChild(b)});
+ bar.appendChild(w);
+ if(link){var l=document.createElement('button');l.className='vn-link';l.textContent=link.label;l.onclick=function(){clearBar();bubble(link.label,'me');SOUND=true;link.go()};bar.appendChild(l)}
+ scroll()}
+
+/* ---------- Vidéo + paroles ---------- */
+function words(c){var w=c.t.split(/\s+/),S=c.s.reduce(function(x,s){return x+s[1]-s[0]},0);
+ var wt=w.map(function(x){return x.replace(/[^\wÀ-ÿ']/g,'').length+1}),W=wt.reduce(function(x,y){return x+y},0),acc=0;
+ return w.map(function(x,i){var t=acc/W*S;acc+=wt[i];var k=0;while(k<c.s.length-1&&t>c.s[k][1]-c.s[k][0]){t-=c.s[k][1]-c.s[k][0];k++}return {w:x,t:c.s[k][0]+t}})}
+function chunks(ws){var out=[],c=[];ws.forEach(function(o){c.push(o);if(/[.?!]$/.test(o.w)||c.length>=4||(/,$/.test(o.w)&&c.length>=2)){out.push(c);c=[]}});if(c.length)out.push(c);return out}
+function play(){var p=V.play();if(p&&p.catch)p.catch(function(e){if(e&&e.name==='AbortError')return;V.muted=true;sndB.hidden=false;V.play().catch(function(){})})}
+var RAF=0,FIN=null;
+V.addEventListener('waiting',function(){stage.classList.add('load')});V.addEventListener('playing',function(){stage.classList.remove('load')});
+sndB.onclick=function(e){e.stopPropagation();SOUND=true;sndB.hidden=true;V.muted=false;V.currentTime=0;play()};
+stage.onclick=function(){if(stage.classList.contains('wide'))return;if(V.muted){sndB.onclick({stopPropagation:function(){}})}else if(V.paused)play();else V.pause()};
+skipB.onclick=function(e){e.stopPropagation();V.pause();if(FIN)FIN()};
+function setWide(on){stage.classList.toggle('wide',on);V.controls=on}
+// Joue un clip ; onReady = au bout de 1,5 s (boutons), la promesse finit à la fin du clip ou sur « Passer »
+function clip(k,step,onReady){return new Promise(function(res){
+ setWide(false);$('vnStep').textContent=step||'';skipB.hidden=false;
+ var c=CAPS[k],ch=chunks(words(c)),done=false,last='',ready=false;
+ cancelAnimationFrame(RAF);V.onended=null;
+ V.poster=CFG.POSTERS[k]||'';V.src=CFG.CLIPS[k];V.muted=!SOUND;sndB.hidden=SOUND;prog.style.width='0';play();
+ function readyNow(){if(!ready){ready=true;onReady&&onReady()}}
+ var rt=setTimeout(readyNow,1500);V.onplaying=function(){clearTimeout(rt);rt=setTimeout(readyNow,1500)};
+ FIN=function(){if(done)return;done=true;FIN=null;cancelAnimationFrame(RAF);clearTimeout(rt);capEl.innerHTML='';prog.style.width='100%';skipB.hidden=true;readyNow();res()};
+ V.onended=FIN;
+ function tick(){var t=V.currentTime;prog.style.width=(t/(V.duration||8)*100)+'%';
+  var ci=-1,wi=-1;ch.forEach(function(g,gi){g.forEach(function(o,oi){if(o.t<=t){ci=gi;wi=oi}})});
+  var key=ci+':'+wi;if(ci>=0&&t>c.s[c.s.length-1][1]+0.6)key='x';
+  if(key!==last){last=key;capEl.innerHTML=(key==='x'||ci<0)?'':ch[ci].slice(0,wi+1).map(function(o,i){return '<span'+(i===wi?' class="on"':'')+'>'+o.w+'</span>'}).join(' ')}
+  if(!done)RAF=requestAnimationFrame(tick)}
+ RAF=requestAnimationFrame(tick)})}
+function stopClip(){if(FIN){var f=FIN;FIN=null;f()}V.pause()}
+
+/* ---------- ÉTAPE 1 : accroche ---------- */
+function s1(){log('Arrivée');fb('ViewContent',{content_name:CFG.PRODUIT});
+ clip('c1','',function(){bubble('Tu veux créer ton propre personnage IA, comme moi ? 😊','q');
+  buttons([{label:'OUI 👍',go:function(){stopClip();log('Intéressé');s2()}},{label:'Non',go:function(){stopClip();s1non()}}],true)})}
+function s1non(){bubble('Ok 😊 Juste 30 secondes : tu veux voir ce que l\'IA peut faire pour toi ?','q');
+ buttons([{label:'Bon, montre-moi 👀',go:function(){log('Intéressé',{note:'a dit non puis oui'});s2()}}])}
+
+/* ---------- ÉTAPE 2 : ce qui bloque ---------- */
+var BLOC={honte:['😳 J\'ai honte de me filmer','Tu restes caché. C\'est ton personnage qui parle à ta place.'],
+ temps:['⏰ Je n\'ai pas le temps','Ta vidéo est prête en quelques minutes.'],
+ tel:['📱 Mon téléphone filme mal','Pas besoin d\'un bon téléphone pour filmer : l\'IA fait l\'image pour toi.'],
+ dire:['🤔 Je ne sais pas quoi dire','Je te donne les textes déjà prêts.'],
+ vue:['👀 Personne ne voit mes vidéos','Tu publies tous les jours, alors on te voit plus.']};
+function s2(){clip('c2','1/4',function(){bubble('Qu\'est-ce qui te bloque, toi ? 👇','q');
+ buttons(Object.keys(BLOC).map(function(k){return {label:BLOC[k][0],go:function(){stopClip();lead.blocage=BLOC[k][0].slice(2).trim();log('Blocage');s3(k)}}}))})}
+
+/* ---------- ÉTAPE 3 : on te comprend ---------- */
+function s3(k){clip('c3','2/4',function(){bubble('✅ '+BLOC[k][1]);
+ bubble('Et si, juste avec ton téléphone, tu créais un personnage comme moi qui présente tes produits ?','q');
+ buttons([{label:'Oui, je veux ça 🔥',go:function(){stopClip();log('Solution vue');s4()}},
+  {label:'C\'est possible pour moi ?',go:function(){stopClip();log('Solution vue');bubble('Oui ! Si tu sais utiliser WhatsApp, tu peux le faire 😉');s4()}}])})}
+
+/* ---------- ÉTAPE 4 : la formation ---------- */
+function s4(){log('Formation vue');clip('c4','3/4',function(){
+ bubble('<div class="vn-card"><h3>🎓 Crée ton personnage IA qui parle à ta place</h3><ul>'+
+  '<li>🎬 Vidéo 1 : bienvenue et ce dont tu as besoin</li><li>👤 Vidéo 2 : créer ton personnage (tenues, décors)</li>'+
+  '<li>✍️ Vidéo 3 : écrire ce qu\'il va dire</li><li>🗣️ Vidéo 4 : le faire parler en vidéo</li><li>✂️ Vidéo 5 : monter et publier</li>'+
+  '<li>🎁 Les textes prêts à copier</li><li>👥 Le groupe d\'entraide</li><li>📱 Tout sur ton téléphone, à ton rythme, à vie</li></ul></div>');
+ bubble('Tu veux savoir le prix ?','q');
+ buttons([{label:'Oui, c\'est combien ? 👉',go:function(){stopClip();s5()}}])})}
+
+/* ---------- ÉTAPE 5 : l'offre ---------- */
+function payItems(){var it=[];
+ it.push({label:'🔴 Je m\'inscris · '+CFG.PRICE,cls:'red',keep:true,href:CFG.CHARIOW||waUrl('Je veux m\'inscrire'),blank:!CFG.CHARIOW,
+  go:function(){stopClip();if(CFG.CHARIOW){log('Commande',{type:'order',mode:'Chariow'});fb('InitiateCheckout',{value:CFG.VALUE,currency:'XOF'})}else{log('Clic WhatsApp',{type:'order',mode:'WhatsApp'});fb('Contact')}}});
+ it.push({label:'💬 J\'ai une question<small>ou payer par Orange / Moov Money</small>',keep:true,href:waUrl('J\'ai une question'),blank:true,
+  go:function(){stopClip();log('Clic WhatsApp',{type:'order',mode:'WhatsApp'});fb('Contact')}});
+ return it}
+function waUrl(t){return 'https://wa.me/'+CFG.WA+'?text='+encodeURIComponent('Bonjour Wilfried, '+t+' à la formation « Personnage IA » à '+CFG.PRICE+'. (réf '+REF+')')}
+function s5(){log('Offre vue');clip('c5','4/4',function(){
+ bubble('<div class="vn-card"><h3>Ta formation complète</h3>Aujourd\'hui 👇<br><span class="vn-price">'+CFG.PRICE+'</span>'+
+  '<div class="vn-guar">🛡️ <b>Satisfait ou remboursé 7 jours.</b> Tu ne risques rien.</div><div style="margin-top:6px">⚡ Accès tout de suite après le paiement.</div>'+
+  (CFG.PROOFS.length?'<div class="vn-proofs">'+CFG.PROOFS.map(function(u){return '<img src="'+u+'" alt="Avis">'}).join('')+'</div>':'')+'</div>');
+ bubble('Tu commences aujourd\'hui ?','q');
+ buttons(payItems(),false,{label:'J\'hésite encore 🤔',go:function(){stopClip();s6()}})})}
+
+/* ---------- ÉTAPE 6 : pour ceux qui doutent ---------- */
+function s6(){log('Hésite');clip('c6','',function(){
+ buttons([{label:'Oui, je regarde ▶️',go:function(){stopClip();free()}}])})}
+function free(){log('Vidéo gratuite');setWide(true);$('vnStep').textContent='🎁 Vidéo 1 · offerte';skipB.hidden=true;sndB.hidden=true;capEl.innerHTML='';
+ V.poster='';V.src=CFG.FREE;V.muted=false;play();
+ V.ontimeupdate=function(){prog.style.width=(V.currentTime/(V.duration||1)*100)+'%'};
+ bubble('🎁 Voici la <b>première vidéo de la formation</b>. Regarde-la tranquillement 👆');
+ var shown=false;function end(){if(shown)return;shown=true;bubble('Alors, tu commences aujourd\'hui ? 😊','q');buttons(payItems())}
+ V.onended=end;setTimeout(end,25000)}
+
+s1();
+})();
+</script>
+</div>
+
+</body></html>

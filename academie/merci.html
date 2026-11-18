@@ -1,0 +1,17 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bienvenue · Will Academy</title>
+<style>body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#06291e;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:20px;box-sizing:border-box}
+.c{max-width:380px}h1{font-size:28px;margin:10px 0}p{opacity:.9;line-height:1.5}a{display:block;margin-top:18px;background:#ffd21e;color:#2a2200;font-weight:800;padding:15px;border-radius:24px;text-decoration:none}</style></head>
+<body><div class="c"><div style="font-size:54px">🎉</div><h1>Bienvenue dans la formation !</h1>
+<p>Ton paiement est bien reçu. Tes vidéos t'attendent sur ton espace Chariow (regarde aussi ton e-mail).</p>
+<a href="https://wa.me/22672019524?text=Bonjour%20Wilfried%2C%20je%20viens%20de%20payer%20la%20formation%20Personnage%20IA%20%F0%9F%8E%89">💬 Écrire à Wilfried sur WhatsApp</a></div>
+<script>
+// Page d'arrivée après paiement : compte comme un ACHAT dans le Sheet « WillShop Académie » (une seule fois par appareil)
+(function(){try{
+ var q=new URLSearchParams(location.search),sid=q.get('sid')||localStorage.getItem('vn_sid')||('a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
+ if(localStorage.getItem('vn_achat_'+sid))return;localStorage.setItem('vn_achat_'+sid,'1');
+ var b=JSON.stringify({produit:'Formation Personnage IA',sid:sid,type:'achat',step:'Achat',montant:5000,date:new Date().toISOString()});
+ var u='https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec';
+ if(!(navigator.sendBeacon&&navigator.sendBeacon(u,b)))fetch(u,{method:'POST',mode:'no-cors',body:b});
+}catch(e){}})();
+</script></body></html>
