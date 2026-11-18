@@ -92,8 +92,8 @@ var CFG={
  CLIPS:["01","02","03","03b","04","04b","05","06"], // un clip absent de AVOIR est sauté
  AVOIR:["01","02","03","03b","04","04b","05","06"],      // ajoute "03" quand le clip 03 est en ligne
  FREE:"",                    // lien .mp4 de la vidéo de bienvenue offerte (vide = « J'hésite » propose WhatsApp)
- APERCUS:[],                 // captures de l'intérieur de la formation (vidéos, pack de prompts…) — liens .jpg
- PROOFS:[],                  // captures du groupe WhatsApp / avis d'élèves (NUMÉROS CACHÉS) — liens .jpg
+ APERCUS:[M+'preuves/formation2.jpg',M+'preuves/formation3.jpg',M+'preuves/formation1.jpg'],                 // captures de l'intérieur de la formation (vidéos, pack de prompts…) — liens .jpg
+ PROOFS:[M+'preuves/groupe3.jpg',M+'preuves/groupe2.jpg',M+'preuves/groupe1.jpg',M+'preuves/groupe4.jpg'],                  // captures du groupe WhatsApp / avis d'élèves (NUMÉROS CACHÉS) — liens .jpg
  /* Bonus du jour (affiché à partir de l'offre, compte à rebours jusqu'à minuit). À DONNER VRAIMENT à ceux qui paient le jour même. */
  BONUS:"10 scripts prêts pour ton activité",
  BONUS_COURT:"10 scripts offerts"
@@ -208,14 +208,14 @@ function ex(){bubble('Regarde 👇 deux personnages créés avec l\'IA pour des 
 /* ---------- ÉTAPE 4 : la formation ---------- */
 function s4(){log('Formation vue');clip('04','3/4',function(){compact(true);
  bubble('<div class="vn-card"><h3>🎓 Crée ton personnage IA qui parle à ta place</h3><ul>'+
-  '<li>🎬 1 · Bienvenue</li><li>👤 2 · Créer ton personnage</li><li>✍️ 3 · Écrire ce qu\'il va dire</li><li>🗣️ 4 · Le faire parler</li><li>✂️ 5 · Monter et publier</li></ul>'+
-  '<div class="x"><span>🎁 Textes prêts</span><span>👥 Groupe d\'entraide</span><span>📱 Sur ton téléphone</span><span>♾️ À vie</span></div></div>');
+  '<li>🎬 1 · Bienvenue et présentation</li><li>✍️ 2 · Écrire le script de ta vidéo</li><li>👤 3 · Créer ton personnage IA</li><li>🗣️ 4 · Faire parler ton personnage</li><li>✂️ 5 · Monter et publier ta vidéo pub</li></ul>'+
+  '<div class="x"><span>📄 17 prompts prêts</span><span>✏️ Modèle de script</span><span>👥 Groupe WhatsApp d\'aide</span><span>📱 Sur ton téléphone</span><span>♾️ À vie</span></div></div>');
  if(CFG.APERCUS.length||CFG.PROOFS.length||TEST){bubble('Tu veux voir à quoi ça ressemble à l\'intérieur ?','q');
   buttons([{label:'Oui, montre-moi 👀',go:function(){stopClip();inside()}},{label:'Non, c\'est combien ? 👉',go:function(){stopClip();s5()}}])}
  else{bubble('Tu veux savoir le prix ?','q');buttons([{label:'Oui, et c\'est combien ? 👉',go:function(){stopClip();s5()}}])}})}
 function inside(){log('Aperçu vu');
- if(CFG.APERCUS.length||TEST)bubble('📸 <b>L\'intérieur de la formation</b> (touche une image pour l\'agrandir)'+gallery(CFG.APERCUS,'Capture formation'));
- if(CFG.PROOFS.length||TEST)bubble('💬 <b>Dans le groupe des élèves</b> : leurs messages et leurs premières vidéos'+gallery(CFG.PROOFS,'Capture groupe'));
+ if(CFG.APERCUS.length||TEST)bubble('📸 <b>Ce que tu reçois</b> (touche une image pour l\'agrandir)'+gallery(CFG.APERCUS,'Capture formation'));
+ if(CFG.PROOFS.length||TEST)bubble('💬 <b>Dans le groupe des élèves</b> : leurs questions, leurs réponses et leurs premiers personnages'+gallery(CFG.PROOFS,'Capture groupe'));
  bubble('Tu veux savoir le prix ?','q');
  buttons([{label:'Oui, et c\'est combien ? 👉',go:function(){s5()}}])}
 
