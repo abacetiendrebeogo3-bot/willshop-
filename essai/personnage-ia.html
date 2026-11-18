@@ -116,7 +116,8 @@ var $=function(i){return document.getElementById(i)};
 var chat=$('vnChat'),bar=$('vnBar'),stage=$('vnStage'),V=$('vnV'),capEl=$('vnCap'),prog=$('vnProg'),sndB=$('vnSnd'),skipB=$('vnSkip');
 if(CFG.AVATAR)$('vnAv').innerHTML='<img src="'+CFG.AVATAR+'" alt="">';
 var lead={blocage:""},SOUND=false,TEST=/\/essai\//.test(location.pathname)||location.protocol==='file:';
-if(!TEST&&CFG.PIXEL&&!window.fbq){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init',CFG.PIXEL);fbq('track','PageView')}
+function loadPixel(){if(!TEST&&CFG.PIXEL&&!window.fbq){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init',CFG.PIXEL);fbq('track','PageView')}}
+if(document.readyState==='complete')setTimeout(loadPixel,800);else addEventListener('load',function(){setTimeout(loadPixel,800)});
 
 /* ---------- Suivi : identifiant visiteur + Sheet + Pixel ---------- */
 var SID='';try{SID=localStorage.getItem('vn_sid')||''}catch(e){}
@@ -145,7 +146,10 @@ function words(c){var w=c.t.split(/\s+/),S=c.s.reduce(function(x,s){return x+s[1
  return w.map(function(x,i){var t=acc/W*S;acc+=wt[i];var k=0;while(k<c.s.length-1&&t>c.s[k][1]-c.s[k][0]){t-=c.s[k][1]-c.s[k][0];k++}return {w:x,t:c.s[k][0]+t}})}
 function chunks(ws){var out=[],c=[];ws.forEach(function(o){c.push(o);if(/[.?!]$/.test(o.w)||c.length>=4||(/,$/.test(o.w)&&c.length>=2)){out.push(c);c=[]}});if(c.length)out.push(c);return out}
 function play(){var p=V.play();if(p&&p.catch)p.catch(function(e){if(e&&e.name==='AbortError')return;V.muted=true;sndB.hidden=false;V.play().catch(function(){})})}
-var RAF=0,FIN=null;
+var RAF=0,FIN=null,PRE={};
+var NEXT={'01':'02','02':'03','03':'03b','03b':'04b','04b':'wilfried','wilfried':'04','04':'05','05':'06'};
+function prefetch(k){var n=NEXT[k];if(!n||PRE[n]||CFG.AVOIR.indexOf(n)<0)return;PRE[n]=1;
+ try{var l=document.createElement('link');l.rel='preload';l.as='video';l.href=M+n+'.mp4'+MV;document.head.appendChild(l);var i=new Image();i.src=M+n+'.jpg'+MV}catch(e){}}
 V.addEventListener('waiting',function(){stage.classList.add('load')});V.addEventListener('playing',function(){stage.classList.remove('load')});
 sndB.onclick=function(e){e.stopPropagation();SOUND=true;sndB.hidden=true;V.muted=false;V.currentTime=0;play()};
 stage.onclick=function(){if(stage.classList.contains('wide'))return;if(V.muted){sndB.onclick({stopPropagation:function(){}})}else if(V.paused)play();else V.pause()};
@@ -162,9 +166,9 @@ function clip(k,step,onReady){return new Promise(function(res){
  var c=CAPS[k],ch=chunks(words(c)),done=false,last='',ready=false;
  cancelAnimationFrame(RAF);V.onended=null;
  if(CFG.AVOIR.indexOf(k)<0){skipB.hidden=true;capEl.innerHTML='';prog.style.width='0';onReady&&onReady();res();return}
- V.poster=M+k+'.jpg'+MV;V.src=M+k+'.mp4'+MV;V.muted=!SOUND;sndB.hidden=SOUND;prog.style.width='0';play();
+ var u=M+k+'.mp4'+MV;if(V.getAttribute('src')!==u){V.poster=M+k+'.jpg'+MV;V.src=u}else if(V.currentTime>0.2)V.currentTime=0;V.muted=!SOUND;sndB.hidden=SOUND;prog.style.width='0';play();
  function readyNow(){if(!ready){ready=true;onReady&&onReady()}}
- var rt=setTimeout(readyNow,1500);V.onplaying=function(){clearTimeout(rt);rt=setTimeout(readyNow,1500)};
+ var rt=setTimeout(readyNow,1500);V.onplaying=function(){clearTimeout(rt);rt=setTimeout(readyNow,1500);prefetch(k)};
  FIN=function(){if(done)return;done=true;FIN=null;cancelAnimationFrame(RAF);clearTimeout(rt);capEl.innerHTML='';prog.style.width='100%';skipB.hidden=true;readyNow();res()};
  V.onended=FIN;
  function tick(){var t=V.currentTime;prog.style.width=(t/(V.duration||8)*100)+'%';
@@ -182,7 +186,13 @@ chat.addEventListener('click',function(e){var im=e.target.closest('.vn-gal img')
 function stopClip(){if(FIN){var f=FIN;FIN=null;f()}V.pause()}
 
 /* ---------- ÉTAPE 1 : accroche ---------- */
-function s1(){log('Arrivée');fb('ViewContent',{content_name:CFG.PRODUIT});
+/* Étape 0 : les navigateurs interdisent le son automatique. On affiche Vanessa (image) + une question :
+   le toucher sur le bouton lance la vidéo 1 directement AVEC le son. */
+function s0(){log('Arrivée');
+ V.preload='auto';V.poster=M+'01.jpg'+MV;V.src=M+'01.mp4'+MV;V.muted=false;skipB.hidden=true;sndB.hidden=true;
+ bubble('Stop ✋ Tu vois cette fille ? 👆 Elle n\'existe pas. Elle a été créée avec un téléphone.','q');
+ buttons([{label:'▶ Oui, montre-moi<small>🔊 avec le son</small>',echo:'Oui, montre-moi 👀',go:function(){s1()}}])}
+function s1(){fb('ViewContent',{content_name:CFG.PRODUIT});
  clip('01','',function(){bubble('Tu veux créer ton propre personnage IA, comme moi ? 😊','q');
   buttons([{label:'OUI 👍',go:function(){stopClip();log('Intéressé');s2()}},{label:'Non',go:function(){stopClip();s1non()}}],true)})}
 function s1non(){bubble('Ok 😊 Juste 30 secondes : tu veux voir ce que l\'IA peut faire pour toi ?','q');
@@ -249,7 +259,7 @@ function free(){log('Vidéo gratuite');setWide(true);$('vnStep').textContent='�
  var shown=false;function end(){if(shown)return;shown=true;bubble('Alors, tu commences aujourd\'hui ? 😊','q');buttons(payItems())}
  V.onended=end;setTimeout(end,25000)}
 
-s1();
+s0();
 })();
 </script>
 </div>
