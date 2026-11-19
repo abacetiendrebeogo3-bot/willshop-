@@ -237,11 +237,11 @@ let sonDebloque = false;
 function joue(cle, tag = "") {
   videoEnCours = cle;
   const src = CFG.videos[cle];
-  $("#scene").classList.remove("cache");
+  if (CFG.videos[cle]) $("#scene").classList.remove("cache");
   $("#tag").style.display = tag ? "block" : "none"; $("#tag").textContent = tag;
   $("#barre").style.width = "0";
-  if (!src) {
-    vid.pause(); vid.style.display = "none"; poster.style.display = "flex";
+  if (!src) {   // pas de vidéo pour cette étape : on replie la zone vidéo, place aux messages
+    vid.pause(); vid.style.display = "none"; $("#scene").classList.add("cache");
     ouvrirPorte();
     poster.textContent = "🎥 Vidéo bientôt ici"; $("#passer").style.display = "none"; $("#son").style.display = "none";
     return;
@@ -354,8 +354,8 @@ async function choixOffre() {
 
 async function video4() {
   joue("v4");
-  await voix("Pour la suite, c'est très simple 👇");
-  await voix("Tout se fait à distance. Tu m'écris sur WhatsApp, tu m'envoies les photos et les vidéos de tes produits, et je m'occupe du reste. Pas besoin de se déplacer 🙂");
+  await voix("Parfait 🙌 Dernière étape : on fixe un moment pour se parler.");
+  await voix("Tout peut se faire à distance : tu m'envoies les photos de tes produits sur WhatsApp et je m'occupe du reste. Mais si tu préfères, on peut aussi se rencontrer.");
   await voix("On se parle comment ?", "fort");
   const c = await boutons([
     { t: "💬 Sur WhatsApp", v: "WhatsApp", pleine: true },
