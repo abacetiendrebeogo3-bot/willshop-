@@ -190,7 +190,18 @@ async function dit(html, style = "moi", attente = 700) {
 }
 function client(txt) { const b = document.createElement("div"); b.className = "b client"; b.textContent = txt; chat.appendChild(b); defile(); }
 
-function boutons(liste, une = false) {
+/* Les réponses n'apparaissent qu'à 95 % de la vidéo (ou si elle est passée / terminée / en panne) */
+const SEUIL = 0.95;
+let ouvrir = null, porte = Promise.resolve(), garde = null;
+function fermerPorte() { porte = new Promise(r => { ouvrir = r; }); }
+function ouvrirPorte() { clearTimeout(garde); if (ouvrir) { const o = ouvrir; ouvrir = null; o(); } }
+async function attendreVideo() {
+  if (!ouvrir) return;
+  bas.innerHTML = `<div class="confiance" style="margin:4px 0">🎧 Écoute jusqu'au bout, les réponses arrivent…</div>`;
+  await porte; bas.innerHTML = "";
+}
+async function boutons(liste, une = false) {
+  await attendreVideo();
   return new Promise(res => {
     bas.innerHTML = ""; const g = document.createElement("div"); g.className = "grille" + (une || liste.length === 1 ? " une" : "");
     liste.forEach(o => {
@@ -202,7 +213,8 @@ function boutons(liste, une = false) {
     bas.appendChild(g); setTimeout(defile, 30);
   });
 }
-function saisir(placeholder, type = "text", verif = null) {
+async function saisir(placeholder, type = "text", verif = null) {
+  await attendreVideo();
   return new Promise(res => {
     bas.innerHTML = `<div class="saisie"><input type="${type}" placeholder="${placeholder}" ${type === "tel" ? 'inputmode="numeric"' : ""}><button>➤</button></div><div class="erreur"></div>`;
     const i = bas.querySelector("input"), e = bas.querySelector(".erreur");
@@ -225,18 +237,23 @@ function joue(cle, tag = "") {
   $("#barre").style.width = "0";
   if (!src) {
     vid.pause(); vid.style.display = "none"; poster.style.display = "flex";
+    ouvrirPorte();
     poster.textContent = "🎥 Vidéo bientôt ici"; $("#passer").style.display = "none"; $("#son").style.display = "none";
     return;
   }
+  fermerPorte();
+  garde = setTimeout(ouvrirPorte, 90000);   // sécurité : jamais bloqué plus de 90 s
   poster.style.display = "none"; vid.style.display = "block";
   vid.src = src; vid.muted = !sonDebloque; vid.currentTime = 0;
   vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); $("#son").style.display = "block"; });
   $("#passer").style.display = "block"; $("#son").style.display = vid.muted ? "block" : "none";
 }
-vid.ontimeupdate = () => { if (vid.duration) $("#barre").style.width = (vid.currentTime / vid.duration * 100) + "%"; };
-vid.onended = () => { $("#passer").style.display = "none"; $("#barre").style.width = "100%"; };
+vid.ontimeupdate = () => { if (vid.duration) { $("#barre").style.width = (vid.currentTime / vid.duration * 100) + "%"; if (vid.currentTime / vid.duration >= SEUIL) ouvrirPorte(); } };
+vid.onloadedmetadata = () => { if (ouvrir && vid.duration) { clearTimeout(garde); garde = setTimeout(ouvrirPorte, (vid.duration + 10) * 1000); } };
+vid.onerror = () => ouvrirPorte();
+vid.onended = () => { $("#passer").style.display = "none"; $("#barre").style.width = "100%"; ouvrirPorte(); };
 document.addEventListener("play", e => { if (e.target !== vid) { vid.pause(); } else { chat.querySelectorAll("video").forEach(v => v.pause()); } }, true); // une seule vidéo à la fois
-$("#passer").onclick = () => { vid.pause(); $("#passer").style.display = "none"; $("#barre").style.width = "100%"; };
+$("#passer").onclick = () => { vid.pause(); $("#passer").style.display = "none"; $("#barre").style.width = "100%"; ouvrirPorte(); };
 $("#son").onclick = () => { sonDebloque = true; vid.muted = false; vid.play(); $("#son").style.display = "none"; };
 
 /* =========================================================
