@@ -532,7 +532,7 @@ async function addC() {
 }
 
 /* ---------- Agence : clients pub (onglet « Clients Pub » du Sheet WillShop) ---------- */
-var AG = { prix: 15000, avance: 7500, deplacement: 2000, objectif: 1000000, offre: /Starter/i, contenu: "2 vidéos + 5 affiches" };
+var AG = { prix: 15000, avance: 7500, deplacement: 2000, objectif: 1000000, offre: /Starter/i, contenu: "2 vidéos + 5 affiches", toutCompris: 35000 };
 var AG_ST = ["Visiteur", "Prospect", "RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée", "Terminé", "Perdu"];
 var AG_ACTIFS = ["RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée"];
 var AG_PAYANTS = ["Acompte payé", "En production", "Pub lancée", "Terminé"];
@@ -544,7 +544,8 @@ var agSeg = ls("ag_seg") || "jour", agF = "cours", agPer = "all";
 function AGL() { return (D && D.agence) || []; }
 function agFind(sid) { return AGL().filter(function (c) { return c.sid === sid; })[0]; }
 function agName(c) { return c.nom ? c.nom + (c.ent ? " · " + c.ent : "") : (c.tel || "Visiteur réf " + ref(c)); }
-function agPrix(c) { return AG.prix + (c.rdv === "Rencontre" ? AG.deplacement : 0); }
+function agTout(c) { return /tout compris/i.test(c.carte || ""); }
+function agPrix(c) { return (agTout(c) ? AG.toutCompris : AG.prix) + (c.rdv === "Rencontre" ? AG.deplacement : 0); }
 function dd(d) { return Math.round((day0(d) - day0(new Date())) / 864e5); }
 function dLabel(d) { var n = dd(d); return n === 0 ? "Aujourd'hui" : n === 1 ? "Demain" : n === -1 ? "Hier" : dShort(d); }
 var MOIS = { janv: 0, "févr": 1, fevr: 1, mars: 2, avr: 3, avril: 3, mai: 4, juin: 5, juil: 6, "août": 7, aout: 7, sept: 8, oct: 9, nov: 10, "déc": 11, dec: 11 };
@@ -602,7 +603,7 @@ function agJour() {
   h += "<h2>🎬 À livrer <span class=\"count\">" + A.length + "</span></h2>";
   h += A.length ? '<div class="list">' + A.map(function (c) {
     var t = c.livraison ? (dd(c.livraison) < 0 ? "🔴 En retard (" + dShort(c.livraison) + ")" : "Livraison " + dLabel(c.livraison).toLowerCase()) : "Date de livraison à fixer";
-    return agItem(c, t + " · " + AG.contenu, c.livraison && dd(c.livraison) <= 0 ? "hot" : "");
+    return agItem(c, t + " · " + AG.contenu + (agTout(c) ? " · 📦 tout compris" : ""), c.livraison && dd(c.livraison) <= 0 ? "hot" : "");
   }).join("") + "</div>" : '<div class="empty">Rien à livrer pour le moment.</div>';
   // Pubs en cours
   var P = L.filter(function (c) { return c.statut === "Pub lancée"; });
@@ -645,7 +646,7 @@ function agTunnel() {
     var ks = Object.keys(m).sort(function (a, b) { return m[b] - m[a]; }); if (!ks.length) return "";
     return "<h2>" + title + '</h2><div class="funnel">' + ks.map(function (k) { return '<div class="fl"><span>' + esc(k) + '</span><div class="t"><i style="width:' + (m[k] / max * 100) + '%"></i></div><b>' + m[k] + "</b></div>"; }).join("") + "</div>";
   }
-  return h + count("com", "Type de commerce") + count("pub", "Pub déjà faite ?") + count("carte", "Carte bancaire") + count("rdv", "Rendez-vous choisi");
+  return h + count("com", "Type de commerce") + count("pub", "Pub déjà faite ?") + count("carte", "Pack tout compris (35 000 F)") + count("rdv", "Rendez-vous choisi");
 }
 
 /* Fiche client */
