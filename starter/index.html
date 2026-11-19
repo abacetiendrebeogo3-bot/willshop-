@@ -277,11 +277,10 @@ async function video3() {
   etape("Offre vue"); joue("v3");
   await dit("Voilà comment je travaille 👇");
   await dit(`<h4>✅ Le Starter Pack</h4>
-    <div class="ligne">🎬 <b>2 vidéos pub</b> professionnelles, créées avec l'IA et le montage, à partir de tes photos et vidéos</div>
+    <div class="ligne">🎬 <b>2 vidéos pub</b> professionnelles</div>
     <div class="ligne">🖼️ <b>5 affiches</b> professionnelles</div>
     <div class="ligne">🚀 Ta <b>pub Facebook configurée</b> et suivie pendant <b>7 jours</b></div>
-    <div class="ligne">📲 Les messages arrivent sur <b>ton WhatsApp</b></div>
-    <div class="ligne">🏠 Pas besoin que je me déplace : tout se fait à distance. Tournage dans ta boutique possible en extra.</div>`, "carte");
+    <div class="ligne">📲 Les messages arrivent sur <b>ton WhatsApp</b></div>`, "carte");
   await dit(`<div class="ligne">💼 <b>Mon travail</b><br><span class="prix">${CFG.prix}</span><br>2 vidéos + 5 affiches + pub configurée + suivi 7 jours</div>
     <div class="ligne">⛽ <b>Le budget pub</b> → pour Facebook<br>Tu le mets sur ta carte. Il ne vient pas chez moi. C'est toi qui choisis le montant (conseillé : à partir de ${CFG.budgetConseil}).</div>`, "carte", 900);
   await dit("La pub, c'est comme une moto 🏍️ Moi je prépare la moto et je la conduis. L'essence, c'est toi qui la mets. Plus tu mets d'essence, plus ta pub va loin.");
@@ -389,7 +388,7 @@ async function regles() {
   await dit(`<h4>📌 Avant de commencer</h4>
     <div class="ligne">💰 Je paie <b>${CFG.avance}</b> pour commencer. Quand les 2 vidéos et les 5 affiches sont prêtes, je paie le reste${D.pack === "Tout compris 35 000" ? " (<b>" + CFG.resteToutCompris + "</b>)" : ""}, puis la pub est lancée.</div>
     <div class="ligne">⏱️ Livraison en <b>48 h</b> après l'avance + mes photos, mon logo et mes prix.</div>
-    <div class="ligne">✏️ <b>1 série de corrections</b> offerte. Tout se fait à distance : j'envoie mes photos et vidéos sur WhatsApp. Tournage sur place = extra sur devis.</div>
+    <div class="ligne">✏️ <b>1 série de corrections</b> offerte. Tout se fait à distance.</div>
     <div class="ligne">${D.pack === "Tout compris 35 000" ? "⛽ " + CFG.budgetInclus + " de pub inclus, payés par Willy. Captures des dépenses au jour 7." : "⛽ Le budget pub est à part, sur ma carte."}</div>
     <div class="ligne">📄 J'ai une page Facebook reliée à mon WhatsApp (sinon, création en extra).</div>`, "carte");
   await boutons([{ t: "✅ J'ai compris, je suis d'accord", v: "ok", pleine: true }], true);
