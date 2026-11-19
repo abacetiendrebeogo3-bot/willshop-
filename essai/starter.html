@@ -44,7 +44,10 @@ header .statut{font-size:13px;opacity:.85}
 .b.carte .ligne:last-child{border:0}
 .b.carte .prix{font-size:20px;font-weight:800;color:#075e54}
 .galerie{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px}
-.galerie img,.galerie video,.galerie .vide{width:150px;height:150px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#ddd}
+.galerie img,.galerie .vide{width:150px;height:150px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#ddd}
+.galerie figure{flex-shrink:0;width:46%;max-width:200px}
+.galerie figure video{width:100%;aspect-ratio:9/16;border-radius:10px;object-fit:cover;background:#000;display:block}
+.galerie figcaption{font-size:12px;color:#555;margin-top:4px;text-align:center}
 .galerie .vide{display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;color:#555;padding:8px}
 .typing{align-self:flex-start;background:#fff;border-radius:12px;padding:12px 16px}
 .typing span{display:inline-block;width:7px;height:7px;margin:0 2px;background:#999;border-radius:50%;animation:dot 1s infinite}
@@ -100,8 +103,9 @@ const CFG = {
   videos: {                         // liens de tes 4 vidéos + bonus (mp4). Vide = image + "vidéo bientôt".
     v1: "https://willshop-app.vercel.app/media/starter/v1-16x9.mp4", v2: "https://willshop-app.vercel.app/media/starter/v2-16x9.mp4", v3: "", v4: "", arnaque: ""
   },
-  exemples: [                       // tes exemples : {type:"img"|"video", src:"lien"}
-    {type:"img", src:""}, {type:"img", src:""}, {type:"video", src:""}
+  exemples: [                       // tes exemples : {type:"img"|"video", src:"lien", poster:"image"}
+    {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-ugc.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-ugc.jpg", titre:"Vidéo UGC · TBM Inov Afrika"},
+    {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-spot.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-spot.jpg", titre:"Spot pub · ventilateur"}
   ],
   creneauxSecours: [9, 11, 15, 17], // utilisés seulement si l'agenda ne répond pas
   joursAvance: 5,
@@ -221,6 +225,7 @@ function joue(cle, tag = "") {
 }
 vid.ontimeupdate = () => { if (vid.duration) $("#barre").style.width = (vid.currentTime / vid.duration * 100) + "%"; };
 vid.onended = () => { $("#passer").style.display = "none"; $("#barre").style.width = "100%"; };
+document.addEventListener("play", e => { if (e.target !== vid) { vid.pause(); } else { chat.querySelectorAll("video").forEach(v => v.pause()); } }, true); // une seule vidéo à la fois
 $("#passer").onclick = () => { vid.pause(); $("#passer").style.display = "none"; $("#barre").style.width = "100%"; };
 $("#son").onclick = () => { sonDebloque = true; vid.muted = false; vid.play(); $("#son").style.display = "none"; };
 
@@ -292,9 +297,9 @@ async function video3() {
 }
 
 async function exemples() {
-  await dit("Regarde 👇 des vidéos et des affiches que j'ai déjà faites.");
+  await dit("Regarde 👇 des vidéos que j'ai déjà faites pour des clients. Touche ▶️ pour voir.");
   const g = CFG.exemples.map(e => !e.src ? `<div class="vide">Exemple bientôt</div>`
-    : e.type === "video" ? `<video src="${e.src}" controls playsinline preload="metadata"></video>`
+    : e.type === "video" ? `<figure><video src="${e.src}" ${e.poster ? `poster="${e.poster}"` : ""} controls playsinline preload="none"></video>${e.titre ? `<figcaption>${e.titre}</figcaption>` : ""}</figure>`
     : `<img src="${e.src}" alt="exemple" loading="lazy">`).join("");
   await dit(`<div class="galerie">${g}</div>`, "carte", 400);
 }
