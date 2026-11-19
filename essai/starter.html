@@ -93,9 +93,11 @@ const CFG = {
   webhook: "https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec",
   produit: "Starter Pack 15 000",
   pixel: "1601889501091366",        // Pixel Meta (compte shopwill). Vide = pas de Pixel.
-  photo: "",                        // lien de ta photo (avatar + image de départ). Vide = initiales "WT".
+  photo: "https://willshop-app.vercel.app/media/starter/willy.jpg",    // avatar (vide = initiales "WT")
+  poster: "https://willshop-app.vercel.app/media/starter/poster.jpg",  // image de départ (étape OUI/Non)
+  // ⚠️ Les médias sont gardés 1 an en cache : pour remplacer une vidéo, donne-lui un NOUVEAU nom (v1b.mp4…).
   videos: {                         // liens de tes 4 vidéos + bonus (mp4). Vide = image + "vidéo bientôt".
-    v1: "", v2: "", v3: "", v4: "", arnaque: ""
+    v1: "https://willshop-app.vercel.app/media/starter/v1.mp4", v2: "", v3: "", v4: "", arnaque: ""
   },
   exemples: [                       // tes exemples : {type:"img"|"video", src:"lien"}
     {type:"img", src:""}, {type:"img", src:""}, {type:"video", src:""}
@@ -117,8 +119,8 @@ D.source = params.get("utm_source") || params.get("src") || "";
 
 if (CFG.photo) {
   $("#avatar").style.backgroundImage = `url(${CFG.photo})`; $("#avatar").textContent = "";
-  poster.style.backgroundImage = `url(${CFG.photo})`;
 }
+if (CFG.poster || CFG.photo) poster.style.backgroundImage = `url(${CFG.poster || CFG.photo})`;
 
 /* ---------- envoi au Google Sheet ---------- */
 function envoyer(type, step, extra = {}) {
