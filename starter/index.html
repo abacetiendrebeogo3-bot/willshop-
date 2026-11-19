@@ -102,15 +102,14 @@ const CFG = {
   ],
   creneauxSecours: [9, 11, 15, 17], // utilisés seulement si l'agenda ne répond pas
   joursAvance: 5,
-  prix: "15 000 F", avance: "7 500 F", deplacement: "2 000 F", budgetConseil: "10 000 F",
-  toutCompris: "35 000 F", budgetInclus: "20 000 F", resteToutCompris: "27 500 F"   // pack sans carte : 15 000 F de travail + 20 000 F de pub
+  prix: "15 000 F", avance: "7 500 F", deplacement: "2 000 F", budgetConseil: "10 000 F"
 };
 
 /* ========================================================= */
 const $ = s => document.querySelector(s);
 const chat = $("#chat"), bas = $("#bas"), vid = $("#vid"), poster = $("#poster");
 let sid; try { sid = localStorage.getItem("sp_sid"); if (!sid) { sid = "sp" + Math.random().toString(36).slice(2, 10); localStorage.setItem("sp_sid", sid); } } catch (e) { sid = "sp" + Math.random().toString(36).slice(2, 10); }
-const D = { pack: "Starter 15 000" };   // réponses du client
+const D = {};   // réponses du client
 /* Suivi seulement sur la vraie page (pas sur /essai/, pas avec ?test, pas en fichier) */
 const LIVE = /^https?:$/.test(location.protocol) && !/^\/essai\//.test(location.pathname) && !/[?&]test/.test(location.search);
 const params = new URLSearchParams(location.search);
@@ -125,7 +124,7 @@ if (CFG.photo) {
 function envoyer(type, step, extra = {}) {
   if (!LIVE || !CFG.webhook) return;
   const o = { agence: 1, sid, produit: CFG.produit, type, step, com: D.domaine, pub: D.pub, rdv: D.contact, lieu: D.quartier,
-    nom: D.prenom, ent: D.commerce, tel: D.numero, carte: D.pack === "Tout compris 35 000" ? "Tout compris 35 000" : "", ...extra };
+    nom: D.prenom, ent: D.commerce, tel: D.numero, ...extra };
   Object.keys(o).forEach(k => { if (o[k] == null || o[k] === "") delete o[k]; });
   const corps = JSON.stringify(o);
   try { if (!(navigator.sendBeacon && navigator.sendBeacon(CFG.webhook, corps))) fetch(CFG.webhook, { method: "POST", mode: "no-cors", body: corps, keepalive: true }); } catch (e) {}
@@ -158,7 +157,7 @@ async function reserver() {
   if (!LIVE) return { ok: true, quand: D.jour + " à " + D.heure + " h" };
   try {
     const r = await fetch(CFG.webhook, { method: "POST", body: JSON.stringify({ agence: 1, type: "rdv", sid, produit: CFG.produit, slot: D.slot, rdv: D.contact,
-      lieu: D.quartier || "", nom: D.prenom, ent: D.commerce, tel: D.numero, com: D.domaine, pub: D.pub, carte: D.pack === "Tout compris 35 000" ? "Tout compris 35 000" : "" }) });
+      lieu: D.quartier || "", nom: D.prenom, ent: D.commerce, tel: D.numero, com: D.domaine, pub: D.pub }) });
     return await r.json();
   } catch (e) { return { ok: true, horsLigne: 1, quand: D.jour + " à " + D.heure + " h" }; }
 }
@@ -300,7 +299,6 @@ async function exemples() {
 async function choixOffre() {
   const a = await boutons([
     { t: "Je veux travailler avec toi ✅", v: "go", pleine: true },
-    { t: "💳 Je n'ai pas de carte", v: "tout", style: "gris", pleine: true },
     { t: "J'ai peur de l'arnaque 😟", v: "arnaque", style: "gris", pleine: true }
   ]);
   if (a === "arnaque") {
@@ -310,24 +308,6 @@ async function choixOffre() {
     await dit("Et tu peux même me rencontrer avant de commencer 🤝");
     return choixOffre();
   }
-  if (a === "tout") return toutCompris();
-  video4();
-}
-
-async function toutCompris() {
-  await dit("Pas de souci 🙂 J'ai un pack où tu n'as rien à gérer : je m'occupe aussi de payer la pub.");
-  await dit(`<h4>📦 Pack Tout compris</h4>
-    <div class="ligne"><span class="prix">${CFG.toutCompris}</span></div>
-    <div class="ligne">💼 ${CFG.prix} → mon travail : 2 vidéos + 5 affiches + pub configurée + suivi 7 jours</div>
-    <div class="ligne">⛽ ${CFG.budgetInclus} → la pub sur Facebook, que je paie pour toi avec ma carte</div>
-    <div class="ligne">📊 Au jour 7, je t'envoie les captures de ce qui a été dépensé.</div>
-    <div class="ligne">🙌 Tu paies, tu t'assois, et les messages arrivent sur ton WhatsApp.</div>`, "carte", 900);
-  const r = await boutons([
-    { t: `Je prends le tout compris (${CFG.toutCompris}) ✅`, v: "tout", pleine: true },
-    { t: `Je préfère ${CFG.prix}, j'ai une carte`, v: "starter", style: "gris", pleine: true }
-  ]);
-  D.pack = r === "tout" ? "Tout compris 35 000" : "Starter 15 000";
-  etape("Offre vue");
   video4();
 }
 
@@ -386,11 +366,10 @@ async function infos() {
 
 async function regles() {
   await dit(`<h4>📌 Avant de commencer</h4>
-    <div class="ligne">💰 Je paie <b>${CFG.avance}</b> pour commencer. Quand les 2 vidéos et les 5 affiches sont prêtes, je paie le reste${D.pack === "Tout compris 35 000" ? " (<b>" + CFG.resteToutCompris + "</b>)" : ""}, puis la pub est lancée.</div>
+    <div class="ligne">💰 Je paie <b>${CFG.avance}</b> pour commencer. Quand les 2 vidéos et les 5 affiches sont prêtes, je paie le reste, puis la pub est lancée.</div>
     <div class="ligne">⏱️ Livraison en <b>48 h</b> après l'avance + mes photos, mon logo et mes prix.</div>
     <div class="ligne">✏️ <b>1 série de corrections</b> offerte. Tout se fait à distance.</div>
-    <div class="ligne">${D.pack === "Tout compris 35 000" ? "⛽ " + CFG.budgetInclus + " de pub inclus, payés par Willy. Captures des dépenses au jour 7." : "⛽ Le budget pub est à part, sur ma carte."}</div>
-    <div class="ligne">📄 J'ai une page Facebook reliée à mon WhatsApp (sinon, création en extra).</div>`, "carte");
+    <div class="ligne">⛽ Le budget pub est à part, sur ma carte.</div>`, "carte");
   await boutons([{ t: "✅ J'ai compris, je suis d'accord", v: "ok", pleine: true }], true);
   etape("Règles acceptées");
   if (D.slot) {
@@ -414,14 +393,13 @@ async function fin() {
   await dit(`<h4>📋 Ton récap</h4>
     <div class="ligne">👤 ${D.prenom} · ${D.commerce}</div>
     <div class="ligne">🏷️ ${D.domaine}</div>
-    <div class="ligne">📦 ${D.pack === "Tout compris 35 000" ? "Pack Tout compris · " + CFG.toutCompris : "Starter Pack · " + CFG.prix}</div>
     <div class="ligne">📅 ${D.contact}${lieu} · ${quand}</div>
     <div class="ligne">📲 ${D.numero}</div>`, "carte");
   await dit("Merci ! J'ai bien tout noté 🙏 Touche le bouton vert : ton message est déjà écrit, tu as juste à l'envoyer. On se parle très vite !", "fort");
   const msg = `Bonjour Willy 👋 Je suis ${D.prenom} (${D.commerce}, ${D.domaine}).\n`
-    + (D.pack === "Tout compris 35 000" ? `Je veux le Pack Tout compris à ${CFG.toutCompris} (pub incluse).\n` : `Je veux le Starter Pack à ${CFG.prix}.\n`)
+    + `Je veux le Starter Pack à ${CFG.prix}.\n`
     + `📅 ${D.contact}${lieu} : ${quand}.\n`
-    + `J'ai lu les conditions : avance de ${CFG.avance}` + (D.pack === "Tout compris 35 000" ? `, reste de ${CFG.resteToutCompris} avant le lancement.` : `, budget pub à part sur ma carte.`);
+    + `J'ai lu les conditions : avance de ${CFG.avance}, budget pub à part sur ma carte.`;
   const lien = `https://wa.me/${CFG.whatsapp}?text=${encodeURIComponent(msg)}`;
   bas.innerHTML = ""; const g = document.createElement("div"); g.className = "grille une";
   const b = document.createElement("a"); b.className = "btn vert"; b.style.textAlign = "center"; b.style.textDecoration = "none";
