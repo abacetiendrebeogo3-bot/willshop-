@@ -88,7 +88,8 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
     <div class="poster" id="poster"></div>
     <video id="vid" playsinline preload="auto" style="display:none"></video>
     <span class="tag" id="tag" style="display:none"></span>
-    <button id="passer">Passer ⏭</button>
+    <button id="passer" aria-hidden="true"></button>
+    
     <button id="son">🔊 Activer le son</button>
     <div id="barre"></div>
   </div>
@@ -250,7 +251,7 @@ function joue(cle, tag = "") {
   poster.style.display = "none"; vid.style.display = "block";
   vid.src = src; vid.muted = !sonDebloque; vid.currentTime = 0;
   vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); $("#son").style.display = "block"; });
-  $("#passer").style.display = "block"; $("#son").style.display = vid.muted ? "block" : "none";
+  /* bouton « Passer » retiré : on écoute jusqu au bout */ $("#son").style.display = vid.muted ? "block" : "none";
 }
 vid.ontimeupdate = () => { if (vid.duration) { $("#barre").style.width = (vid.currentTime / vid.duration * 100) + "%"; if (vid.currentTime / vid.duration >= SEUIL) ouvrirPorte(); } };
 vid.onloadedmetadata = () => { if (ouvrir && vid.duration) { clearTimeout(garde); garde = setTimeout(ouvrirPorte, (vid.duration + 10) * 1000); } };
