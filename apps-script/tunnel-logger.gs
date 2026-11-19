@@ -359,3 +359,6 @@ function doGet(e) {
   }
   return ContentService.createTextOutput("WillShop commandes : actif");
 }
+
+// À lancer UNE fois depuis l'éditeur (Exécuter) pour autoriser l'accès à Google Agenda. Affiche les créneaux libres dans le journal.
+function autoriserAgenda() { Logger.log(JSON.stringify(creneaux_())); }
