@@ -532,12 +532,12 @@ async function addC() {
 }
 
 /* ---------- Agence : clients pub (onglet « Clients Pub » du Sheet WillShop) ---------- */
-var AG = { prix: 15000, avance: 7500, deplacement: 2000, objectif: 1000000, places: 50 };
+var AG = { prix: 15000, avance: 7500, deplacement: 2000, objectif: 1000000, offre: /Starter/i, contenu: "2 vidéos + 5 affiches" };
 var AG_ST = ["Visiteur", "Prospect", "RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée", "Terminé", "Perdu"];
 var AG_ACTIFS = ["RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée"];
 var AG_PAYANTS = ["Acompte payé", "En production", "Pub lancée", "Terminé"];
-var AG_STEPS = ["Arrivée", "Commerce", "Pub", "Preuve vue", "Vidéo lancée", "Offre vue", "Question WhatsApp", "Budget pub", "Page Facebook", "Rendez-vous", "Numéro donné", "Récap vu", "Clic WhatsApp"];
-var AG_FUN = [["Visiteurs", "Arrivée"], ["Commerce choisi", "Commerce"], ["Offre vue", "Offre vue"], ["Rendez-vous choisi", "Rendez-vous"], ["Numéro laissé", "Numéro donné"], ["Clic WhatsApp", "Clic WhatsApp"]];
+var AG_STEPS = ["Arrivée", "Intéressé", "Commerce", "Pub", "Preuve vue", "Vidéo lancée", "Offre vue", "Question WhatsApp", "Budget pub", "Page Facebook", "Rendez-vous", "Numéro donné", "Règles acceptées", "Récap vu", "Clic WhatsApp"];
+var AG_FUN = [["Visiteurs", "Arrivée"], ["Ont dit OUI", "Intéressé"], ["Domaine choisi", "Commerce"], ["Expérience pub", "Pub"], ["Offre vue", "Offre vue"], ["Créneau choisi", "Rendez-vous"], ["Numéro laissé", "Numéro donné"], ["Règles acceptées", "Règles acceptées"], ["Clic WhatsApp", "Clic WhatsApp"]];
 var AG_NEXT = { "Visiteur": "RDV fait", "Prospect": "RDV fait", "RDV demandé": "RDV fait", "RDV fait": "Acompte payé", "Acompte payé": "En production", "En production": "Pub lancée", "Pub lancée": "Terminé" };
 var AG_NEXT_TXT = { "RDV fait": "✓ Rendez-vous fait", "Acompte payé": "💰 Acompte reçu (" + fmt(AG.avance) + ")", "En production": "🎬 Je commence le travail", "Pub lancée": "📢 Pub lancée", "Terminé": "🏁 Terminé" };
 var agSeg = ls("ag_seg") || "jour", agF = "cours", agPer = "all";
@@ -586,13 +586,13 @@ function agItem(c, extra, cls) {
 }
 function agJour() {
   var s = agStats(), L = AGL(), pct = Math.min(100, Math.round(s.enc / AG.objectif * 100));
-  var h = "<h1>Agence</h1><p class=\"sub\">" + s.cours + " client" + (s.cours > 1 ? "s" : "") + " en cours · " + s.places + " / " + AG.places + " places prises</p>";
+  var h = "<h1>Agence</h1><p class=\"sub\">" + s.cours + " client" + (s.cours > 1 ? "s" : "") + " en cours · " + s.places + " client" + (s.places > 1 ? "s" : "") + " payant" + (s.places > 1 ? "s" : "") + "</p>";
   h += '<div class="kpis"><div class="kpi hero"><div class="l">Encaissé ce mois</div><div class="v">' + fmt(s.enc) + '</div><div class="h">objectif ' + fmt(AG.objectif) + " · il manque " + fmt(Math.max(0, AG.objectif - s.enc)) +
-    '</div><div class="bar"><i style="width:' + pct + '%"></i></div></div>' + kpi("Reste à encaisser", fmt(s.reste), "chez les clients en cours") + kpi("Places", s.places + " / " + AG.places, "offre fêtes") + "</div>";
+    '</div><div class="bar"><i style="width:' + pct + '%"></i></div></div>' + kpi("Reste à encaisser", fmt(s.reste), "chez les clients en cours") + kpi("Clients payants", String(s.places), "Starter Pack") + "</div>";
   // Rendez-vous
   var R = L.filter(function (c) { return c.statut === "RDV demandé"; }).map(function (c) { return { c: c, d: rdvDate(c) }; })
     .sort(function (a, b) { return (a.d || 9e15) - (b.d || 9e15); });
-  h += "<h2>📅 Rendez-vous <span class=\"count\">" + R.length + "</span></h2>";
+  h += "<h2>📅 Rendez-vous <span class=\"count\">" + R.length + "</span></h2><p class=\"sub\">Le tunnel ne propose que tes moments libres de Google Agenda. Bloque tes heures de production dans l'agenda. <a href=\"https://calendar.google.com/calendar/r/week\" target=\"_blank\" rel=\"noopener\">Ouvrir mon agenda</a></p>";
   h += R.length ? '<div class="list">' + R.map(function (x) {
     var c = x.c, t = x.d ? (dd(x.d) < 0 ? "⚠️ Passé (" + dShort(x.d) + ") : mets à jour" : dLabel(x.d) + " à " + x.d.getHours() + " h") : (c.quand || "Date à fixer");
     return agItem(c, [t, c.rdv === "Rencontre" ? "Rencontre" + (c.lieu ? " à " + c.lieu : "") : c.rdv, c.tel].filter(Boolean).join(" · "), x.d && dd(x.d) === 0 ? "hot" : "");
@@ -602,7 +602,7 @@ function agJour() {
   h += "<h2>🎬 À livrer <span class=\"count\">" + A.length + "</span></h2>";
   h += A.length ? '<div class="list">' + A.map(function (c) {
     var t = c.livraison ? (dd(c.livraison) < 0 ? "🔴 En retard (" + dShort(c.livraison) + ")" : "Livraison " + dLabel(c.livraison).toLowerCase()) : "Date de livraison à fixer";
-    return agItem(c, t + " · 2 vidéos + 3 affiches", c.livraison && dd(c.livraison) <= 0 ? "hot" : "");
+    return agItem(c, t + " · " + AG.contenu, c.livraison && dd(c.livraison) <= 0 ? "hot" : "");
   }).join("") + "</div>" : '<div class="empty">Rien à livrer pour le moment.</div>';
   // Pubs en cours
   var P = L.filter(function (c) { return c.statut === "Pub lancée"; });
@@ -628,9 +628,9 @@ function agClients() {
   return h + (L.length ? '<div class="list">' + L.slice(0, 300).map(function (c) { return agItem(c, [c.tel, c.com, c.quand, when(c.date)].filter(Boolean).join(" · ")); }).join("") + "</div>" : '<div class="empty" style="margin-top:12px">Personne ici pour le moment.</div>');
 }
 function agTunnel() {
-  var L = AGL().filter(function (c) { return !/^m/.test(c.sid) && agPerOk(c); }), max = L.length || 1;
+  var L = AGL().filter(function (c) { return !/^m/.test(c.sid) && AG.offre.test(c.offre || "") && agPerOk(c); }), max = L.length || 1;
   var h = '<div class="seg" role="group">' + [["today", "Aujourd'hui"], ["7", "7 jours"], ["all", "Tout"]].map(function (p) { return '<button aria-pressed="' + (agPer === p[0]) + '" onclick="setAgPer(\'' + p[0] + '\')">' + p[1] + "</button>"; }).join("") + "</div>";
-  h += '<h2>Entonnoir</h2><div class="funnel">';
+  h += '<h2>Entonnoir · tunnel Starter Pack</h2><div class="funnel">';
   var prev = null, drop = null;
   AG_FUN.forEach(function (f) {
     var k = AG_STEPS.indexOf(f[1]), n = L.filter(function (c) { return agStep(c) >= k; }).length;
@@ -653,7 +653,7 @@ function dInput(d) { if (!d) return ""; d = new Date(d); if (isNaN(d)) return ""
 function agMsg(c) {
   var p = prenom(c) || "";
   if (c.statut === "RDV demandé") return "Bonjour " + p + ", c'est Willy 👋 Je te confirme notre rendez-vous" + (c.quand ? " : " + c.quand : "") + ". À tout à l'heure !";
-  if (c.statut === "Prospect") return "Bonjour " + p + ", c'est Willy 👋 Tu as laissé ton numéro pour l'offre fêtes à 15 000 F (2 vidéos + 3 affiches + ta pub). On en parle quand ?";
+  if (c.statut === "Prospect") return "Bonjour " + p + ", c'est Willy 👋 Tu as laissé ton numéro pour le Starter Pack à 15 000 F (2 vidéos + 5 affiches + ta pub configurée). On en parle quand ?";
   if (c.statut === "Pub lancée") return "Bonjour " + p + ", c'est Willy 👋 Voici le point sur ta pub : ";
   return "";
 }

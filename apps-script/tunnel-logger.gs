@@ -72,7 +72,7 @@ function upsertCommande(ss, d) {
 var AG_HEAD = ["Date", "Offre", "Session", "Prénom", "Commerce (nom)", "WhatsApp", "Type de commerce", "Pub déjà ?", "Carte", "Page Facebook",
   "Rendez-vous", "Quand", "Lieu", "Dernière étape", "Statut", "Encaissé (F)", "Livraison prévue", "Retouches (sur 1)", "Note", "Mise à jour",
   "Pub lancée le", "Acompte le"];
-var AG_STEPS = ["Arrivée", "Commerce", "Pub", "Preuve vue", "Vidéo lancée", "Offre vue", "Question WhatsApp", "Budget pub", "Page Facebook", "Rendez-vous", "Numéro donné", "Récap vu", "Clic WhatsApp"];
+var AG_STEPS = ["Arrivée", "Intéressé", "Commerce", "Pub", "Preuve vue", "Vidéo lancée", "Offre vue", "Question WhatsApp", "Budget pub", "Page Facebook", "Rendez-vous", "Numéro donné", "Règles acceptées", "Récap vu", "Clic WhatsApp"];
 var AG_STATUTS = ["Visiteur", "Prospect", "RDV demandé", "RDV fait", "Acompte payé", "En production", "Pub lancée", "Terminé", "Perdu"];
 function agSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID), sh = ss.getSheetByName("Clients Pub");
@@ -129,7 +129,7 @@ function agAdd_(p) {
 }
 function upsertAgence(d) {
   var sh = agSheet_(), now = new Date(), r = findRow(sh, 3, d.sid);
-  var statut = d.step === "Clic WhatsApp" ? "RDV demandé" : (d.tel ? "Prospect" : "Visiteur");
+  var statut = (d.step === "Clic WhatsApp" || d.reserve) ? "RDV demandé" : (d.tel ? "Prospect" : "Visiteur");
   var step = txt(d.step || "Arrivée", 40);
   if (!r) {
     sh.appendRow([now, txt(d.produit), txt(d.sid, 40), txt(d.nom, 60), txt(d.ent, 60), d.tel ? "'" + txt(d.tel, 25) : "", txt(d.com, 60), txt(d.pub, 30),
@@ -144,6 +144,55 @@ function upsertAgence(d) {
   if (AG_STATUTS.indexOf(statut) > AG_STATUTS.indexOf(String(row[14]))) row[14] = statut; // ne rétrograde jamais (statuts mis à la main inclus)
   row[19] = now;
   sh.getRange(r, 1, 1, 20).setValues([row]);
+}
+
+// ===================== AGENDA (tunnel Starter Pack) =====================
+// Le tunnel ne propose que les créneaux libres du Google Agenda principal du propriétaire du script.
+// Tout événement de l'agenda bloque le créneau (production, autre client, perso…). Un événement « toute la journée » bloque la journée,
+// sauf si son titre commence par « ~ » (ex. « ~ Anniversaire de maman » ne bloque rien).
+// Heure de Ouagadougou = GMT : tous les calculs sont faits en GMT.
+var RDV_CFG = { heures: [9, 11, 15, 17], jours: 5, scan: 14, delaiH: 2, dureeSlotMin: 60, dureeRdv: { "Rencontre": 60 }, dureeDefaut: 30 };
+var JOURS_FR = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+var MOIS_FR = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+function rdvJour_(d) { return JOURS_FR[d.getUTCDay()] + " " + d.getUTCDate() + " " + MOIS_FR[d.getUTCMonth()]; }
+function rdvLibre_(evs, a, b) {
+  for (var i = 0; i < evs.length; i++) {
+    var e = evs[i];
+    if (e.isAllDayEvent()) { if (String(e.getTitle()).charAt(0) !== "~") return false; continue; }
+    if (e.getStartTime() < b && e.getEndTime() > a) return false;
+  }
+  return true;
+}
+// Liste des jours avec leurs heures libres : [{date:"2026-11-20", jour:"Vendredi 20 nov.", heures:[{h:9, iso:"…"}]}]
+function creneaux_() {
+  var cal = CalendarApp.getDefaultCalendar(), now = new Date(), out = [], min = now.getTime() + RDV_CFG.delaiH * 3600e3;
+  var d0 = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  for (var k = 0; k < RDV_CFG.scan && out.length < RDV_CFG.jours; k++) {
+    var day = new Date(d0.getTime() + k * 864e5);
+    if (day.getUTCDay() === 0) continue; // pas le dimanche
+    var evs = cal.getEvents(day, new Date(day.getTime() + 864e5)), hs = [];
+    RDV_CFG.heures.forEach(function (h) {
+      var a = new Date(day.getTime() + h * 3600e3), b = new Date(a.getTime() + RDV_CFG.dureeSlotMin * 60e3);
+      if (a.getTime() >= min && rdvLibre_(evs, a, b)) hs.push({ h: h, iso: a.toISOString() });
+    });
+    if (hs.length) out.push({ date: day.toISOString().slice(0, 10), jour: rdvJour_(day), heures: hs });
+  }
+  return out;
+}
+// Réserve le créneau choisi dans le tunnel : vérifie qu'il est encore libre, crée l'événement, met la fiche en « RDV demandé ».
+function rdvReserve_(d) {
+  var a = new Date(d.slot);
+  if (isNaN(a)) return { ok: false, error: "Créneau invalide" };
+  var libre = creneaux_().some(function (j) { return j.heures.some(function (x) { return x.iso === a.toISOString(); }); });
+  if (!libre) return { ok: false, pris: true, jours: creneaux_() };
+  var mode = txt(d.rdv, 20) || "Appel", dur = RDV_CFG.dureeRdv[mode] || RDV_CFG.dureeDefaut;
+  var b = new Date(a.getTime() + dur * 60e3), quand = rdvJour_(a) + " à " + a.getUTCHours() + " h";
+  var titre = "📅 " + mode + " · " + (txt(d.nom, 40) || "Client") + (d.ent ? " (" + txt(d.ent, 40) + ")" : "");
+  var desc = "Starter Pack — rendez-vous pris dans le tunnel\nWhatsApp : " + txt(d.tel, 25) + "\nDomaine : " + txt(d.com, 60) +
+    "\nPub déjà faite : " + txt(d.pub, 40) + (d.lieu ? "\nLieu : " + txt(d.lieu, 60) : "") + "\nhttps://wa.me/226" + String(d.tel || "").replace(/\D/g, "").slice(-8);
+  CalendarApp.getDefaultCalendar().createEvent(titre, a, b, { description: desc, location: mode === "Rencontre" ? txt(d.lieu, 60) : "" });
+  d.quand = quand; d.reserve = 1; d.step = "Rendez-vous"; upsertAgence(d);
+  return { ok: true, quand: quand };
 }
 
 // ===================== ACADÉMIE (formations) =====================
@@ -288,6 +337,7 @@ function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
     if (d.app) return acaApi(d);
+    if (d.agence && d.type === "rdv") return acaJson(rdvReserve_(d));
     if (d.agence) { upsertAgence(d); return ContentService.createTextOutput("ok"); }
     if (/^Formation/i.test(String(d.produit || ""))) { upsertAcademie(d); return ContentService.createTextOutput("ok"); }
     var ss = SpreadsheetApp.openById(SHEET_ID);
@@ -303,6 +353,9 @@ function doPost(e) {
   }
 }
 
-function doGet() {
+function doGet(e) {
+  if (e && e.parameter && e.parameter.dispo) {
+    try { return acaJson({ ok: true, jours: creneaux_() }); } catch (err) { return acaJson({ ok: false, error: String(err.message || err) }); }
+  }
   return ContentService.createTextOutput("WillShop commandes : actif");
 }
