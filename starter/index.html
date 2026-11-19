@@ -21,14 +21,15 @@ header .nom{font-weight:700;font-size:18px;line-height:1.1}
 header .statut{font-size:13px;opacity:.85}
 
 /* Zone vidéo */
-#scene{position:relative;overflow:hidden;transition:height .3s;background:#000;flex-shrink:0;height:42dvh;max-height:420px}
-#scene video,#scene .poster{width:100%;height:100%;object-fit:cover;display:block}
-#scene .poster{background:#0b3d36 center/cover no-repeat;display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px;color:#fff;font-weight:700;font-size:15px;text-shadow:0 1px 4px #000}
+#scene{position:relative;overflow:hidden;background:#000;flex-shrink:0;width:100%;aspect-ratio:16/9;max-height:40dvh}
+#scene video,#scene .poster{width:100%;height:100%;object-fit:contain;display:block}
+#scene video{background:#000}
+#scene .poster{background:#000 center/cover no-repeat;display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px;color:#fff;font-weight:700;font-size:15px;text-shadow:0 1px 4px #000}
 .tag{position:absolute;top:12px;left:12px;background:#ffd21f;color:#111;font-weight:800;font-size:13px;padding:6px 12px;border-radius:20px}
 #passer{position:absolute;top:12px;right:12px;background:rgba(60,60,60,.8);color:#fff;border:0;border-radius:22px;padding:8px 16px;font-size:15px;font-weight:600;display:none}
 #son{position:absolute;bottom:14px;right:12px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:20px;padding:6px 12px;font-size:14px;display:none}
 #barre{position:absolute;left:0;bottom:0;height:5px;background:#25d366;width:0}
-#scene.cache{height:0}
+#scene.cache{aspect-ratio:auto;height:0}
 
 /* Discussion */
 #chat{flex:1;overflow-y:auto;padding:14px 12px 8px;display:flex;flex-direction:column;gap:9px;
@@ -94,10 +95,10 @@ const CFG = {
   produit: "Starter Pack 15 000",
   pixel: "1601889501091366",        // Pixel Meta (compte shopwill). Vide = pas de Pixel.
   photo: "https://willshop-app.vercel.app/media/starter/willy.jpg",    // avatar (vide = initiales "WT")
-  poster: "https://willshop-app.vercel.app/media/starter/poster.jpg",  // image de départ (étape OUI/Non)
+  poster: "https://willshop-app.vercel.app/media/starter/poster-16x9.jpg",  // image de départ (étape OUI/Non)
   // ⚠️ Les médias sont gardés 1 an en cache : pour remplacer une vidéo, donne-lui un NOUVEAU nom (v1b.mp4…).
   videos: {                         // liens de tes 4 vidéos + bonus (mp4). Vide = image + "vidéo bientôt".
-    v1: "https://willshop-app.vercel.app/media/starter/v1.mp4", v2: "", v3: "", v4: "", arnaque: ""
+    v1: "https://willshop-app.vercel.app/media/starter/v1-16x9.mp4", v2: "", v3: "", v4: "", arnaque: ""
   },
   exemples: [                       // tes exemples : {type:"img"|"video", src:"lien"}
     {type:"img", src:""}, {type:"img", src:""}, {type:"video", src:""}
