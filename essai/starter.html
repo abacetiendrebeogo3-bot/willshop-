@@ -188,6 +188,9 @@ async function dit(html, style = "moi", attente = 700) {
   const b = document.createElement("div"); b.className = "b " + style; b.innerHTML = html;
   chat.appendChild(b); defile(); return b;
 }
+/* Ce que Willy dit dans la vidéo : écrit seulement s'il n'y a pas (encore) de vidéo pour cette étape */
+let videoEnCours = "";
+function voix(html, style, attente) { if (CFG.videos[videoEnCours]) return Promise.resolve(); return dit(html, style, attente); }
 function client(txt) { const b = document.createElement("div"); b.className = "b client"; b.textContent = txt; chat.appendChild(b); defile(); }
 
 /* Les réponses n'apparaissent qu'à 95 % de la vidéo (ou si elle est passée / terminée / en panne) */
@@ -231,6 +234,7 @@ async function saisir(placeholder, type = "text", verif = null) {
 /* ---------- vidéo ---------- */
 let sonDebloque = false;
 function joue(cle, tag = "") {
+  videoEnCours = cle;
   const src = CFG.videos[cle];
   $("#scene").classList.remove("cache");
   $("#tag").style.display = tag ? "block" : "none"; $("#tag").textContent = tag;
@@ -275,9 +279,9 @@ async function demarrer() {
 
 async function video1() {
   joue("v1");
-  await dit("Salut ! Moi c'est <b>Willy Tiendré</b> 👋<br>Je fais la pub Facebook pour les commerçants et les entrepreneurs, pour qu'ils aient plus de clients et vendent leurs produits.");
-  await dit("Moi-même je vends en ligne depuis 2021. Je sais ce qui fait venir les clients.");
-  await dit("Dis-moi d'abord : tu es dans quel domaine ?", "fort");
+  await voix("Salut ! Moi c'est <b>Willy Tiendré</b> 👋<br>Je fais la pub Facebook pour les commerçants et les entrepreneurs, pour qu'ils aient plus de clients et vendent leurs produits.");
+  await voix("Moi-même je vends en ligne depuis 2021. Je sais ce qui fait venir les clients.");
+  await voix("Dis-moi d'abord : tu es dans quel domaine ?", "fort");
   let a = await boutons([
     { t: "🛍️ Boutique" }, { t: "🍽️ Resto / maquis" }, { t: "💇 Beauté / coiffure" },
     { t: "👗 Vêtements" }, { t: "🛠️ Services" }, { t: "✍️ Autre", v: "autre" }
@@ -290,8 +294,8 @@ async function video1() {
 
 async function video2() {
   joue("v2");
-  await dit("Super, c'est noté ! 👌");
-  await dit("Dis-moi : tu as déjà fait le boostage ou lancé une pub sur Facebook ?", "fort");
+  await voix("Super, c'est noté ! 👌");
+  await voix("Dis-moi : tu as déjà fait le boostage ou lancé une pub sur Facebook ?", "fort");
   let a = await boutons([
     { t: "Oui, et ça marche 👍", v: "marche", pleine: true },
     { t: "Oui, mais ça n'a pas marché 😕", v: "pas marche", pleine: true },
@@ -309,22 +313,23 @@ async function video2() {
 
 async function video3() {
   etape("Offre vue"); joue("v3");
-  await dit("Voilà comment je travaille 👇");
-  await dit(`<h4>✅ Le Starter Pack</h4>
+  await voix("Voilà comment je travaille 👇");
+  await voix(`<h4>✅ Le Starter Pack</h4>
     <div class="ligne">🎬 <b>2 vidéos pub</b> professionnelles</div>
     <div class="ligne">🖼️ <b>5 affiches</b> professionnelles</div>
     <div class="ligne">🚀 Ta <b>pub Facebook configurée</b> et suivie pendant <b>7 jours</b></div>
     <div class="ligne">📲 Les messages arrivent sur <b>ton WhatsApp</b></div>`, "carte");
-  await dit(`<div class="ligne">💼 <b>Mon travail</b><br><span class="prix">${CFG.prix}</span><br>2 vidéos + 5 affiches + pub configurée + suivi 7 jours</div>
+  await voix(`<div class="ligne">💼 <b>Mon travail</b><br><span class="prix">${CFG.prix}</span><br>2 vidéos + 5 affiches + pub configurée + suivi 7 jours</div>
     <div class="ligne">⛽ <b>Le budget pub</b> → pour Facebook<br>Tu le mets sur ta carte. Il ne vient pas chez moi. C'est toi qui choisis le montant (conseillé : à partir de ${CFG.budgetConseil}).</div>`, "carte", 900);
-  await dit("La pub, c'est comme une moto 🏍️ Moi je prépare la moto et je la conduis. L'essence, c'est toi qui la mets. Plus tu mets d'essence, plus ta pub va loin.");
-  await dit("Moi je t'amène les messages. La vente, c'est toi 😉");
+  await voix("La pub, c'est comme une moto 🏍️ Moi je prépare la moto et je la conduis. L'essence, c'est toi qui la mets. Plus tu mets d'essence, plus ta pub va loin.");
+  await voix("Moi je t'amène les messages. La vente, c'est toi 😉");
+  await attendreVideo();
   await exemples();
   choixOffre();
 }
 
 async function exemples() {
-  await dit("Regarde 👇 des vidéos que j'ai déjà faites pour des clients. Touche ▶️ pour voir.");
+  await voix("Regarde 👇 des vidéos que j'ai déjà faites pour des clients. Touche ▶️ pour voir.");
   const g = CFG.exemples.map(e => !e.src ? `<div class="vide">Exemple bientôt</div>`
     : e.type === "video" ? `<figure><video src="${e.src}" ${e.poster ? `poster="${e.poster}"` : ""} controls playsinline preload="none"></video>${e.titre ? `<figcaption>${e.titre}</figcaption>` : ""}</figure>`
     : `<img src="${e.src}" alt="exemple" loading="lazy">`).join("");
@@ -338,9 +343,9 @@ async function choixOffre() {
   ]);
   if (a === "arnaque") {
     joue("arnaque", "Ta question");
-    await dit("Je te comprends, il y a beaucoup d'arnaques 🙏");
-    await dit(`C'est pour ça que tu paies seulement <b>${CFG.avance}</b> au début. Tu vois tes 2 vidéos et tes 5 affiches finies avant de payer le reste. Ensuite je lance ta pub.`);
-    await dit("Et tu peux même me rencontrer avant de commencer 🤝");
+    await voix("Je te comprends, il y a beaucoup d'arnaques 🙏");
+    await voix(`C'est pour ça que tu paies seulement <b>${CFG.avance}</b> au début. Tu vois tes 2 vidéos et tes 5 affiches finies avant de payer le reste. Ensuite je lance ta pub.`);
+    await voix("Et tu peux même me rencontrer avant de commencer 🤝");
     return choixOffre();
   }
   video4();
@@ -348,9 +353,9 @@ async function choixOffre() {
 
 async function video4() {
   joue("v4");
-  await dit("Pour la suite, c'est très simple 👇");
-  await dit("Tout se fait à distance. Tu m'écris sur WhatsApp, tu m'envoies les photos et les vidéos de tes produits, et je m'occupe du reste. Pas besoin de se déplacer 🙂");
-  await dit("On se parle comment ?", "fort");
+  await voix("Pour la suite, c'est très simple 👇");
+  await voix("Tout se fait à distance. Tu m'écris sur WhatsApp, tu m'envoies les photos et les vidéos de tes produits, et je m'occupe du reste. Pas besoin de se déplacer 🙂");
+  await voix("On se parle comment ?", "fort");
   const c = await boutons([
     { t: "💬 Sur WhatsApp", v: "WhatsApp", pleine: true },
     { t: "📞 Appel de 15 min", v: "Appel 15 min", pleine: true },
