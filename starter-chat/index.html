@@ -86,6 +86,9 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 #zoom{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:99;padding:14px}
 #zoom img{max-width:100%;max-height:100%;border-radius:8px}
 #zoom b{position:absolute;top:12px;right:16px;color:#fff;font-size:30px;line-height:1}
+.saisie.libre{margin-top:8px}
+.saisie.libre input{padding:10px 12px;font-size:15px}
+.saisie.libre button{width:44px;height:44px}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
 @keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
 .grille.pulse .btn{animation:pulse 1.2s ease-in-out infinite}
@@ -254,17 +257,28 @@ async function attendreVideo() {
   bas.innerHTML = `<div class="confiance" style="margin:4px 0">🎧 Écoute jusqu'au bout, les réponses arrivent…</div>`;
   await porte; bas.innerHTML = "";
 }
-async function boutons(liste, une = false) {
+let tape = false;   // true si la dernière réponse a été écrite (pas un bouton)
+async function boutons(liste, une = false, libre = true) {
   await attendreVideo();
   return new Promise(res => {
-    bas.innerHTML = `<div class="aide">👇 Touche ta réponse</div>`; const g = document.createElement("div"); g.className = "grille pulse" + (une || liste.length === 1 ? " une" : "");
+    tape = false;
+    bas.innerHTML = `<div class="aide">👇 Touche ta réponse${libre ? " ou écris" : ""}</div>`; const g = document.createElement("div"); g.className = "grille pulse" + (une || liste.length === 1 ? " une" : "");
     liste.forEach(o => {
       const b = document.createElement("button"); b.className = "btn " + (o.style || ""); b.textContent = o.t;
       if (o.pleine) b.style.gridColumn = "1 / -1";
       b.onclick = () => { bas.innerHTML = ""; if (!o.silence) client(o.t); res(o.v ?? o.t); };
       g.appendChild(b);
     });
-    bas.appendChild(g); setTimeout(defile, 30);
+    bas.appendChild(g);
+    if (libre) {
+      const z = document.createElement("div"); z.className = "saisie libre";
+      z.innerHTML = `<input type="text" placeholder="Écris ici…"><button aria-label="Envoyer">➤</button>`;
+      const i = z.querySelector("input");
+      const ok = () => { const v = i.value.trim(); if (!v) return; tape = true; bas.innerHTML = ""; client(v); res(v); };
+      z.querySelector("button").onclick = ok; i.onkeydown = ev => { if (ev.key === "Enter") ok(); };
+      bas.appendChild(z);
+    }
+    setTimeout(defile, 30);
   });
 }
 async function saisir(placeholder, type = "text", verif = null) {
@@ -328,16 +342,16 @@ async function demarrer() {
     { t: "👗 Vêtements" }, { t: "🛠️ Services" }, { t: "✍️ Autre", v: "autre" }
   ]);
   if (a === "autre") { await dit("Écris-le ici 👇"); a = await saisir("Ex : pharmacie, cosmétiques…"); }
-  D.domaine = a.replace(/^\S+\s/, "");
+  D.domaine = tape ? a : a.replace(/^\S+\s/, "");
   etape("Commerce");
   await dit("Tu as déjà fait la pub ?", "fort");
   a = await boutons([
     { t: "Oui, ça marche 👍", v: "marche" }, { t: "Oui, sans résultat 😕", v: "pas marche" },
     { t: "Jamais", v: "jamais", pleine: true }
   ]);
-  D.pub = { "marche": "Oui, ça marche", "pas marche": "Oui, sans résultat", "jamais": "Jamais" }[a];
+  D.pub = { "marche": "Oui, ça marche", "pas marche": "Oui, sans résultat", "jamais": "Jamais" }[a] || a;
   etape("Pub");
-  await dit({ "marche": "Ok, top 👌", "pas marche": "Ok, je comprends 👌", "jamais": "Ok, pas de souci 👌" }[a]);
+  await dit({ "marche": "Ok, top 👌", "pas marche": "Ok, je comprends 👌", "jamais": "Ok, pas de souci 👌" }[a] || "Ok, merci 👌");
   offre();
 }
 
@@ -395,13 +409,12 @@ async function choix() {
 
 async function rdv() {
   await dit("Super 🙌");
-  await dit("Tout se fait à distance 📲");
-  await dit("Tu m'envoies juste tes photos.");
   await dit("On se parle comment ?", "fort");
   D.contact = await boutons([
     { t: "💬 WhatsApp", v: "WhatsApp" }, { t: "📞 Appel", v: "Appel 15 min" },
-    { t: `Se voir (${CFG.deplacement})`, v: "Rencontre", style: "gris", pleine: true }
-  ]);
+    { t: `🤝 Se voir (${CFG.deplacement})`, v: "Rencontre", style: "gris", pleine: true }
+  ], false, false);
+  if (D.contact === "WhatsApp") return versWhatsApp();
   if (D.contact === "Rencontre") await dit(`Le déplacement : ${CFG.deplacement}.`);
   let jours = await (DISPO || chargerDispo());
   if (!jours) jours = dispoSecours();
@@ -424,13 +437,26 @@ async function rdv() {
   fin();
 }
 
+/* WhatsApp choisi : on ouvre directement WhatsApp avec un message déjà écrit */
+async function versWhatsApp() {
+  const msg = `Bonjour Willy 👋 Je veux le Starter Pack à ${CFG.prix}.` + (D.domaine ? `\nMon activité : ${D.domaine}.` : "");
+  const lien = `https://wa.me/${CFG.whatsapp}?text=${encodeURIComponent(msg)}`;
+  etape("Clic WhatsApp"); px("Lead"); px("Contact");
+  await dit("Je t'ouvre WhatsApp 📲", "fort", 400);
+  bas.innerHTML = ""; const g = document.createElement("div"); g.className = "grille une";
+  const bt = document.createElement("a"); bt.className = "btn vert"; bt.style.textAlign = "center"; bt.style.textDecoration = "none";
+  bt.href = lien; bt.target = "_blank"; bt.textContent = "Ouvrir WhatsApp ➤";
+  g.appendChild(bt); bas.appendChild(g); setTimeout(defile, 50);
+  setTimeout(() => { location.href = lien; }, 900);
+}
+
 async function choisirMoment(jours) {
   if (!jours.length) { D.jour = "à fixer"; D.heure = ""; D.slot = ""; await dit("On fixe le moment sur WhatsApp 🙂"); return; }
   await dit("Quel jour ?", "fort");
-  const date = await boutons(jours.map(x => ({ t: x.jour, v: x.date })));
+  const date = await boutons(jours.map(x => ({ t: x.jour, v: x.date })), false, false);
   const j = jours.find(x => x.date === date);
   await dit("Quelle heure ?", "fort");
-  const iso = await boutons(j.heures.map(x => ({ t: x.h + " h", v: x.iso })));
+  const iso = await boutons(j.heures.map(x => ({ t: x.h + " h", v: x.iso })), false, false);
   D.jour = j.jour; D.slot = iso; D.heure = j.heures.find(x => x.iso === iso).h;
 }
 
