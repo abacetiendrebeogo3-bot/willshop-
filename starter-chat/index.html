@@ -73,8 +73,8 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .erreur{color:#C62828;font-size:13px;padding:6px 4px 0}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
 @keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
-.grille.pulse .btn{animation:pulse 1.8s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(30,107,255,.0)}50%{box-shadow:0 0 0 5px rgba(30,107,255,.22)}}
+.grille.pulse .btn{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(30,107,255,0);transform:scale(1);filter:brightness(1)}50%{box-shadow:0 0 0 7px rgba(30,107,255,.35);transform:scale(1.03);filter:brightness(1.15)}}
 .confiance{font-size:11.5px;color:var(--mut);text-align:center;margin-top:8px}
 
 /* Formulaire unique (rendez-vous + infos + règles) */
