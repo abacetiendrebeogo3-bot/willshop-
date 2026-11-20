@@ -315,18 +315,25 @@ async function demarrer() {
 }
 
 async function offre() {
-  etape("Offre vue");
-  await dit("Voici mon offre 👇");
-  await dit(`<h4>✅ Starter Pack</h4>
-    <div class="ligne">🎬 <b>2 vidéos pub</b></div>
-    <div class="ligne">🖼️ <b>5 affiches</b></div>
-    <div class="ligne">🚀 <b>Ta pub lancée</b> + suivi 7 jours</div>
-    <div class="ligne"><span class="prix">${CFG.prix}</span></div>`, "carte", 600);
-  await dit("Mes exemples 👇");
+  await dit("Regarde ce que je fais 👇", "fort");
+  await boutons([{ t: "Voir 👀" }], true);
   const g = CFG.exemples.filter(e => e.src).map(e => e.type === "video"
     ? `<figure><video src="${e.src}" ${e.poster ? `poster="${e.poster}"` : ""} controls playsinline preload="none"></video>${e.titre ? `<figcaption>${e.titre}</figcaption>` : ""}</figure>`
     : `<img src="${e.src}" alt="exemple" loading="lazy">`).join("");
   if (g) await dit(`<div class="galerie">${g}</div>`, "carte", 400);
+  await dit("Touche ▶️ pour voir.");
+  await dit("Je peux faire ça pour toi.", "fort");
+  await boutons([{ t: "Comment ? 🤔" }], true);
+  await dit("1️⃣ Je fais <b>2 vidéos pub</b> 🎬");
+  await boutons([{ t: "Et après ?" }], true);
+  await dit("2️⃣ Je fais <b>5 affiches</b> 🖼️");
+  await boutons([{ t: "Et après ?" }], true);
+  await dit("3️⃣ Je lance <b>ta pub</b> 🚀");
+  await boutons([{ t: "Et après ?" }], true);
+  await dit("4️⃣ Les clients t'écrivent 📲");
+  await boutons([{ t: "C'est combien ? 💰" }], true);
+  etape("Offre vue");
+  await dit(`Tout ça : <b>${CFG.prix}</b> ✅`, "fort");
   choix();
 }
 
