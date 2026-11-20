@@ -71,6 +71,10 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .saisie input:focus{border-color:var(--vif)}
 .saisie button{width:50px;height:50px;border-radius:12px;border:0;background:var(--vif);color:#fff;font-size:20px}
 .erreur{color:#C62828;font-size:13px;padding:6px 4px 0}
+.aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
+@keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.grille.pulse .btn{animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(30,107,255,.0)}50%{box-shadow:0 0 0 5px rgba(30,107,255,.22)}}
 .confiance{font-size:11.5px;color:var(--mut);text-align:center;margin-top:8px}
 
 /* Formulaire unique (rendez-vous + infos + règles) */
@@ -125,7 +129,8 @@ const CFG = {
   webhook: "https://script.google.com/macros/s/AKfycbxIaukPzsovSA39TKZa9FsETNUr4nGKl7N0KAHO2qWSqP1bmPygGyc98NEeLXJ06JEV/exec",
   produit: "Starter Pack 15 000 · chat",   // « · chat » = version sans vidéo (l'app la compte dans l'onglet Agence car le nom contient « Starter »)
   pixel: "2301144290453434",        // Pixel Meta « Starter Pack - Willy Tiendré » (compte shopmoney). Vide = pas de Pixel.
-  photo: "https://willshop-app.vercel.app/media/starter/willy.jpg",    // avatar (vide = initiales "WT")
+  photo: "https://willshop-app.vercel.app/media/starter/willy-avatar.jpg",    // avatar (vide = initiales "WT")
+  photoChat: "https://willshop-app.vercel.app/media/starter/willy-chat.jpg",  // photo envoyée dans le chat
   poster: "https://willshop-app.vercel.app/media/starter/poster-16x9.jpg",  // image de départ (étape OUI/Non)
   // ⚠️ Les médias sont gardés 1 an en cache : pour remplacer une vidéo, donne-lui un NOUVEAU nom (v1b.mp4…).
   videos: {                         // liens de tes 4 vidéos + bonus (mp4). Vide = image + "vidéo bientôt".
@@ -225,7 +230,7 @@ async function attendreVideo() {
 async function boutons(liste, une = false) {
   await attendreVideo();
   return new Promise(res => {
-    bas.innerHTML = ""; const g = document.createElement("div"); g.className = "grille" + (une || liste.length === 1 ? " une" : "");
+    bas.innerHTML = `<div class="aide">👇 Touche ta réponse</div>`; const g = document.createElement("div"); g.className = "grille pulse" + (une || liste.length === 1 ? " une" : "");
     liste.forEach(o => {
       const b = document.createElement("button"); b.className = "btn " + (o.style || ""); b.textContent = o.t;
       if (o.pleine) b.style.gridColumn = "1 / -1";
@@ -287,7 +292,7 @@ async function demarrer() {
   await dit("Salut 👋", "fort", 500);
   await boutons([{ t: "Salut 👋" }], true);
   etape("Intéressé"); px("TunnelDemarre", true);
-  if (CFG.photo) await dit(`<img src="${CFG.photo}" alt="Willy Tiendré" style="width:100%;max-width:200px;border-radius:12px;display:block">`, "moi", 500);
+  if (CFG.photoChat) await dit(`<img src="${CFG.photoChat}" alt="Willy Tiendré" style="width:100%;max-width:200px;border-radius:12px;display:block">`, "moi", 500);
   await dit("Moi c'est <b>Willy Tiendré</b>.");
   await dit("Je fais ta pub Facebook 📢");
   await dit("Tu vends quoi ?", "fort");
