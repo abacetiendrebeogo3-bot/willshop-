@@ -155,7 +155,8 @@ const CFG = {
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-ugc.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-ugc.jpg", titre:"Vidéo UGC · TBM Inov Afrika"},
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-spot.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-spot.jpg", titre:"Spot pub · ventilateur"}
   ],
-  spotEx: null,                    // 2e vidéo (spot) du même produit : { src, poster }. null = sautée.
+  produitEx2: "https://willshop-app.vercel.app/media/starter/prod-fittea.jpg",  // 2e produit (photo brute)
+  spotEx: { src: "https://willshop-app.vercel.app/media/starter/ex-spot-fittea.mp4", poster: "https://willshop-app.vercel.app/media/starter/ex-spot-fittea.jpg" },  // le spot pub fait pour ce 2e produit. null = sauté.
   produitEx: "https://willshop-app.vercel.app/media/starter/prod-fertility.jpg",   // photo du produit du client (avant)
   videoEx: { src: "https://willshop-app.vercel.app/media/starter/ex-fertility.mp4", poster: "https://willshop-app.vercel.app/media/starter/ex-fertility.jpg" },  // la vidéo pub faite pour ce produit (après)
   affiches: ["https://willshop-app.vercel.app/media/starter/aff-fertility.jpg","https://willshop-app.vercel.app/media/starter/aff-voiture.jpg","https://willshop-app.vercel.app/media/starter/aff-kit-minceur.jpg","https://willshop-app.vercel.app/media/starter/aff-ventilateur.jpg"],   // 4 affiches = grille 2 × 2                    // affiches d'exemple (liens .jpg). Vide = étape sautée.
@@ -356,8 +357,13 @@ async function offre() {
     await dit("Je l'ai créée pour la pub.");
     await vu();
   }
+  if (CFG.produitEx2) {
+    await dit("Et ce produit 👇", "fort");
+    await dit(`<img src="${CFG.produitEx2}" alt="produit" style="width:100%;max-width:220px;border-radius:12px;display:block">`, "moi", 400);
+    await vu();
+  }
   if (CFG.spotEx && CFG.spotEx.src) {
-    await dit("Et voici un spot pub 👇", "fort");
+    await dit("Regarde son spot pub 👇", "fort");
     await dit(`<video src="${CFG.spotEx.src}" ${CFG.spotEx.poster ? `poster="${CFG.spotEx.poster}"` : ""} controls playsinline preload="none" style="width:100%;max-width:260px;border-radius:12px;display:block;background:#000"></video>`, "moi", 400);
     await vu();
   }
