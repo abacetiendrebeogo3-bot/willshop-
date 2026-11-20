@@ -71,6 +71,10 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .saisie input:focus{border-color:var(--vif)}
 .saisie button{width:50px;height:50px;border-radius:12px;border:0;background:var(--vif);color:#fff;font-size:20px}
 .erreur{color:#C62828;font-size:13px;padding:6px 4px 0}
+.pack{background:linear-gradient(135deg,var(--nuit),#163a8a);color:#fff;border-radius:14px;padding:16px 18px;margin:-14px -16px}
+.pack-t{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#FFD21F;margin-bottom:8px}
+.pack-l{font-size:17px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.15)}
+.pack-l:last-child{border:0}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
 @keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
 .grille.pulse .btn{animation:pulse 1.2s ease-in-out infinite}
@@ -140,6 +144,7 @@ const CFG = {
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-ugc.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-ugc.jpg", titre:"Vidéo UGC · TBM Inov Afrika"},
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-spot.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-spot.jpg", titre:"Spot pub · ventilateur"}
   ],
+  affiches: [],                    // tes affiches d'exemple (liens .jpg). Vide = l'étape « affiches » est sautée.
   creneauxSecours: [9, 11, 15, 17], // utilisés seulement si l'agenda ne répond pas
   joursAvance: 5,
   prix: "15 000 F", avance: "7 500 F", deplacement: "2 000 F", budgetConseil: "10 000 F"
@@ -310,28 +315,30 @@ async function demarrer() {
   ]);
   D.pub = { "marche": "Oui, ça marche", "pas marche": "Oui, sans résultat", "jamais": "Jamais" }[a];
   etape("Pub");
-  await dit({ "marche": "Top ! On fait encore mieux 🔥", "pas marche": "Souvent, c'est la pub le problème.", "jamais": "Pas de souci, je gère tout 🙂" }[a]);
+  await dit({ "marche": "Ok, top 👌", "pas marche": "Ok, je comprends 👌", "jamais": "Ok, pas de souci 👌" }[a]);
   offre();
 }
 
 async function offre() {
-  await dit("Regarde ce que je fais 👇", "fort");
-  await boutons([{ t: "Voir 👀" }], true);
-  const g = CFG.exemples.filter(e => e.src).map(e => e.type === "video"
+  await dit(`<div class="pack">
+    <div class="pack-t">Je fais pour toi :</div>
+    <div class="pack-l">🎬 <b>2 vidéos</b> pub</div>
+    <div class="pack-l">🖼️ <b>5 affiches</b></div>
+    <div class="pack-l">🚀 <b>Campagne</b> lancée</div>
+  </div>`, "carte", 600);
+  await dit("Tu veux ça ?", "fort");
+  await boutons([{ t: "Oui 👍" }, { t: "Montre-moi 👀" }]);
+  await dit("Regarde mes vidéos 👇", "fort");
+  const vids = CFG.exemples.filter(e => e.src).map(e => e.type === "video"
     ? `<figure><video src="${e.src}" ${e.poster ? `poster="${e.poster}"` : ""} controls playsinline preload="none"></video>${e.titre ? `<figcaption>${e.titre}</figcaption>` : ""}</figure>`
     : `<img src="${e.src}" alt="exemple" loading="lazy">`).join("");
-  if (g) await dit(`<div class="galerie">${g}</div>`, "carte", 400);
-  await dit("Touche ▶️ pour voir.");
-  await dit("Je peux faire ça pour toi.", "fort");
-  await boutons([{ t: "Comment ? 🤔" }], true);
-  await dit("1️⃣ Je fais <b>2 vidéos pub</b> 🎬");
-  await boutons([{ t: "Et après ?" }], true);
-  await dit("2️⃣ Je fais <b>5 affiches</b> 🖼️");
-  await boutons([{ t: "Et après ?" }], true);
-  await dit("3️⃣ Je lance <b>ta pub</b> 🚀");
-  await boutons([{ t: "Et après ?" }], true);
-  await dit("4️⃣ Les clients t'écrivent 📲");
-  await boutons([{ t: "C'est combien ? 💰" }], true);
+  if (vids) await dit(`<div class="galerie">${vids}</div>`, "carte", 400);
+  await boutons([{ t: "J'ai vu 👍" }], true);
+  if (CFG.affiches.length) {
+    await dit("Regarde mes affiches 👇", "fort");
+    await dit(`<div class="galerie">${CFG.affiches.map(u => `<img src="${u}" alt="affiche" loading="lazy">`).join("")}</div>`, "carte", 400);
+    await boutons([{ t: "J'ai vu 👍" }], true);
+  }
   etape("Offre vue");
   await dit(`Tout ça : <b>${CFG.prix}</b> ✅`, "fort");
   choix();
