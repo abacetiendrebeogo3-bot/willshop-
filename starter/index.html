@@ -72,6 +72,24 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .saisie button{width:50px;height:50px;border-radius:12px;border:0;background:var(--vif);color:#fff;font-size:20px}
 .erreur{color:#C62828;font-size:13px;padding:6px 4px 0}
 .confiance{font-size:11.5px;color:var(--mut);text-align:center;margin-top:8px}
+
+/* Formulaire unique (rendez-vous + infos + règles) */
+.form{display:flex;flex-direction:column;gap:12px}
+.form label.t{display:block;font-size:13px;font-weight:700;color:var(--nuit);margin-bottom:5px}
+.form input[type=text],.form input[type=tel],.form select{width:100%;border:1.5px solid #CBD3E1;border-radius:10px;padding:12px;font-size:16px;background:#fff;color:var(--txt);outline:none;-webkit-appearance:none;appearance:none}
+.form select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%230B1F4D' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E") no-repeat right 12px center}
+.form input:focus,.form select:focus{border-color:var(--vif)}
+.puces{display:flex;flex-wrap:wrap;gap:7px}
+.puces button{flex:1 1 auto;min-width:64px;border:1.5px solid #CBD3E1;background:#fff;color:var(--nuit);border-radius:10px;padding:10px 8px;font-size:14.5px;font-weight:600;cursor:pointer}
+.puces button.on{background:var(--vif);border-color:var(--vif);color:#fff}
+.form .deux{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form .regles{background:var(--fond);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.5}
+.form .coche{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;font-weight:600;cursor:pointer}
+.form .coche input{width:22px;height:22px;flex-shrink:0;accent-color:var(--vif);margin-top:1px}
+.form .note{font-size:12.5px;color:var(--mut);margin-top:4px}
+.form .err{color:#C62828;font-size:13px;font-weight:600;min-height:0}
+.form .btn{width:100%}
+.form .btn[disabled]{opacity:.6}
 </style>
 </head>
 <body>
@@ -356,75 +374,110 @@ async function video4() {
   joue("v4");
   await voix("Parfait 🙌 Dernière étape : on fixe un moment pour se parler.");
   await voix("Tout peut se faire à distance : tu m'envoies les photos de tes produits sur WhatsApp et je m'occupe du reste. Mais si tu préfères, on peut aussi se rencontrer.");
-  await voix("On se parle comment ?", "fort");
-  const c = await boutons([
-    { t: "💬 Sur WhatsApp", v: "WhatsApp", pleine: true },
-    { t: "📞 Appel de 15 min", v: "Appel 15 min", pleine: true },
-    { t: `Je préfère qu'on se voie (${CFG.deplacement})`, v: "Rencontre", style: "gris", pleine: true }
-  ]);
-  D.contact = c;
-  if (c === "Rencontre") {
-    await dit(`D'accord 🤝 Le déplacement coûte <b>${CFG.deplacement}</b>, payés avant que je vienne. Tu es dans quel quartier ?`);
-    D.quartier = await saisir("Ex : Ouaga 2000, Tanghin, Pissy…");
-  }
-  await choisirCreneau();
-  infos();
-}
-
-async function choisirCreneau(msg) {
-  if (msg) await dit(msg);
+  await attendreVideo();
   let jours = await (DISPO || chargerDispo());
   if (!jours) jours = dispoSecours();
-  if (!jours.length) {
-    await dit("Mon agenda est plein ces jours-ci 🙏 Écris-moi directement sur WhatsApp, je te trouve un moment.");
-    D.jour = "à fixer"; D.heure = ""; D.slot = ""; return;
-  }
-  await dit("Choisis ton jour 📅 (je te montre seulement mes moments libres)", "fort");
-  const j = await boutons(jours.map(x => ({ t: x.jour, v: x.date })));
-  const jour = jours.find(x => x.date === j);
-  D.jour = jour.jour;
-  await dit("Et l'heure ⏰", "fort");
-  const iso = await boutons(jour.heures.map(x => ({ t: x.h + " h", v: x.iso })));
-  D.slot = iso; D.heure = jour.heures.find(x => x.iso === iso).h;
-  etape("Rendez-vous");
-}
-
-async function infos() {
-  await dit("Parfait 👌 Il me faut juste 3 petites infos.");
-  await dit("Ton prénom ?", "fort");
-  D.prenom = await saisir("Ton prénom");
-  await dit(`Merci ${D.prenom} 🙏 Le nom de ton commerce ?`, "fort");
-  D.commerce = await saisir("Nom de ton commerce ou de ta page");
-  await dit("Et ton numéro WhatsApp ?", "fort");
-  D.numero = await saisir("Ex : 70 12 34 56", "tel", v => {
-    const n = v.replace(/\D/g, "").replace(/^(00)?226/, "");
-    return n.length === 8 ? null : "Mets les 8 chiffres de ton numéro 🙏";
-  });
-  D.numero = D.numero.replace(/\D/g, "").replace(/^(00)?226/, "");
-  envoyer("lead", "Numéro donné"); px("Lead");   // numéro laissé (même s'il ne clique pas sur WhatsApp)
-  regles();
-}
-
-async function regles() {
-  await dit(`<h4>📌 Avant de commencer</h4>
-    <div class="ligne">💰 Je paie <b>${CFG.avance}</b> pour commencer. Quand les 2 vidéos et les 5 affiches sont prêtes, je paie le reste, puis la pub est lancée.</div>
-    <div class="ligne">⏱️ Livraison en <b>48 h</b> après l'avance + mes photos, mon logo et mes prix.</div>
-    <div class="ligne">✏️ <b>1 série de corrections</b> offerte. Tout se fait à distance.</div>
-    <div class="ligne">⛽ Le budget pub est à part, sur ma carte.</div>`, "carte");
-  await boutons([{ t: "✅ J'ai compris, je suis d'accord", v: "ok", pleine: true }], true);
-  etape("Règles acceptées");
-  if (D.slot) {
-    let r = await reserver();
-    while (r && r.pris) {                // quelqu'un vient de prendre ce créneau
-      DISPO = Promise.resolve(r.jours);
-      await choisirCreneau("Oups 😅 Quelqu'un vient de prendre ce moment. Choisis un autre créneau :");
-      if (!D.slot) break;
-      r = await reserver();
-    }
-    if (r && r.quand) D.quand = r.quand;
-    px("Schedule");
-  }
+  await formulaire(jours);
   fin();
+}
+
+/* Un seul formulaire : le client remplit tout, coche les règles et valide en 1 clic */
+function formulaire(jours, msgErreur = "") {
+  return new Promise(async res => {
+    const b = await dit(`<h4>📅 Ton rendez-vous</h4>
+    <form class="form" novalidate>
+      <div><label class="t">On se parle comment ?</label>
+        <div class="puces" data-champ="contact">
+          <button type="button" data-v="WhatsApp">💬 WhatsApp</button>
+          <button type="button" data-v="Appel 15 min">📞 Appel 15 min</button>
+          <button type="button" data-v="Rencontre">🤝 Se voir (${CFG.deplacement})</button>
+        </div>
+        <div class="note" data-note-rencontre style="display:none">Le déplacement coûte ${CFG.deplacement}, payés avant que je vienne.</div>
+      </div>
+      ${jours.length ? `<div><label class="t">Jour</label>
+        <select name="jour"><option value="">Choisis ton jour</option>${jours.map(x => `<option value="${x.date}">${x.jour}</option>`).join("")}</select></div>
+      <div><label class="t">Heure</label><div class="puces" data-champ="heure"><span class="note">Choisis d'abord le jour</span></div></div>`
+      : `<div class="note">Mon agenda est plein ces jours-ci 🙏 On fixe le moment ensemble sur WhatsApp.</div>`}
+      <div class="deux">
+        <div><label class="t">Prénom</label><input type="text" name="prenom" placeholder="Ton prénom" autocomplete="given-name"></div>
+        <div><label class="t">Quartier</label><input type="text" name="quartier" placeholder="Ex : Tanghin"></div>
+      </div>
+      <div><label class="t">Nom de ton commerce ou de ta page</label><input type="text" name="commerce" placeholder="Ex : Boutique Awa Style"></div>
+      <div><label class="t">Ton numéro WhatsApp</label><input type="tel" name="numero" inputmode="numeric" placeholder="Ex : 70 12 34 56" autocomplete="tel"></div>
+      <div class="regles">
+        💰 J'avance <b>${CFG.avance}</b>. Quand les 2 vidéos et les 5 affiches sont prêtes, je paie le reste, puis la pub est lancée.<br>
+        ⏱️ Livraison en <b>48 h</b> après l'avance + mes photos, mon logo et mes prix.<br>
+        ✏️ <b>1 série de corrections</b> offerte. Tout se fait à distance.<br>
+        ⛽ Le budget pub est à part, sur ma carte.
+      </div>
+      <label class="coche"><input type="checkbox" name="ok"> J'ai compris, je suis d'accord</label>
+      <div class="err">${msgErreur}</div>
+      <button type="submit" class="btn">Valider mon rendez-vous ✅</button>
+    </form>`, "carte", 500);
+    const f = b.querySelector("form"), err = f.querySelector(".err");
+    const choix = { contact: "", heure: "" };
+    const puces = (zone, cle) => zone.querySelectorAll("button").forEach(x => x.onclick = () => {
+      zone.querySelectorAll("button").forEach(y => y.classList.remove("on")); x.classList.add("on"); choix[cle] = x.dataset.v;
+      if (cle === "contact") f.querySelector("[data-note-rencontre]").style.display = x.dataset.v === "Rencontre" ? "block" : "none";
+    });
+    puces(f.querySelector('[data-champ="contact"]'), "contact");
+    const selJour = f.querySelector('select[name="jour"]'), zoneH = f.querySelector('[data-champ="heure"]');
+    if (selJour) selJour.onchange = () => {
+      choix.heure = "";
+      const j = jours.find(x => x.date === selJour.value);
+      zoneH.innerHTML = j ? j.heures.map(x => `<button type="button" data-v="${x.iso}">${x.h} h</button>`).join("") : `<span class="note">Choisis d'abord le jour</span>`;
+      puces(zoneH, "heure");
+    };
+    setTimeout(() => { b.scrollIntoView({ block: "start", behavior: "smooth" }); }, 50);
+    f.onsubmit = async e => {
+      e.preventDefault(); err.textContent = "";
+      const v = n => (f.elements[n] ? f.elements[n].value.trim() : "");
+      const num = v("numero").replace(/\D/g, "").replace(/^(00)?226/, "");
+      const manque = !choix.contact ? "Choisis comment on se parle 🙏"
+        : jours.length && !selJour.value ? "Choisis ton jour 📅"
+        : jours.length && !choix.heure ? "Choisis l'heure ⏰"
+        : !v("prenom") ? "Écris ton prénom 🙏"
+        : !v("quartier") ? "Écris ton quartier 🙏"
+        : !v("commerce") ? "Écris le nom de ton commerce 🙏"
+        : num.length !== 8 ? "Mets les 8 chiffres de ton numéro WhatsApp 🙏"
+        : !f.elements.ok.checked ? "Coche « J'ai compris, je suis d'accord » ✅" : "";
+      if (manque) { err.textContent = manque; err.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
+      D.contact = choix.contact; D.prenom = v("prenom"); D.quartier = v("quartier"); D.commerce = v("commerce"); D.numero = num;
+      if (jours.length) {
+        const j = jours.find(x => x.date === selJour.value);
+        D.jour = j.jour; D.slot = choix.heure; D.heure = j.heures.find(x => x.iso === choix.heure).h;
+      } else { D.jour = "à fixer"; D.heure = ""; D.slot = ""; }
+      const bt = f.querySelector('button[type="submit"]'); bt.disabled = true; bt.textContent = "Un instant…";
+      etape("Rendez-vous");
+      envoyer("lead", "Numéro donné"); px("Lead");
+      etape("Règles acceptées");
+      if (D.slot) {
+        const r = await reserver();
+        if (r && r.pris) {               // quelqu'un vient de prendre ce créneau : on remet le formulaire avec les nouveaux créneaux
+          b.remove();
+          const nj = r.jours || dispoSecours();
+          return res(await formulaireRempli(nj));
+        }
+        if (r && r.quand) D.quand = r.quand;
+        px("Schedule");
+      }
+      b.remove();
+      res();
+    };
+  });
+}
+/* Créneau pris entre-temps : nouveau formulaire, déjà rempli avec ce qu'il avait écrit */
+async function formulaireRempli(jours) {
+  const garde = { ...D };
+  const p = formulaire(jours, "Oups 😅 Quelqu'un vient de prendre ce moment. Choisis un autre jour ou une autre heure.");
+  await pause(600);
+  const f = chat.querySelector(".carte:last-child form");
+  if (f) {
+    ["prenom", "quartier", "commerce"].forEach(n => f.elements[n].value = garde[n] || "");
+    f.elements.numero.value = garde.numero || ""; f.elements.ok.checked = true;
+    const c = f.querySelector(`[data-champ="contact"] button[data-v="${garde.contact}"]`); if (c) c.click();
+  }
+  return p;
 }
 
 async function fin() {
@@ -432,13 +485,14 @@ async function fin() {
   document.querySelector("#etapes i").style.width = "100%";
   const quand = D.slot ? D.jour + " à " + D.heure + " h" : "date à fixer";
   const lieu = D.contact === "Rencontre" ? ` à ${D.quartier}` : "";
+  const quartier = D.quartier ? ` · 📍 ${D.quartier}` : "";
   await dit(`<h4>📋 Ton récap</h4>
     <div class="ligne">👤 ${D.prenom} · ${D.commerce}</div>
-    <div class="ligne">🏷️ ${D.domaine}</div>
+    <div class="ligne">🏷️ ${D.domaine}${quartier}</div>
     <div class="ligne">📅 ${D.contact}${lieu} · ${quand}</div>
     <div class="ligne">📲 ${D.numero}</div>`, "carte");
   await dit("Merci ! J'ai bien tout noté 🙏 Touche le bouton vert : ton message est déjà écrit, tu as juste à l'envoyer. On se parle très vite !", "fort");
-  const msg = `Bonjour Willy 👋 Je suis ${D.prenom} (${D.commerce}, ${D.domaine}).\n`
+  const msg = `Bonjour Willy 👋 Je suis ${D.prenom} (${D.commerce}, ${D.domaine}, ${D.quartier}).\n`
     + `Je veux le Starter Pack à ${CFG.prix}.\n`
     + `📅 ${D.contact}${lieu} : ${quand}.\n`
     + `J'ai lu les conditions : avance de ${CFG.avance}, budget pub à part sur ma carte.`;
