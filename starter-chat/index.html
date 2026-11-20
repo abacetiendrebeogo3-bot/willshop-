@@ -144,7 +144,9 @@ const CFG = {
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-ugc.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-ugc.jpg", titre:"Vidéo UGC · TBM Inov Afrika"},
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-spot.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-spot.jpg", titre:"Spot pub · ventilateur"}
   ],
-  affiches: [],                    // tes affiches d'exemple (liens .jpg). Vide = l'étape « affiches » est sautée.
+  videoEx: { src: "https://willshop-app.vercel.app/media/starter/ex-ugc.mp4", poster: "https://willshop-app.vercel.app/media/starter/ex-ugc.jpg" },  // UNE vidéo d'exemple
+  affiches: [],                    // affiches d'exemple (liens .jpg). Vide = étape sautée.
+  captures: [],                    // captures d'écran de campagne (liens .jpg). Vide = pas d'exemple, juste la phrase.
   creneauxSecours: [9, 11, 15, 17], // utilisés seulement si l'agenda ne répond pas
   joursAvance: 5,
   prix: "15 000 F", avance: "7 500 F", deplacement: "2 000 F", budgetConseil: "10 000 F"
@@ -328,17 +330,23 @@ async function offre() {
   </div>`, "carte", 600);
   await dit("Tu veux ça ?", "fort");
   await boutons([{ t: "Oui 👍" }, { t: "Montre-moi 👀" }]);
-  await dit("Regarde mes vidéos 👇", "fort");
-  const vids = CFG.exemples.filter(e => e.src).map(e => e.type === "video"
-    ? `<figure><video src="${e.src}" ${e.poster ? `poster="${e.poster}"` : ""} controls playsinline preload="none"></video>${e.titre ? `<figcaption>${e.titre}</figcaption>` : ""}</figure>`
-    : `<img src="${e.src}" alt="exemple" loading="lazy">`).join("");
-  if (vids) await dit(`<div class="galerie">${vids}</div>`, "carte", 400);
-  await boutons([{ t: "J'ai vu 👍" }], true);
-  if (CFG.affiches.length) {
-    await dit("Regarde mes affiches 👇", "fort");
-    await dit(`<div class="galerie">${CFG.affiches.map(u => `<img src="${u}" alt="affiche" loading="lazy">`).join("")}</div>`, "carte", 400);
-    await boutons([{ t: "J'ai vu 👍" }], true);
+  const vu = () => boutons([{ t: "J'ai vu 👍" }], true);
+  const galerie = l => `<div class="galerie">${l.map(u => `<img src="${u}" alt="exemple" loading="lazy">`).join("")}</div>`;
+  // 1. Vidéos
+  await dit("Je fais <b>2 vidéos</b> pour toi 🎬", "fort");
+  if (CFG.videoEx && CFG.videoEx.src) {
+    await dit("Exemple 👇");
+    await dit(`<video src="${CFG.videoEx.src}" ${CFG.videoEx.poster ? `poster="${CFG.videoEx.poster}"` : ""} controls playsinline preload="none" style="width:100%;max-width:260px;border-radius:12px;display:block;background:#000"></video>`, "moi", 400);
   }
+  await vu();
+  // 2. Affiches
+  await dit("Je fais <b>5 affiches</b> pour toi 🖼️", "fort");
+  if (CFG.affiches.length) { await dit("Exemple 👇"); await dit(galerie(CFG.affiches), "carte", 400); }
+  await vu();
+  // 3. Campagne
+  await dit("Je lance <b>ta campagne</b> 🚀", "fort");
+  if (CFG.captures.length) { await dit("Exemple 👇"); await dit(galerie(CFG.captures), "carte", 400); }
+  await vu();
   etape("Offre vue");
   await dit(`Tout ça : <b>${CFG.prix}</b> ✅`, "fort");
   choix();
