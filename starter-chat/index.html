@@ -81,6 +81,11 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .form.mini{gap:8px}
 .form.mini input{width:100%;border:1.5px solid #CBD3E1;border-radius:10px;padding:12px;font-size:16px;outline:none}
 .form.mini input:focus{border-color:var(--vif)}
+.grille4{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-4px -6px}
+.grille4 img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:zoom-in}
+#zoom{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:99;padding:14px}
+#zoom img{max-width:100%;max-height:100%;border-radius:8px}
+#zoom b{position:absolute;top:12px;right:16px;color:#fff;font-size:30px;line-height:1}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
 @keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
 .grille.pulse .btn{animation:pulse 1.2s ease-in-out infinite}
@@ -150,9 +155,10 @@ const CFG = {
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-ugc.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-ugc.jpg", titre:"Vidéo UGC · TBM Inov Afrika"},
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-spot.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-spot.jpg", titre:"Spot pub · ventilateur"}
   ],
+  spotEx: null,                    // 2e vidéo (spot) du même produit : { src, poster }. null = sautée.
   produitEx: "https://willshop-app.vercel.app/media/starter/prod-fertility.jpg",   // photo du produit du client (avant)
   videoEx: { src: "https://willshop-app.vercel.app/media/starter/ex-fertility.mp4", poster: "https://willshop-app.vercel.app/media/starter/ex-fertility.jpg" },  // la vidéo pub faite pour ce produit (après)
-  affiches: ["https://willshop-app.vercel.app/media/starter/aff-fertility.jpg","https://willshop-app.vercel.app/media/starter/aff-voiture.jpg","https://willshop-app.vercel.app/media/starter/aff-kit-minceur.jpg","https://willshop-app.vercel.app/media/starter/aff-ventilateur.jpg","https://willshop-app.vercel.app/media/starter/aff-formation-ia.jpg"],                    // affiches d'exemple (liens .jpg). Vide = étape sautée.
+  affiches: ["https://willshop-app.vercel.app/media/starter/aff-fertility.jpg","https://willshop-app.vercel.app/media/starter/aff-voiture.jpg","https://willshop-app.vercel.app/media/starter/aff-kit-minceur.jpg","https://willshop-app.vercel.app/media/starter/aff-ventilateur.jpg"],   // 4 affiches = grille 2 × 2                    // affiches d'exemple (liens .jpg). Vide = étape sautée.
   captures: [],                    // captures d'écran de campagne (liens .jpg). Vide = pas d'exemple, juste la phrase.
   creneauxSecours: [9, 11, 15, 17], // utilisés seulement si l'agenda ne répond pas
   joursAvance: 5,
@@ -215,6 +221,12 @@ async function reserver() {
       lieu: D.quartier || "", nom: D.prenom, ent: D.commerce, tel: D.numero, com: D.domaine, pub: D.pub }) });
     return await r.json();
   } catch (e) { return { ok: true, horsLigne: 1, quand: D.jour + " à " + D.heure + " h" }; }
+}
+
+/* ---------- affiche en grand ---------- */
+function zoom(src) {
+  const z = document.createElement("div"); z.id = "zoom"; z.innerHTML = `<img src="${src}" alt="affiche"><b>×</b>`;
+  z.onclick = () => z.remove(); document.body.appendChild(z);
 }
 
 /* ---------- discussion ---------- */
@@ -344,11 +356,16 @@ async function offre() {
     await dit("Je l'ai créée pour la pub.");
     await vu();
   }
+  if (CFG.spotEx && CFG.spotEx.src) {
+    await dit("Et voici un spot pub 👇", "fort");
+    await dit(`<video src="${CFG.spotEx.src}" ${CFG.spotEx.poster ? `poster="${CFG.spotEx.poster}"` : ""} controls playsinline preload="none" style="width:100%;max-width:260px;border-radius:12px;display:block;background:#000"></video>`, "moi", 400);
+    await vu();
+  }
   // 3. Les affiches
   if (CFG.affiches.length) {
     await dit("Regarde mes affiches 👇", "fort");
-    await dit(`<div class="defile">${CFG.affiches.map(u => `<img src="${u}" alt="affiche" loading="lazy">`).join("")}</div>`, "carte", 400);
-    await dit("Glisse ➡️ pour voir.");
+    await dit(`<div class="grille4">${CFG.affiches.map(u => `<img src="${u}" alt="affiche" loading="lazy" onclick="zoom(this.src)">`).join("")}</div>`, "carte", 400);
+    await dit("Touche une affiche pour l'agrandir 🔍");
     await vu();
   }
   // 4. L'offre
@@ -365,17 +382,19 @@ async function offre() {
 }
 
 async function choix() {
-  await dit("Ça t'intéresse ?", "fort", 400);
-  await boutons([{ t: "Oui, je veux ✅" }], true);
+  await dit("On travaille ensemble ?", "fort", 400);
+  await boutons([{ t: "Oui ✅" }], true);
   rdv();
 }
 
 async function rdv() {
   await dit("Super 🙌");
+  await dit("Tout se fait à distance 📲");
+  await dit("Tu m'envoies juste tes photos.");
   await dit("On se parle comment ?", "fort");
   D.contact = await boutons([
     { t: "💬 WhatsApp", v: "WhatsApp" }, { t: "📞 Appel", v: "Appel 15 min" },
-    { t: `🤝 Se voir (${CFG.deplacement})`, v: "Rencontre", pleine: true }
+    { t: `Se voir (${CFG.deplacement})`, v: "Rencontre", style: "gris", pleine: true }
   ]);
   if (D.contact === "Rencontre") await dit(`Le déplacement : ${CFG.deplacement}.`);
   let jours = await (DISPO || chargerDispo());
