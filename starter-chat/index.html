@@ -89,6 +89,8 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .saisie.libre{margin-top:8px}
 .saisie.libre input{padding:10px 12px;font-size:15px}
 .saisie.libre button{width:44px;height:44px}
+.b img,.b video{max-height:46vh;max-width:100%;object-fit:contain}
+.grille4 img{max-height:none}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
 @keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
 .grille.pulse .btn{animation:pulse 1.2s ease-in-out infinite}
@@ -240,7 +242,13 @@ async function dit(html, style = "moi", attente = 700) {
   const t = document.createElement("div"); t.className = "typing"; t.innerHTML = "<span></span><span></span><span></span>";
   chat.appendChild(t); defile(); await pause(attente); t.remove();
   const b = document.createElement("div"); b.className = "b " + style; b.innerHTML = html;
-  chat.appendChild(b); defile(); return b;
+  chat.appendChild(b); defile();
+  const medias = b.querySelectorAll("img, video");
+  if (medias.length) {
+    const montre = () => { chat.scrollTop = Math.max(0, b.offsetTop - 60); };
+    montre(); medias.forEach(m => { m.addEventListener("load", montre); m.addEventListener("loadedmetadata", montre); });
+  }
+  return b;
 }
 /* Ce que Willy dit dans la vidéo : écrit seulement s'il n'y a pas (encore) de vidéo pour cette étape */
 let videoEnCours = "";
@@ -258,7 +266,7 @@ async function attendreVideo() {
   await porte; bas.innerHTML = "";
 }
 let tape = false;   // true si la dernière réponse a été écrite (pas un bouton)
-async function boutons(liste, une = false, libre = true) {
+async function boutons(liste, une = false, libre = false) {
   await attendreVideo();
   return new Promise(res => {
     tape = false;
@@ -266,7 +274,7 @@ async function boutons(liste, une = false, libre = true) {
     liste.forEach(o => {
       const b = document.createElement("button"); b.className = "btn " + (o.style || ""); b.textContent = o.t;
       if (o.pleine) b.style.gridColumn = "1 / -1";
-      b.onclick = () => { bas.innerHTML = ""; if (!o.silence) client(o.t); res(o.v ?? o.t); };
+      b.onclick = () => { chat.querySelectorAll("video").forEach(v => v.pause()); bas.innerHTML = ""; if (!o.silence) client(o.t); res(o.v ?? o.t); };
       g.appendChild(b);
     });
     bas.appendChild(g);
@@ -365,7 +373,7 @@ async function offre() {
   }
   // 2. La pub faite avec
   if (CFG.videoEx && CFG.videoEx.src) {
-    await dit("Regarde la pub que j'ai faite 👇", "fort");
+    await dit("Regarde la pub que j'ai faite avec 👇", "fort");
     await dit(`<video src="${CFG.videoEx.src}" ${CFG.videoEx.poster ? `poster="${CFG.videoEx.poster}"` : ""} controls playsinline preload="none" style="width:100%;max-width:260px;border-radius:12px;display:block;background:#000"></video>`, "moi", 400);
     await dit("Cette femme n'existe pas 🤯");
     await dit("Je l'ai créée pour la pub.");
@@ -377,19 +385,19 @@ async function offre() {
     await vu();
   }
   if (CFG.spotEx && CFG.spotEx.src) {
-    await dit("Regarde son spot pub 👇", "fort");
+    await dit("Regarde le spot que j'ai fait avec 👇", "fort");
     await dit(`<video src="${CFG.spotEx.src}" ${CFG.spotEx.poster ? `poster="${CFG.spotEx.poster}"` : ""} controls playsinline preload="none" style="width:100%;max-width:260px;border-radius:12px;display:block;background:#000"></video>`, "moi", 400);
     await vu();
   }
   // 3. Les affiches
   if (CFG.affiches.length) {
-    await dit("Regarde mes affiches 👇", "fort");
+    await dit("Regarde les affiches que j'ai faites 👇", "fort");
     await dit(`<div class="grille4">${CFG.affiches.map(u => `<img src="${u}" alt="affiche" loading="lazy" onclick="zoom(this.src)">`).join("")}</div>`, "carte", 400);
     await dit("Touche une affiche pour l'agrandir 🔍");
     await vu();
   }
   // 4. L'offre
-  await dit("Je peux faire ça pour toi 💪", "fort");
+  await dit("Je peux faire ça pour toi aussi 💪", "fort");
   etape("Offre vue");
   await dit(`<div class="pack">
     <div class="pack-t">Pour ton commerce :</div>
@@ -402,13 +410,15 @@ async function offre() {
 }
 
 async function choix() {
-  await dit("On travaille ensemble ?", "fort", 400);
+  await dit("Tu veux qu'on travaille ensemble ?", "fort", 400);
   await boutons([{ t: "Oui ✅" }], true);
   rdv();
 }
 
 async function rdv() {
-  await dit("Super 🙌");
+  await dit("Ok, super 🙌");
+  await dit("Tu veux qu'on se parle ?", "fort");
+  await boutons([{ t: "Oui 👍" }], true);
   await dit("On se parle comment ?", "fort");
   D.contact = await boutons([
     { t: "💬 WhatsApp", v: "WhatsApp" }, { t: "📞 Appel", v: "Appel 15 min" },
