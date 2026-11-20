@@ -91,6 +91,8 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .saisie.libre button{width:44px;height:44px}
 .b img,.b video{max-height:46vh;max-width:100%;object-fit:contain}
 .grille4 img{max-height:none}
+.b.avance{background:#FFF6D6;border:2px solid #FFD21F;color:var(--nuit);font-weight:600;animation:avance 1.4s ease-in-out infinite}
+@keyframes avance{0%,100%{box-shadow:0 0 0 0 rgba(255,210,31,0)}50%{box-shadow:0 0 0 6px rgba(255,210,31,.45)}}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
 @keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
 .grille.pulse .btn{animation:pulse 1.2s ease-in-out infinite}
@@ -406,6 +408,7 @@ async function offre() {
     <div class="pack-l">🚀 <b>Ta campagne</b> lancée</div>
     <div class="pack-p">${CFG.prix}</div>
   </div>`, "carte", 600);
+  await dit(`💰 Tu paies <b>${CFG.avance}</b> pour commencer.<br>Quand tes vidéos et affiches sont prêtes, tu paies le reste, puis je lance ta pub ✅`, "avance", 700);
   choix();
 }
 
@@ -449,7 +452,24 @@ async function rdv() {
 
 /* WhatsApp choisi : on ouvre directement WhatsApp avec un message déjà écrit */
 async function versWhatsApp() {
-  const msg = `Bonjour Willy 👋 Je veux le Starter Pack à ${CFG.prix}.` + (D.domaine ? `\nMon activité : ${D.domaine}.` : "");
+  await dit("Laisse ton numéro WhatsApp 👇", "fort");
+  await new Promise(res => {
+    bas.innerHTML = `<form class="form mini" novalidate>
+      <input type="tel" name="numero" inputmode="numeric" placeholder="Ton numéro WhatsApp" autocomplete="tel">
+      <div class="err"></div>
+      <button type="submit" class="btn">Valider ✅</button>
+    </form>`;
+    const f = bas.querySelector("form"), err = f.querySelector(".err");
+    setTimeout(() => { f.elements.numero.focus(); defile(); }, 100);
+    f.onsubmit = e => {
+      e.preventDefault();
+      const num = f.elements.numero.value.replace(/\D/g, "").replace(/^(00)?226/, "");
+      if (num.length !== 8) { err.textContent = "Mets les 8 chiffres de ton numéro 🙏"; return; }
+      D.numero = num; bas.innerHTML = ""; client(num); res();
+    };
+  });
+  envoyer("lead", "Numéro donné");
+  const msg = `Bonjour Willy 👋 Je veux le Starter Pack à ${CFG.prix}.` + (D.domaine ? `\nMon activité : ${D.domaine}.` : "") + `\nMon numéro : ${D.numero}`;
   const lien = `https://wa.me/${CFG.whatsapp}?text=${encodeURIComponent(msg)}`;
   etape("Clic WhatsApp"); px("Lead"); px("Contact");
   await dit("Je t'ouvre WhatsApp 📲", "fort", 400);
