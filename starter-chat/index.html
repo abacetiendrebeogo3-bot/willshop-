@@ -75,6 +75,8 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .pack-t{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#FFD21F;margin-bottom:8px}
 .pack-l{font-size:17px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.15)}
 .pack-l:last-child{border:0}
+.defile{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:-4px -6px;padding:4px 6px}
+.defile img{width:78%;flex:none;border-radius:10px;scroll-snap-align:start}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
 @keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
 .grille.pulse .btn{animation:pulse 1.2s ease-in-out infinite}
@@ -144,8 +146,9 @@ const CFG = {
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-ugc.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-ugc.jpg", titre:"Vidéo UGC · TBM Inov Afrika"},
     {type:"video", src:"https://willshop-app.vercel.app/media/starter/ex-spot.mp4", poster:"https://willshop-app.vercel.app/media/starter/ex-spot.jpg", titre:"Spot pub · ventilateur"}
   ],
-  videoEx: { src: "https://willshop-app.vercel.app/media/starter/ex-ugc.mp4", poster: "https://willshop-app.vercel.app/media/starter/ex-ugc.jpg" },  // UNE vidéo d'exemple
-  affiches: [],                    // affiches d'exemple (liens .jpg). Vide = étape sautée.
+  produitEx: "https://willshop-app.vercel.app/media/starter/prod-fertility.jpg",   // photo du produit du client (avant)
+  videoEx: { src: "https://willshop-app.vercel.app/media/starter/ex-fertility.mp4", poster: "https://willshop-app.vercel.app/media/starter/ex-fertility.jpg" },  // la vidéo pub faite pour ce produit (après)
+  affiches: ["https://willshop-app.vercel.app/media/starter/aff-fertility.jpg","https://willshop-app.vercel.app/media/starter/aff-voiture.jpg","https://willshop-app.vercel.app/media/starter/aff-kit-minceur.jpg","https://willshop-app.vercel.app/media/starter/aff-ventilateur.jpg","https://willshop-app.vercel.app/media/starter/aff-formation-ia.jpg"],                    // affiches d'exemple (liens .jpg). Vide = étape sautée.
   captures: [],                    // captures d'écran de campagne (liens .jpg). Vide = pas d'exemple, juste la phrase.
   creneauxSecours: [9, 11, 15, 17], // utilisés seulement si l'agenda ne répond pas
   joursAvance: 5,
@@ -334,14 +337,18 @@ async function offre() {
   const galerie = l => `<div class="galerie">${l.map(u => `<img src="${u}" alt="exemple" loading="lazy">`).join("")}</div>`;
   // 1. Vidéos
   await dit("Je fais <b>2 vidéos</b> pour toi 🎬", "fort");
+  if (CFG.produitEx) {
+    await dit("Exemple : ce produit 👇");
+    await dit(`<img src="${CFG.produitEx}" alt="produit" style="width:100%;max-width:220px;border-radius:12px;display:block">`, "moi", 400);
+  }
   if (CFG.videoEx && CFG.videoEx.src) {
-    await dit("Exemple 👇");
+    await dit("Voici sa vidéo pub 👇");
     await dit(`<video src="${CFG.videoEx.src}" ${CFG.videoEx.poster ? `poster="${CFG.videoEx.poster}"` : ""} controls playsinline preload="none" style="width:100%;max-width:260px;border-radius:12px;display:block;background:#000"></video>`, "moi", 400);
   }
   await vu();
   // 2. Affiches
   await dit("Je fais <b>5 affiches</b> pour toi 🖼️", "fort");
-  if (CFG.affiches.length) { await dit("Exemple 👇"); await dit(galerie(CFG.affiches), "carte", 400); }
+  if (CFG.affiches.length) { await dit("Exemples 👇 (glisse ➡️)"); await dit(`<div class="defile">${CFG.affiches.map(u => `<img src="${u}" alt="affiche" loading="lazy">`).join("")}</div>`, "carte", 400); }
   await vu();
   // 3. Campagne
   await dit("Je lance <b>ta campagne</b> 🚀", "fort");
