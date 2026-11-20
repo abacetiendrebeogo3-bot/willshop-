@@ -284,97 +284,72 @@ $("#son").onclick = () => { sonDebloque = true; vid.muted = false; vid.play(); $
    ========================================================= */
 async function demarrer() {
   etape("Arrivée"); chargerDispo();
-  await dit("Tu vends, mais tu n'as pas assez de clients ? 🤔", "fort", 500);
-  const r = await boutons([{ t: "OUI 👍", v: "oui" }, { t: "Non", v: "non", style: "gris" }]);
-  sonDebloque = true;                       // le clic débloque le son
-  if (r === "non") {
-    await dit("D'accord, pas de souci 🙏 Si un jour tu veux plus de clients sur ton WhatsApp, je suis là.");
-    await boutons([{ t: "Finalement oui 👍", v: "oui" }], true);
-  }
+  await dit("Salut 👋", "fort", 500);
+  await boutons([{ t: "Salut 👋" }], true);
   etape("Intéressé"); px("TunnelDemarre", true);
-  video1();
-}
-
-async function video1() {
-  joue("v1");
-  if (CFG.photo) await dit(`<img src="${CFG.photo}" alt="Willy Tiendré" style="width:100%;max-width:220px;border-radius:12px;display:block">`, "moi", 500);
-  await voix("Salut ! Moi c'est <b>Willy Tiendré</b> 👋<br>Je fais la pub Facebook pour les commerçants et les entrepreneurs, pour qu'ils aient plus de clients et vendent leurs produits.");
-  await voix("Moi-même je vends en ligne depuis 2021. Je sais ce qui fait venir les clients.");
-  await voix("Dis-moi d'abord : tu es dans quel domaine ?", "fort");
+  if (CFG.photo) await dit(`<img src="${CFG.photo}" alt="Willy Tiendré" style="width:100%;max-width:200px;border-radius:12px;display:block">`, "moi", 500);
+  await dit("Moi c'est <b>Willy Tiendré</b>.");
+  await dit("Je fais ta pub Facebook 📢");
+  await dit("Tu vends quoi ?", "fort");
   let a = await boutons([
     { t: "🛍️ Boutique" }, { t: "🍽️ Resto / maquis" }, { t: "💇 Beauté / coiffure" },
     { t: "👗 Vêtements" }, { t: "🛠️ Services" }, { t: "✍️ Autre", v: "autre" }
   ]);
-  if (a === "autre") { await dit("Écris ton domaine ici 👇"); a = await saisir("Ex : pharmacie, cosmétiques, auto…"); }
+  if (a === "autre") { await dit("Écris-le ici 👇"); a = await saisir("Ex : pharmacie, cosmétiques…"); }
   D.domaine = a.replace(/^\S+\s/, "");
   etape("Commerce");
-  video2();
-}
-
-async function video2() {
-  joue("v2");
-  await voix("Super, c'est noté ! 👌");
-  await voix("Dis-moi : tu as déjà fait le boostage ou lancé une pub sur Facebook ?", "fort");
-  let a = await boutons([
-    { t: "Oui, et ça marche 👍", v: "marche", pleine: true },
-    { t: "Oui, mais ça n'a pas marché 😕", v: "pas marche", pleine: true },
-    { t: "Jamais", v: "jamais" }, { t: "✍️ Autre", v: "autre" }
+  await dit("Tu as déjà fait la pub ?", "fort");
+  a = await boutons([
+    { t: "Oui, ça marche 👍", v: "marche" }, { t: "Oui, sans résultat 😕", v: "pas marche" },
+    { t: "Jamais", v: "jamais", pleine: true }
   ]);
-  if (a === "autre") { await dit("Raconte-moi en quelques mots 👇"); a = await saisir("Ton expérience avec la pub…"); }
-  D.pub = { "marche": "Oui, ça marche", "pas marche": "Oui, sans résultat", "jamais": "Jamais" }[a] || a;
+  D.pub = { "marche": "Oui, ça marche", "pas marche": "Oui, sans résultat", "jamais": "Jamais" }[a];
   etape("Pub");
-  if (a === "pas marche") await dit("Souvent ce n'est pas ton produit, c'est la pub qui est mal faite. On va régler ça 💪");
-  else if (a === "jamais") await dit("Pas de souci, je m'occupe de tout. Tu n'as rien de technique à faire 🙂");
-  else if (a === "marche") await dit("Très bien ! Alors on va faire encore mieux 🔥");
-  else await dit("Merci, ça m'aide à mieux te comprendre 🙏");
-  video3();
+  await dit({ "marche": "Top ! On fait encore mieux 🔥", "pas marche": "Souvent, c'est la pub le problème.", "jamais": "Pas de souci, je gère tout 🙂" }[a]);
+  offre();
 }
 
-async function video3() {
-  etape("Offre vue"); joue("v3");
-  await voix("Voilà comment je travaille 👇");
-  await voix(`<h4>✅ Le Starter Pack</h4>
-    <div class="ligne">🎬 <b>2 vidéos pub</b> professionnelles</div>
-    <div class="ligne">🖼️ <b>5 affiches</b> professionnelles</div>
-    <div class="ligne">🚀 Ta <b>pub Facebook configurée</b> et suivie pendant <b>7 jours</b></div>
-    <div class="ligne">📲 Les messages arrivent sur <b>ton WhatsApp</b></div>`, "carte");
-  await voix(`<div class="ligne">💼 <b>Mon travail</b><br><span class="prix">${CFG.prix}</span><br>2 vidéos + 5 affiches + pub configurée + suivi 7 jours</div>
-    <div class="ligne">⛽ <b>Le budget pub</b> → pour Facebook<br>Tu le mets sur ta carte. Il ne vient pas chez moi. C'est toi qui choisis le montant (conseillé : à partir de ${CFG.budgetConseil}).</div>`, "carte", 900);
-  await voix("La pub, c'est comme une moto 🏍️ Moi je prépare la moto et je la conduis. L'essence, c'est toi qui la mets. Plus tu mets d'essence, plus ta pub va loin.");
-  await voix("Moi je t'amène les messages. La vente, c'est toi 😉");
-  await attendreVideo();
-  await exemples();
-  choixOffre();
-}
-
-async function exemples() {
-  await voix("Regarde 👇 des vidéos que j'ai déjà faites pour des clients. Touche ▶️ pour voir.");
-  const g = CFG.exemples.map(e => !e.src ? `<div class="vide">Exemple bientôt</div>`
-    : e.type === "video" ? `<figure><video src="${e.src}" ${e.poster ? `poster="${e.poster}"` : ""} controls playsinline preload="none"></video>${e.titre ? `<figcaption>${e.titre}</figcaption>` : ""}</figure>`
+async function offre() {
+  etape("Offre vue");
+  await dit("Voici mon offre 👇");
+  await dit(`<h4>✅ Starter Pack</h4>
+    <div class="ligne">🎬 <b>2 vidéos pub</b></div>
+    <div class="ligne">🖼️ <b>5 affiches</b></div>
+    <div class="ligne">🚀 <b>Ta pub lancée</b> + suivi 7 jours</div>
+    <div class="ligne"><span class="prix">${CFG.prix}</span></div>`, "carte", 600);
+  await dit("Mes exemples 👇");
+  const g = CFG.exemples.filter(e => e.src).map(e => e.type === "video"
+    ? `<figure><video src="${e.src}" ${e.poster ? `poster="${e.poster}"` : ""} controls playsinline preload="none"></video>${e.titre ? `<figcaption>${e.titre}</figcaption>` : ""}</figure>`
     : `<img src="${e.src}" alt="exemple" loading="lazy">`).join("");
-  await dit(`<div class="galerie">${g}</div>`, "carte", 400);
+  if (g) await dit(`<div class="galerie">${g}</div>`, "carte", 400);
+  choix();
 }
 
-async function choixOffre() {
+async function choix() {
+  await dit("Ça t'intéresse ?", "fort", 400);
   const a = await boutons([
-    { t: "Je veux travailler avec toi ✅", v: "go", pleine: true },
-    { t: "J'ai peur de l'arnaque 😟", v: "arnaque", style: "gris", pleine: true }
+    { t: "Oui, je veux ✅", v: "go", pleine: true },
+    { t: "Et le budget pub ?", v: "budget", style: "gris" },
+    { t: "J'ai peur 😟", v: "arnaque", style: "gris" }
   ]);
-  if (a === "arnaque") {
-    joue("arnaque", "Ta question");
-    await voix("Je te comprends, il y a beaucoup d'arnaques 🙏");
-    await voix(`C'est pour ça que tu paies seulement <b>${CFG.avance}</b> au début. Tu vois tes 2 vidéos et tes 5 affiches finies avant de payer le reste. Ensuite je lance ta pub.`);
-    await voix("Et tu peux même me rencontrer avant de commencer 🤝");
-    return choixOffre();
+  if (a === "budget") {
+    await dit("C'est l'argent pour Facebook ⛽");
+    await dit("Tu le paies avec ta carte.");
+    await dit(`Conseillé : ${CFG.budgetConseil} minimum.`);
+    return choix();
   }
-  video4();
+  if (a === "arnaque") {
+    await dit(`Tu paies d'abord ${CFG.avance}.`);
+    await dit("Tu vois le travail fini.");
+    await dit("Puis tu paies le reste ✅");
+    await dit("On peut aussi se voir 🤝");
+    return choix();
+  }
+  rdv();
 }
 
-async function video4() {
-  joue("v4");
-  await voix("Parfait 🙌 Dernière étape : on fixe un moment pour se parler.");
-  await voix("Tout peut se faire à distance : tu m'envoies les photos de tes produits sur WhatsApp et je m'occupe du reste. Mais si tu préfères, on peut aussi se rencontrer.");
-  await attendreVideo();
+async function rdv() {
+  await dit("On fixe un appel ? 📅", "fort");
   let jours = await (DISPO || chargerDispo());
   if (!jours) jours = dispoSecours();
   await formulaire(jours);
@@ -384,7 +359,7 @@ async function video4() {
 /* Un seul formulaire : le client remplit tout, coche les règles et valide en 1 clic */
 function formulaire(jours, msgErreur = "") {
   return new Promise(async res => {
-    const b = await dit(`<h4>📅 Ton rendez-vous</h4>
+    const b = await dit(`<h4>📅 Ton appel</h4>
     <form class="form" novalidate>
       <div><label class="t">On se parle comment ?</label>
         <div class="puces" data-champ="contact">
@@ -405,10 +380,10 @@ function formulaire(jours, msgErreur = "") {
       <div><label class="t">Nom de ton commerce ou de ta page</label><input type="text" name="commerce" placeholder="Ex : Boutique Awa Style"></div>
       <div><label class="t">Ton numéro WhatsApp</label><input type="tel" name="numero" inputmode="numeric" placeholder="Ex : 70 12 34 56" autocomplete="tel"></div>
       <div class="regles">
-        💰 J'avance <b>${CFG.avance}</b>. Quand les 2 vidéos et les 5 affiches sont prêtes, je paie le reste, puis la pub est lancée.<br>
-        ⏱️ Livraison en <b>48 h</b> après l'avance + mes photos, mon logo et mes prix.<br>
-        ✏️ <b>1 série de corrections</b> offerte. Tout se fait à distance.<br>
-        ⛽ Le budget pub est à part, sur ma carte.
+        💰 <b>${CFG.avance}</b> d'avance, le reste avant la pub<br>
+        ⏱️ Prêt en <b>48 h</b><br>
+        ✏️ <b>1 série</b> de corrections<br>
+        ⛽ Budget pub à part
       </div>
       <label class="coche"><input type="checkbox" name="ok"> J'ai compris, je suis d'accord</label>
       <div class="err">${msgErreur}</div>
@@ -491,7 +466,7 @@ async function fin() {
     <div class="ligne">🏷️ ${D.domaine}${quartier}</div>
     <div class="ligne">📅 ${D.contact}${lieu} · ${quand}</div>
     <div class="ligne">📲 ${D.numero}</div>`, "carte");
-  await dit("Merci ! J'ai bien tout noté 🙏 Touche le bouton vert : ton message est déjà écrit, tu as juste à l'envoyer. On se parle très vite !", "fort");
+  await dit("C'est noté 🙏 Touche le bouton vert 👇", "fort");
   const msg = `Bonjour Willy 👋 Je suis ${D.prenom} (${D.commerce}, ${D.domaine}, ${D.quartier}).\n`
     + `Je veux le Starter Pack à ${CFG.prix}.\n`
     + `📅 ${D.contact}${lieu} : ${quand}.\n`
