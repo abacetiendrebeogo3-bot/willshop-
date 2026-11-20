@@ -78,6 +78,9 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .pack-p{margin-top:10px;font-size:28px;font-weight:800;color:#FFD21F}
 .defile{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:-4px -6px;padding:4px 6px}
 .defile img{width:78%;flex:none;border-radius:10px;scroll-snap-align:start}
+.form.mini{gap:8px}
+.form.mini input{width:100%;border:1.5px solid #CBD3E1;border-radius:10px;padding:12px;font-size:16px;outline:none}
+.form.mini input:focus{border-color:var(--vif)}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
 @keyframes aide{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
 .grille.pulse .btn{animation:pulse 1.2s ease-in-out infinite}
@@ -363,33 +366,72 @@ async function offre() {
 
 async function choix() {
   await dit("Ça t'intéresse ?", "fort", 400);
-  const a = await boutons([
-    { t: "Oui, je veux ✅", v: "go", pleine: true },
-    { t: "Et le budget pub ?", v: "budget", style: "gris" },
-    { t: "J'ai peur 😟", v: "arnaque", style: "gris" }
-  ]);
-  if (a === "budget") {
-    await dit("C'est l'argent pour Facebook ⛽");
-    await dit("Tu le paies avec ta carte.");
-    await dit(`Conseillé : ${CFG.budgetConseil} minimum.`);
-    return choix();
-  }
-  if (a === "arnaque") {
-    await dit(`Tu paies d'abord ${CFG.avance}.`);
-    await dit("Tu vois le travail fini.");
-    await dit("Puis tu paies le reste ✅");
-    await dit("On peut aussi se voir 🤝");
-    return choix();
-  }
+  await boutons([{ t: "Oui, je veux ✅" }], true);
   rdv();
 }
 
 async function rdv() {
-  await dit("On fixe un appel ? 📅", "fort");
+  await dit("Super 🙌");
+  await dit("On se parle comment ?", "fort");
+  D.contact = await boutons([
+    { t: "💬 WhatsApp", v: "WhatsApp" }, { t: "📞 Appel", v: "Appel 15 min" },
+    { t: `🤝 Se voir (${CFG.deplacement})`, v: "Rencontre", pleine: true }
+  ]);
+  if (D.contact === "Rencontre") await dit(`Le déplacement : ${CFG.deplacement}.`);
   let jours = await (DISPO || chargerDispo());
   if (!jours) jours = dispoSecours();
-  await formulaire(jours);
+  await choisirMoment(jours);
+  await dit("Laisse ton numéro 👇", "fort");
+  await infos();
+  etape("Rendez-vous");
+  envoyer("lead", "Numéro donné"); px("Lead");
+  while (D.slot) {
+    const r = await reserver();
+    if (r && r.pris) {
+      await dit("Oups 😅 Ce moment vient d'être pris.");
+      await choisirMoment(r.jours || dispoSecours());
+      continue;
+    }
+    if (r && r.quand) D.quand = r.quand;
+    px("Schedule");
+    break;
+  }
   fin();
+}
+
+async function choisirMoment(jours) {
+  if (!jours.length) { D.jour = "à fixer"; D.heure = ""; D.slot = ""; await dit("On fixe le moment sur WhatsApp 🙂"); return; }
+  await dit("Quel jour ?", "fort");
+  const date = await boutons(jours.map(x => ({ t: x.jour, v: x.date })));
+  const j = jours.find(x => x.date === date);
+  await dit("Quelle heure ?", "fort");
+  const iso = await boutons(j.heures.map(x => ({ t: x.h + " h", v: x.iso })));
+  D.jour = j.jour; D.slot = iso; D.heure = j.heures.find(x => x.iso === iso).h;
+}
+
+/* Petit formulaire : prénom, numéro, quartier, 1 clic */
+function infos() {
+  return new Promise(res => {
+    bas.innerHTML = `<form class="form mini" novalidate>
+      <input type="text" name="prenom" placeholder="Ton prénom" autocomplete="given-name">
+      <input type="tel" name="numero" inputmode="numeric" placeholder="Ton numéro WhatsApp" autocomplete="tel">
+      <input type="text" name="quartier" placeholder="Ton quartier (ex : Tanghin)">
+      <div class="err"></div>
+      <button type="submit" class="btn">Valider ✅</button>
+    </form>`;
+    const f = bas.querySelector("form"), err = f.querySelector(".err");
+    setTimeout(() => { f.elements.prenom.focus(); defile(); }, 100);
+    f.onsubmit = e => {
+      e.preventDefault();
+      const v = n => f.elements[n].value.trim();
+      const num = v("numero").replace(/\D/g, "").replace(/^(00)?226/, "");
+      const manque = !v("prenom") ? "Écris ton prénom 🙏" : num.length !== 8 ? "Mets les 8 chiffres de ton numéro 🙏" : !v("quartier") ? "Écris ton quartier 🙏" : "";
+      if (manque) { err.textContent = manque; return; }
+      D.prenom = v("prenom"); D.numero = num; D.quartier = v("quartier"); D.commerce = "";
+      bas.innerHTML = ""; client(`${D.prenom} · ${num} · ${D.quartier}`);
+      res();
+    };
+  });
 }
 
 /* Un seul formulaire : le client remplit tout, coche les règles et valide en 1 clic */
@@ -498,15 +540,14 @@ async function fin() {
   const lieu = D.contact === "Rencontre" ? ` à ${D.quartier}` : "";
   const quartier = D.quartier ? ` · 📍 ${D.quartier}` : "";
   await dit(`<h4>📋 Ton récap</h4>
-    <div class="ligne">👤 ${D.prenom} · ${D.commerce}</div>
+    <div class="ligne">👤 ${D.prenom}</div>
     <div class="ligne">🏷️ ${D.domaine}${quartier}</div>
     <div class="ligne">📅 ${D.contact}${lieu} · ${quand}</div>
     <div class="ligne">📲 ${D.numero}</div>`, "carte");
   await dit("C'est noté 🙏 Touche le bouton vert 👇", "fort");
-  const msg = `Bonjour Willy 👋 Je suis ${D.prenom} (${D.commerce}, ${D.domaine}, ${D.quartier}).\n`
+  const msg = `Bonjour Willy 👋 Je suis ${D.prenom} (${D.domaine}, ${D.quartier}).\n`
     + `Je veux le Starter Pack à ${CFG.prix}.\n`
-    + `📅 ${D.contact}${lieu} : ${quand}.\n`
-    + `J'ai lu les conditions : avance de ${CFG.avance}, budget pub à part sur ma carte.`;
+    + `📅 ${D.contact}${lieu} : ${quand}.`;
   const lien = `https://wa.me/${CFG.whatsapp}?text=${encodeURIComponent(msg)}`;
   bas.innerHTML = ""; const g = document.createElement("div"); g.className = "grille une";
   const b = document.createElement("a"); b.className = "btn vert"; b.style.textAlign = "center"; b.style.textDecoration = "none";
