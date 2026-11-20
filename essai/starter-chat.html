@@ -74,7 +74,8 @@ header .statut i{width:7px;height:7px;border-radius:50%;background:#2BD67B;displ
 .pack{background:linear-gradient(135deg,var(--nuit),#163a8a);color:#fff;border-radius:14px;padding:16px 18px;margin:-14px -16px}
 .pack-t{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#FFD21F;margin-bottom:8px}
 .pack-l{font-size:17px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.15)}
-.pack-l:last-child{border:0}
+.pack-l:last-of-type{border:0}
+.pack-p{margin-top:10px;font-size:28px;font-weight:800;color:#FFD21F}
 .defile{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:-4px -6px;padding:4px 6px}
 .defile img{width:78%;flex:none;border-radius:10px;scroll-snap-align:start}
 .aide{text-align:center;font-size:13px;font-weight:700;color:var(--vif);margin:2px 0 8px;animation:aide 1.2s ease-in-out infinite}
@@ -325,37 +326,38 @@ async function demarrer() {
 }
 
 async function offre() {
+  const vu = () => boutons([{ t: "J'ai vu 👍" }], true);
+  // 1. Le produit
+  if (CFG.produitEx) {
+    await dit("Regarde ce produit 👇", "fort");
+    await dit(`<img src="${CFG.produitEx}" alt="produit" style="width:100%;max-width:220px;border-radius:12px;display:block">`, "moi", 400);
+    await vu();
+  }
+  // 2. La pub faite avec
+  if (CFG.videoEx && CFG.videoEx.src) {
+    await dit("Regarde la pub que j'ai faite 👇", "fort");
+    await dit(`<video src="${CFG.videoEx.src}" ${CFG.videoEx.poster ? `poster="${CFG.videoEx.poster}"` : ""} controls playsinline preload="none" style="width:100%;max-width:260px;border-radius:12px;display:block;background:#000"></video>`, "moi", 400);
+    await dit("Cette femme n'existe pas 🤯");
+    await dit("Je l'ai créée pour la pub.");
+    await vu();
+  }
+  // 3. Les affiches
+  if (CFG.affiches.length) {
+    await dit("Regarde mes affiches 👇", "fort");
+    await dit(`<div class="defile">${CFG.affiches.map(u => `<img src="${u}" alt="affiche" loading="lazy">`).join("")}</div>`, "carte", 400);
+    await dit("Glisse ➡️ pour voir.");
+    await vu();
+  }
+  // 4. L'offre
+  await dit("Je peux faire ça pour toi 💪", "fort");
+  etape("Offre vue");
   await dit(`<div class="pack">
-    <div class="pack-t">Je fais pour toi :</div>
+    <div class="pack-t">Pour ton commerce :</div>
     <div class="pack-l">🎬 <b>2 vidéos</b> pub</div>
     <div class="pack-l">🖼️ <b>5 affiches</b></div>
-    <div class="pack-l">🚀 <b>Campagne</b> lancée</div>
+    <div class="pack-l">🚀 <b>Ta campagne</b> lancée</div>
+    <div class="pack-p">${CFG.prix}</div>
   </div>`, "carte", 600);
-  await dit("Tu veux ça ?", "fort");
-  await boutons([{ t: "Oui 👍" }, { t: "Montre-moi 👀" }]);
-  const vu = () => boutons([{ t: "J'ai vu 👍" }], true);
-  const galerie = l => `<div class="galerie">${l.map(u => `<img src="${u}" alt="exemple" loading="lazy">`).join("")}</div>`;
-  // 1. Vidéos
-  await dit("Je fais <b>2 vidéos</b> pour toi 🎬", "fort");
-  if (CFG.produitEx) {
-    await dit("Exemple : ce produit 👇");
-    await dit(`<img src="${CFG.produitEx}" alt="produit" style="width:100%;max-width:220px;border-radius:12px;display:block">`, "moi", 400);
-  }
-  if (CFG.videoEx && CFG.videoEx.src) {
-    await dit("Voici sa vidéo pub 👇");
-    await dit(`<video src="${CFG.videoEx.src}" ${CFG.videoEx.poster ? `poster="${CFG.videoEx.poster}"` : ""} controls playsinline preload="none" style="width:100%;max-width:260px;border-radius:12px;display:block;background:#000"></video>`, "moi", 400);
-  }
-  await vu();
-  // 2. Affiches
-  await dit("Je fais <b>5 affiches</b> pour toi 🖼️", "fort");
-  if (CFG.affiches.length) { await dit("Exemples 👇 (glisse ➡️)"); await dit(`<div class="defile">${CFG.affiches.map(u => `<img src="${u}" alt="affiche" loading="lazy">`).join("")}</div>`, "carte", 400); }
-  await vu();
-  // 3. Campagne
-  await dit("Je lance <b>ta campagne</b> 🚀", "fort");
-  if (CFG.captures.length) { await dit("Exemple 👇"); await dit(galerie(CFG.captures), "carte", 400); }
-  await vu();
-  etape("Offre vue");
-  await dit(`Tout ça : <b>${CFG.prix}</b> ✅`, "fort");
   choix();
 }
 
