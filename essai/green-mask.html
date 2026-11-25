@@ -288,7 +288,7 @@ probleme();
 });
 }
 /* Témoignages : mettre ici les noms des VRAIES captures WhatsApp (numéros masqués), dans media/green-mask/ */
-var TEMOS = ["avis-note.jpg", "avis-1.jpg", "avis-2.jpg"];
+var TEMOS = ["avis-bloc.jpg"];
 function zoomImg(u) { var z = document.getElementById("zoom"); z.querySelector("img").src = u; z.style.display = "flex"; }
 function temos() {
 if (!TEMOS.length) return prix();
@@ -296,7 +296,7 @@ prog(36);
 track("Étape 2");
 bot(["Regarde les avis des acheteurs 👇"].concat(TEMOS.map(function (f) {
 var u = "https://willshop-app.vercel.app/media/green-mask/" + f;
-return { card: '<div class="bub proof" style="max-width:78%;padding:6px"><img src="' + u + '" alt="Avis d’un client sur WhatsApp" onclick="zoomImg(\'' + u + '\')"></div>' };
+return { card: '<div class="bub proof" style="max-width:86%;width:86%;padding:6px"><img src="' + u + '" alt="Avis d’un client sur WhatsApp" onclick="zoomImg(\'' + u + '\')"></div>' };
 })), function () {
 ask(["Je veux le mien 👍", "J’ai une question"], function (a) { if (/question/.test(a)) return other(); prix(); });
 });
