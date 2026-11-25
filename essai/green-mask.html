@@ -133,7 +133,7 @@ body.drb-on{overflow:hidden}
 <div class="who" style="flex:1"><b>WillShop Beauté</b><span><i class="dot"></i>Conseillère · en ligne</span></div>
 <div class="prog" id="prog" style="width:0"></div>
 </header>
-<div class="urg" id="urg"><b>🔥 Promo 3 500 F : finit aujourd’hui</b> <span id="cd">--</span><small>Demain le prix passe à 5 500 F · ⚠️ Il ne reste que <span id="stk">6</span> offres en stock</small></div>
+<div class="urg" id="urg"><b>🔥 Promo 3 500 F : finit aujourd’hui !</b><small>Demain le prix passe à 5 500 F · ⚠️ Il ne reste que <span id="stk">6</span> offres en stock</small></div>
 <div id="chat"></div>
 <div id="dock"></div>
 </div></div>
@@ -423,6 +423,7 @@ var PROMO_FIN = (function () { var n = new Date(); return Date.UTC(n.getUTCFullY
 (function cd() {
 var el = document.getElementById("cd"), box = document.getElementById("urg");
 document.getElementById("stk").textContent = STOCK_OFFRES;
+if (!el) return;
 function z(n) { return (n < 10 ? "0" : "") + n; }
 function tick() {
 var r = Math.floor((PROMO_FIN - Date.now()) / 1000);
