@@ -1936,12 +1936,12 @@ function stockStats() {
     return Object.assign({}, x, { reserve, sold7, dispo, days: perDay > 0 ? Math.floor(Math.max(0, dispo) / perDay) : null });
   });
 }
-/* ---------- Campagne pub Kit Minceur (plan du 29/10/2026, tunnels/kit-minceur-media/PLAN_PUB.md) ---------- */
+/* ---------- Campagne en cours : plan du 25/11/2026 (Green Mask pub directe → tunnel chat → Kit Barbe → Kit Minceur → 100 000 F/jour) ---------- */
 // Onglet « Pub » du Sheet : Date · Campagne · Dépense (F) · Saisi par · Le · Note
 const CAMP = {
-  nom: "Relance Kit Minceur", produit: /minceur/i, start: new Date(2026, 9, 29),
-  plan: [[10000, 5, "5"], [10000, 5, "5"], [15000, 7.5, "7-8"], [20000, 10, "10"], [25000, 12.5, "12-13"], [30000, 15, "15"], [35000, 17.5, "17-18"]],
-  seuil: 2000, achat: 2400, livraison: 1000, capacite: 15, objectifSemaine: 58
+  nom: "Green Mask · étape 1 (pub directe) puis tunnel chat", produit: /green|mask/i, start: new Date(2026, 10, 25),
+  plan: [[8000, 10, "10"], [8000, 10, "10"], [8000, 10, "10"], [10000, 11, "11"], [10000, 11, "11"], [12000, 13, "13"], [12000, 13, "13"]],
+  seuil: 1000, achat: 917, achatFixe: true, prixBase: 3500, livraison: 1000, capacite: 15, objectif: 50000
 };
 let pubRows = [], pubLoaded = false, pubEdit = false, pubDay = null;
 const campDayIndex = d => daysBetween(CAMP.start, d);           // 0 = J1
@@ -1950,7 +1950,7 @@ function pubFor(d) {
   const k = startOfDay(d).getTime(), r = pubRows.find(x => x.date && startOfDay(x.date).getTime() === k);
   return r ? r.montant : null;
 }
-function achatKit() { const s = stock.find(x => CAMP.produit.test(x.produit)); return (s && s.achat) || CAMP.achat; }
+function achatKit() { if (CAMP.achatFixe) return CAMP.achat; const s = stock.find(x => CAMP.produit.test(x.produit)); return (s && s.achat) || CAMP.achat; }
 // Chiffres d'une journée de campagne
 function campDay(d) {
   const t0 = startOfDay(d).getTime(), on = x => x && startOfDay(x).getTime() === t0, kit = o => CAMP.produit.test(o.produit);
@@ -1960,7 +1960,7 @@ function campDay(d) {
   const kits = livr.reduce((n, o) => n + (o.qte || 1), 0);
   const cash = orders.filter(o => kit(o) && on(o.payeLe)).reduce((n, o) => n + o.prix, 0);
   const ca = livr.reduce((n, o) => n + o.prix, 0);
-  const marge = livr.reduce((n, o) => n + o.prix - CAMP.livraison * (o.prix ? 1 : 0) - (o.qte || 1) * achatKit(), 0);
+  const marge = livr.reduce((n, o) => n + o.prix - (o.prix > CAMP.prixBase ? CAMP.livraison : 0) - (o.qte || 1) * achatKit(), 0);
   const pub = pubFor(d);
   return { d, vis, cmds: cmds.length, kitsCmd: cmds.reduce((n, o) => n + (o.qte || 1), 0), kits, cash, ca, marge, pub,
     cpk: pub && kits ? Math.round(pub / kits) : null, gain: pub === null ? null : marge - pub };
@@ -2007,17 +2007,30 @@ function renderCamp() {
     <div class="cdays" role="tablist">${days.map((x, k) => `<button data-cday="${k}" aria-pressed="${k === i}"><b>${campLabel(k)}</b><span>${x.d.getDate()}/${x.d.getMonth() + 1}</span>${x.pub !== null ? `<i class="${col(x.cpk) || "mut"}"></i>` : ""}</button>`).join("")}</div>
 
     <div class="cgoal">
+      <div class="cg-top"><span class="eyebrow">Étape 1 · épargne visée</span><span class="tg">${F(CAMP.objectif)}</span></div>
+      <div class="cbar"><div style="width:${Math.max(0, Math.min(100, Math.round((week.gain || 0) / CAMP.objectif * 100)))}%"></div></div>
+      <p class="meta" style="margin:6px 0 0">${F(Math.max(0, week.gain || 0))} gagnés · encore ${F(Math.max(0, CAMP.objectif - (week.gain || 0)))} · environ ${Math.max(0, Math.ceil((CAMP.objectif - (week.gain || 0)) / 1750))} ventes de 2 sticks</p>
+    </div>
+    <div class="card" style="margin-top:10px"><div class="meta" style="line-height:1.6"><b>Le plan</b><br>
+      1. 25 → 27 nov : Green Mask en pub directe → 50 000 F épargnés<br>
+      2. 28 nov → 1er déc : tunnel chat Green Mask (4 500 F livraison comprise) → 20 000 F/jour<br>
+      3. Semaine du 2 déc : + Kit Barbe en tunnel → 40 000 F/jour<br>
+      4. Semaine du 9 déc : + Kit Minceur en tunnel → 60 000 F/jour<br>
+      5. 16 → 29 déc : + 2 produits → 100 000 F/jour (≈ 55 commandes, 3 livreurs)<br>
+      Règle des 4 poches : Stock · Pub · Salaire (3 000 F/jour max) · Épargne/dettes.</div></div>
+
+    <div class="cgoal">
       <div class="cg-top"><span class="eyebrow">Objectif ${isToday ? "du jour" : "de " + campLabel(i)}</span><span class="tg">${label(day)}</span></div>
-      <div class="cg-row"><div><small>Budget pub</small><b>${F(budget)}</b></div><div><small>Kits livrés visés</small><b>${kitsTxt}</b></div></div>
+      <div class="cg-row"><div><small>Budget pub</small><b>${F(budget)}</b></div><div><small>Ventes livrées visées</small><b>${kitsTxt}</b></div></div>
       <div class="cbar"><div style="width:${pct}%"></div></div>
-      <p class="meta" style="margin:6px 0 0">${day.kits} kit${day.kits > 1 ? "s" : ""} livré${day.kits > 1 ? "s" : ""} sur ${kitsTxt} · ${pct >= 100 ? "objectif atteint 🎉" : "encore " + Math.max(0, Math.ceil(kitsGoal - day.kits)) + " à livrer"}</p>
+      <p class="meta" style="margin:6px 0 0">${day.kits} vente${day.kits > 1 ? "s" : ""} livrée${day.kits > 1 ? "s" : ""} sur ${kitsTxt} · ${pct >= 100 ? "objectif atteint 🎉" : "encore " + Math.max(0, Math.ceil(kitsGoal - day.kits)) + " à livrer"}</p>
     </div>
 
     <h2>Avancement ${isToday ? "en direct" : "de " + campLabel(i)}</h2>
     <div class="bubbles cbubs">
       <div class="bub k-blue"><span class="ic">${SV('<circle cx="12" cy="12" r="3"/><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/>')}</span><span class="l">Visiteurs du tunnel</span><span class="n">${visitsLoaded ? day.vis : "…"}</span></div>
       <div class="bub k-orange"><span class="ic">${SV('<path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/>')}</span><span class="l">Commandes</span><span class="n">${day.cmds}</span></div>
-      <div class="bub k-green"><span class="ic">${SV('<path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>')}</span><span class="l">Kits livrés</span><span class="n">${day.kits}</span></div>
+      <div class="bub k-green"><span class="ic">${SV('<path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>')}</span><span class="l">Ventes livrées</span><span class="n">${day.kits}</span></div>
       <div class="bub k-bx cm"><span class="ic">${SV('<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>')}</span><span class="l">Argent encaissé</span><span class="n cmoney">${F(day.cash)}</span></div>
     </div>
     ${day.vis ? `<p class="verdict">${day.kitsCmd} kit${day.kitsCmd > 1 ? "s" : ""} commandé${day.kitsCmd > 1 ? "s" : ""} · ${Math.round(day.cmds / day.vis * 100)} % des visiteurs ont commandé${day.pub ? " · " + F(Math.round(day.pub / day.vis)) + " de pub par visiteur" : ""}.</p>` : ""}
@@ -2033,12 +2046,12 @@ function renderCamp() {
 
     <h2>Bilan</h2>
     <div class="tiles">
-      ${tile("Coût par kit livré", day.cpk === null ? "—" : F(day.cpk), day.pub === null ? "dépense à rentrer" : day.kits ? (day.cpk <= CAMP.seuil ? "sous " : "au-dessus de ") + F(CAMP.seuil) : "aucun kit livré", "c-" + col(day.cpk))}
-      ${tile("Gain " + (isToday ? "du jour" : "de " + campLabel(i)), fmtGain(day.gain), "marge des kits livrés − pub", day.gain === null ? "" : day.gain >= 0 ? "c-ok" : "c-bad")}
-      ${tile("Coût par kit · semaine", weekCpk === null ? "—" : F(weekCpk), week.kits + " kits livrés · " + F(week.pub) + " de pub", "c-" + col(weekCpk))}
-      ${tile("Gain cumulé · semaine", fmtGain(week.gain), "objectif semaine : ≥ " + CAMP.objectifSemaine + " kits", week.gain === null ? "" : week.gain >= 0 ? "c-ok" : "c-bad")}
+      ${tile("Pub par vente", day.cpk === null ? "—" : F(day.cpk), day.pub === null ? "dépense à rentrer" : day.kits ? (day.cpk <= CAMP.seuil ? "sous " : "au-dessus de ") + F(CAMP.seuil) : "aucun kit livré", "c-" + col(day.cpk))}
+      ${tile("Gain " + (isToday ? "du jour" : "de " + campLabel(i)), fmtGain(day.gain), "marge des ventes livrées − pub", day.gain === null ? "" : day.gain >= 0 ? "c-ok" : "c-bad")}
+      ${tile("Pub par vente · semaine", weekCpk === null ? "—" : F(weekCpk), week.kits + " ventes livrées · " + F(week.pub) + " de pub", "c-" + col(weekCpk))}
+      ${tile("Gain cumulé", fmtGain(week.gain), "objectif étape 1 : " + F(CAMP.objectif), week.gain === null ? "" : week.gain >= 0 ? "c-ok" : "c-bad")}
     </div>
-    <p class="meta" style="margin:6px 2px 0">Marge = prix encaissé − ${F(CAMP.livraison)} de livraison − ${F(achatKit())} d'achat par kit. On compte les kits <b>livrés</b>, pas les commandes.</p>
+    <p class="meta" style="margin:6px 2px 0">Marge = prix encaissé − ${F(achatKit())} d'achat par vente (2 sticks) − ${F(CAMP.livraison)} de livraison seulement si le client l'a payée. On compte les ventes <b>livrées</b>, pas les commandes.</p>
 
     <h2>Budget de demain</h2>
     <div class="cadv k-${adv.lvl === "ok" ? "green" : adv.lvl === "bad" ? "red" : adv.lvl === "warm" ? "orange" : "blue"}">
@@ -2049,7 +2062,7 @@ function renderCamp() {
     </div>
 
     <h2>Les 7 jours</h2>
-    <div class="card ctable"><table><thead><tr><th>Jour</th><th>Pub</th><th>Visé</th><th>Livrés</th><th>Coût/kit</th><th>Gain</th></tr></thead><tbody>
+    <div class="card ctable"><table><thead><tr><th>Jour</th><th>Pub</th><th>Visé</th><th>Livrés</th><th>Pub/vente</th><th>Gain</th></tr></thead><tbody>
       ${CAMP.plan.map((p, k) => { const x = days[k]; return `<tr class="${k === i ? "cur" : ""}"><td>${campLabel(k)}</td><td>${x && x.pub !== null ? F(x.pub) : `<span class="faint">${F(p[0])}</span>`}</td><td>${p[2]}</td><td>${x ? x.kits : "—"}</td><td class="${x ? col(x.cpk) : ""}">${x && x.cpk !== null ? F(x.cpk) : "—"}</td><td class="${x && x.gain !== null ? (x.gain >= 0 ? "ok" : "bad") : ""}">${x ? fmtGain(x.gain) : "—"}</td></tr>`; }).join("")}
     </tbody></table></div>`;
 }

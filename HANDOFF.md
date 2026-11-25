@@ -87,7 +87,8 @@
 - **Tags clients** : enregistrés au début de la colonne J (Note) sous la forme `[Tags: VIP, Fidèle]` ; `tagsOf()` les lit, `noteText()` donne la note sans les tags.
 
 ## 6 bis. Écran « Campagne » (Direction, 29/10)
-- Onglet `camp` « Campagne » (2e onglet de la Direction) : suivi de la relance Kit Minceur lancée le **29/10/2026** selon `tunnels/kit-minceur-media/PLAN_PUB.md`.
+- **25/11/2026** : l'onglet Campagne suit maintenant le plan Green Mask (`CAMP` : départ 25/11, 3 jours de pub directe à 8 000 F pour 10 ventes/jour, puis tunnel ; achat 917 F les 2 sticks ; livraison déduite seulement si le client l'a payée ; objectif étape 1 = 50 000 F). Anciennes commandes archivées dans l'onglet « Commandes archive 25-11 », onglet Commandes vidé.
+- Onglet `camp` « Campagne » (2e onglet de la Direction) : à l'origine suivi de la relance Kit Minceur lancée le **29/10/2026** selon `tunnels/kit-minceur-media/PLAN_PUB.md`.
 - Code : bloc `/* ---------- Campagne pub Kit Minceur ... */` dans `index.html` : `CAMP` (date de départ, tableau des 7 jours, seuil 2 000 F, achat 2 400 F par défaut ou prix d'achat de l'onglet Stock, 1 000 F de livraison, capacité 15 livraisons/jour), `campDay()`, `campAdvice()`, `renderCamp()`, `bindCamp()`, `savePub()`.
 - **Chiffres** (produit contenant « minceur ») : visiteurs = lignes de l'onglet Visites du jour ; commandes = commandes du jour hors prospects, promesses et annulées ; kits livrés = quantités des commandes passées à « Livrée » ce jour-là (colonne Q) ; encaissé = prix des commandes payées ce jour-là (colonne S).
 - **Bilan** : coût par kit livré = pub ÷ kits livrés (vert ≤ 2 000 F, rouge au-dessus) ; gain = Σ(prix − 1 000 F − qté × achat) des kits livrés − pub ; cumul de J1 au jour choisi. Les pastilles J1…J7 permettent de revoir un jour passé et de corriger sa dépense.
