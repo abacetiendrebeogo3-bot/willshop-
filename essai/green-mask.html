@@ -133,7 +133,7 @@ body.drb-on{overflow:hidden}
 <div class="who" style="flex:1"><b>WillShop Beauté</b><span><i class="dot"></i>Conseillère · en ligne</span></div>
 <div class="prog" id="prog" style="width:0"></div>
 </header>
-<div class="urg" id="urg"><b>🔥 Promo 3 500 F : finit aujourd’hui</b> <span id="cd">--</span><small>Demain le prix passe à 5 500 F les 2 · ⚠️ Stock limité</small></div>
+<div class="urg" id="urg"><b>🔥 Promo 3 500 F : finit aujourd’hui</b> <span id="cd">--</span><small>Demain le prix passe à 5 500 F · ⚠️ Il ne reste que <span id="stk">6</span> offres en stock</small></div>
 <div id="chat"></div>
 <div id="dock"></div>
 </div></div>
@@ -418,13 +418,15 @@ return "https://api.whatsapp.com/send?phone=" + WA + "&text=" + encodeURICompone
 function goWA(url) { try { window.top.location.href = url; } catch (e) { window.location.href = url; } }
 var ESSAI = /\/essai\//.test(location.pathname);
 /* Compte à rebours promo (heure de Ouaga = UTC) */
-var PROMO_FIN = Date.UTC(2026, 10, 25, 23, 59, 59);
+var STOCK_OFFRES = 6; /* à mettre à jour quand le stock change */
+var PROMO_FIN = (function () { var n = new Date(); return Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate(), 23, 59, 59); })();
 (function cd() {
 var el = document.getElementById("cd"), box = document.getElementById("urg");
+document.getElementById("stk").textContent = STOCK_OFFRES;
 function z(n) { return (n < 10 ? "0" : "") + n; }
 function tick() {
 var r = Math.floor((PROMO_FIN - Date.now()) / 1000);
-if (r <= 0) { box.style.display = "none"; return; }
+if (r <= 0) { PROMO_FIN += 86400000; r = Math.floor((PROMO_FIN - Date.now()) / 1000); }
 var j = Math.floor(r / 86400), h = Math.floor(r % 86400 / 3600), m = Math.floor(r % 3600 / 60), sec = r % 60;
 el.textContent = (j ? j + "j " : "") + z(h) + ":" + z(m) + ":" + z(sec);
 setTimeout(tick, 1000);
