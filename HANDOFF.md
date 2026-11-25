@@ -14,6 +14,7 @@
 | **Google Sheet** | ID `1pTd-mhmjUVUYX1tDb37XChKd23ATgKYhuW9rpLq2Flo` | Base de données |
 | **Tunnel Kit Minceur** | `tunnels/kit-minceur-awa.html` → collé dans Systeme.io | Page de vente en ligne : https://abacetiendrebeogo3.systeme.io/kit-minceur |
 | Tunnel Green Mask | `tunnels/green-mask-actuel.html` (format chat « Dr Bébé », avec les retouches du Kit du 19/10) | https://abacetiendrebeogo3.systeme.io/green-mask |
+| Tunnel Green Mask v2 (25/11) | `tunnels/green-mask-chat.html` : chat « WillShop Beauté », visuels pub (`media/green-mask/`), parcours intérêt → souci (boutons/acné/taches) → ville → quartier → jour → numéro → récap 3 500 + 1 000 = 4 500 F → WhatsApp. Build : `python3 build_gm_chat.py green-mask-actuel.html green-mask-chat.html` (script hors dépôt, reconstruit depuis l'ancien). Essai : https://willshop-app.vercel.app/essai/green-mask.html | À coller dans Systeme.io /green-mask |
 | Médias | `media/` (servis par Vercel sous `/media/...`) | Vidéo d'Awa, images, avis clientes |
 | Assistant IA | `api/chat.js` (fonction Vercel) | Inactif tant que `ANTHROPIC_API_KEY` n'est pas dans Vercel |
 
