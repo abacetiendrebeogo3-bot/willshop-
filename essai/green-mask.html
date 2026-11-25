@@ -294,7 +294,7 @@ function temos() {
 if (!TEMOS.length) return prix();
 prog(36);
 track("Étape 2");
-bot(["Regarde ce que disent les acheteurs du Green Mask 👇"].concat(TEMOS.map(function (f) {
+bot(["Regarde les avis des acheteurs 👇"].concat(TEMOS.map(function (f) {
 var u = "https://willshop-app.vercel.app/media/green-mask/" + f;
 return { card: '<div class="bub proof" style="max-width:78%;padding:6px"><img src="' + u + '" alt="Avis d’un client sur WhatsApp" onclick="zoomImg(\'' + u + '\')"></div>' };
 })), function () {
@@ -306,7 +306,7 @@ var PA = '<div class="bub pa"><div class="st"><img class="l" src="https://willsh
 function prix() {
 prog(40);
 track("Offre vue");
-bot(["Voici ton offre 👇", { card: PA }], function () { setTimeout(zone, 1800); });
+bot(["Aujourd’hui, tu peux l’avoir à 👇", { card: PA }], function () { setTimeout(zone, 1800); });
 }
 /* Étape 2 : le problème */
 function probleme() {
@@ -315,8 +315,7 @@ bot(["Ok ! Sur ton visage, c’est quoi le souci ?"], function () {
 ask(["Des boutons", "De l’acné", "Des taches", "Un peu de tout"], function (a) {
 S.pb = a;
 track("Veut le produit", { veut: a.slice(0, 20) });
-var u = /acné/.test(a) ? VIS.acne : (/tout/.test(a) ? VIS.homme : VIS.boutons);
-bot([{ card: visCard(u) }, "Le Green Mask au thé vert nettoie les pores en profondeur et enlève le gras. Tu le passes comme un stick, tu attends 10 minutes, tu rinces."], temos);
+bot(["Ok ! Le Green Mask va régler ce problème 💪"], temos);
 }, "days");
 });
 }
