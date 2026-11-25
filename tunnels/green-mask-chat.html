@@ -286,6 +286,20 @@ probleme();
 });
 });
 }
+/* Témoignages : mettre ici les noms des VRAIES captures WhatsApp (numéros masqués), dans media/green-mask/ */
+var TEMOS = [];
+function zoomImg(u) { var z = document.getElementById("zoom"); z.querySelector("img").src = u; z.style.display = "flex"; }
+function temos() {
+if (!TEMOS.length) return zone();
+prog(36);
+track("Étape 2");
+bot(["Regarde ce que disent les clients qui l’utilisent déjà 👇"].concat(TEMOS.map(function (f) {
+var u = "https://willshop-app.vercel.app/media/green-mask/" + f;
+return { card: '<div class="bub proof" style="max-width:78%;padding:6px"><img src="' + u + '" alt="Avis d’un client sur WhatsApp" onclick="zoomImg(\'' + u + '\')"></div>' };
+})), function () {
+ask(["Je veux le mien 👍", "J’ai une question"], function (a) { if (/question/.test(a)) return other(); zone(); });
+});
+}
 /* Étape 2 : le problème */
 function probleme() {
 prog(28);
@@ -294,7 +308,7 @@ ask(["Des boutons", "De l’acné", "Des taches", "Un peu de tout"], function (a
 S.pb = a;
 track("Veut le produit", { veut: a.slice(0, 20) });
 var u = /acné/.test(a) ? VIS.acne : (/tout/.test(a) ? VIS.homme : VIS.boutons);
-bot([{ card: visCard(u) }, "Le Green Mask au thé vert nettoie les pores en profondeur et enlève le gras. Tu le passes comme un stick, tu attends 10 minutes, tu rinces.", "2 sticks = <b>3 500 F</b> + 1 000 F de livraison. Tu paies quand tu reçois."], zone);
+bot([{ card: visCard(u) }, "Le Green Mask au thé vert nettoie les pores en profondeur et enlève le gras. Tu le passes comme un stick, tu attends 10 minutes, tu rinces.", "2 sticks = <b>3 500 F</b> + 1 000 F de livraison. Tu paies quand tu reçois."], temos);
 }, "days");
 });
 }
